@@ -13,6 +13,7 @@ export const EditProfile = () => {
     lastName: "",
     email: "",
     mobile: "",
+    socialTag: "",
   });
   const [profileData, setProfileData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +39,7 @@ export const EditProfile = () => {
             lastName: profileData.lastName || "",
             email: profileData.email || "",
             mobile: profileData.mobile || "",
+            socialTag: profileData.socialTag || "",
           });
           if (profileData.profile?.avatar) {
             setAvatarPreview(profileData.profile.avatar);
@@ -91,6 +93,14 @@ export const EditProfile = () => {
       }
     }
     
+    if (field === 'socialTag') {
+      if (value && value.length > 20) {
+        errors[field] = 'Social Tag must be 20 characters or less';
+      } else if (value && !/^[a-zA-Z0-9_]+$/.test(value)) {
+        errors[field] = 'Social Tag can only contain letters, numbers, and underscores';
+      }
+    }
+    
     return errors;
   };
 
@@ -103,6 +113,8 @@ export const EditProfile = () => {
       truncatedValue = value.substring(0, 50);
     } else if (field === 'mobile' && value.length > 15) {
       truncatedValue = value.substring(0, 15);
+    } else if (field === 'socialTag' && value.length > 20) {
+      truncatedValue = value.substring(0, 20);
     }
     
     setFormData((prev) => ({ ...prev, [field]: truncatedValue }));
@@ -122,6 +134,7 @@ export const EditProfile = () => {
       ...validateField('lastName', formData.lastName),
       ...validateField('email', formData.email),
       ...validateField('mobile', formData.mobile),
+      ...validateField('socialTag', formData.socialTag),
     };
     
     return Object.keys(errors).length === 0 && formData.firstName.trim() !== '';
@@ -149,6 +162,7 @@ export const EditProfile = () => {
       status: "active",
       bio: profileData?.profile?.bio || "Financial enthusiast",
       theme: profileData?.profile?.theme || "light",
+      socialTag: formData.socialTag,
     };
 
     try {
@@ -377,6 +391,32 @@ export const EditProfile = () => {
               {fieldErrors.mobile && (
                 <div className="mt-1 text-red-400 text-xs [font-family:'Poppins',Helvetica]">
                   {fieldErrors.mobile}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="w-full">
+            <label
+              htmlFor="socialTag"
+              className="block [font-family:'Poppins',Helvetica] font-medium text-neutral-400 text-[14.3px] tracking-[0] leading-[normal] mb-3"
+            >
+              Social Tag
+            </label>
+            <div className="relative w-full">
+              <img className="w-full h-[54px]" alt="Input background" src="https://c.animaapp.com/mFM2C37Z/img/card-4@2x.png" />
+              <input
+                id="socialTag"
+                type="text"
+                value={formData.socialTag || ""}
+                onChange={(e) => handleInputChange("socialTag", e.target.value)}
+                className="absolute inset-0 bg-transparent px-4 py-3 text-white [font-family:'Poppins',Helvetica] text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 rounded"
+                placeholder="Enter your social tag (e.g., gamerpro)"
+                maxLength="20"
+              />
+              {fieldErrors.socialTag && (
+                <div className="mt-1 text-red-400 text-xs [font-family:'Poppins',Helvetica]">
+                  {fieldErrors.socialTag}
                 </div>
               )}
             </div>

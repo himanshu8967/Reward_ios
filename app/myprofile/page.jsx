@@ -185,8 +185,12 @@ export default function MyProfile() {
                 height={132}
                 className="w-[132px] h-[132px] object-cover rounded-full"
                 alt="Profile avatar"
-                src={profile?.profile?.avatar || "https://c.animaapp.com/V1uc3arn/img/component-1.svg"}
+                src={profile?.profile?.avatar || "https://c.animaapp.com/xCaMzUYh/img/group-4-1@2x.png"}
                 crossOrigin="anonymous"
+                onError={(e) => {
+                  console.log("Avatar failed to load, falling back to default");
+                  e.target.src = "https://c.animaapp.com/xCaMzUYh/img/group-4-1@2x.png";
+                }}
               />
 
               {/* JACK_51: Edit badge in its own holder (no overlap/clipping) */}
@@ -255,7 +259,7 @@ export default function MyProfile() {
                   alt="Flag"
                   src="https://c.animaapp.com/V1uc3arn/img/image-3956@2x.png"
                 />
-                <span className="tracking-wide font-medium">GamePro</span>
+                <span className="tracking-wide font-medium">{profile?.socialTag || "GamePro"}</span>
               </div>
             </div>
           </section>
