@@ -4,7 +4,7 @@ export const WelcomeOffer = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipRef = useRef(null)
-    
+
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
   };
@@ -25,12 +25,11 @@ export const WelcomeOffer = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-  
+
   return (
     <div
-      className={`relative w-full max-w-[375px] rounded-[20px] overflow-hidden bg-[linear-gradient(103deg,rgba(121,32,207,1)_0%,rgba(205,73,153,1)_80%)] transition-all duration-300 ${
-        isExpanded ? 'h-[330px]' : 'h-[245px]'
-      }`}
+      className={`relative w-full max-w-[375px] rounded-[20px] overflow-hidden bg-[linear-gradient(103deg,rgba(121,32,207,1)_0%,rgba(205,73,153,1)_80%)] transition-all duration-300 ${isExpanded ? 'h-[330px]' : 'h-[245px]'
+        }`}
       data-model-id="4001:7472"
     >
       <div className="absolute w-full h-[245px] top-0 left-0">
@@ -66,7 +65,7 @@ export const WelcomeOffer = () => {
           />
 
           <img
-            className="absolute w-10 h-10 top-[-3px] right-[5px] cursor-pointer hover:opacity-80 transition-opacity duration-200"
+            className="absolute w-10 h-10 top-[-3px] right-[-1px] cursor-pointer hover:opacity-80 transition-opacity duration-200"
             alt="Information circle"
             src="https://c.animaapp.com/iuW6cMRd/img/informationcircle.svg"
             onClick={toggleTooltip}
@@ -75,7 +74,7 @@ export const WelcomeOffer = () => {
 
         <div className="h-[73px] top-[172px] bg-[#982fbb] rounded-[0px_0px_20px_20px] absolute w-full left-0" />
 
-        <div 
+        <div
           className="inline-flex items-center gap-1 absolute top-[214px] left-[100px] cursor-pointer"
           onClick={toggleExpanded}
         >
@@ -84,9 +83,8 @@ export const WelcomeOffer = () => {
           </div>
 
           <img
-            className={`relative w-5 h-5 transition-transform duration-300 ${
-              isExpanded ? 'rotate-90' : ''
-            }`}
+            className={`relative w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''
+              }`}
             alt="Arrow"
             src="https://c.animaapp.com/iuW6cMRd/img/arrow.svg"
           />
@@ -116,7 +114,7 @@ export const WelcomeOffer = () => {
 
       {/* Tooltip */}
       {showTooltip && (
-        <div 
+        <div
           ref={tooltipRef}
           className="absolute top-[45px] right-[-4px] z-50 w-[320px] bg-black/95 backdrop-blur-sm rounded-[12px] px-4 py-3 shadow-2xl"
         >

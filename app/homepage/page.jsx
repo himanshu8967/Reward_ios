@@ -1010,7 +1010,8 @@ const MainContentSection = () => {
         </div>
       </div>
       <div className="flex flex-col w-full items-start gap-4 relative">
-        <div className="h-[111px] rounded-[20px] overflow-hidden bg-[linear-gradient(64deg,rgba(41,138,171,1)_0%,rgba(41,171,162,1)_100%)] overflow-x-scroll relative w-full">
+        <div className="h-[111px] rounded-[20px] overflow-hidden bg-[linear-gradient(64deg,rgba(41,138,171,1)_0%,rgba(41,171,162,1)_100%)]  relative w-full">
+
           <div className="relative w-[285px] h-[207px] top-[-73px] left-5">
             <div className="top-[88px] left-0 font-medium absolute [font-family:'Poppins',Helvetica] text-white text-base tracking-[0] leading-6 whitespace-nowrap">
               30 Days Streak
@@ -1047,12 +1048,15 @@ const MainContentSection = () => {
         {showTooltip && (
           <div
             ref={tooltipRef}
-            className="absolute top-[34px]  -right-[10px] z-50 w-[340px] bg-black/95 backdrop-blur-sm rounded-[12px] px-4 py-3 shadow-2xl animate-fade-in"
+            className="absolute top-[34px]  -right-[10px] z-50 w-[340px] bg-black/95 backdrop-blur-sm rounded-[12px] px-4 pt-3 pb-2 shadow-2xl animate-fade-in"
           >
             <div className="text-white font-medium text-sm [font-family:'Poppins',Helvetica] leading-normal">
-
+              <div className="text-[#95f2ec] font-semibold mb-1 text-center">
+                30 Days Streak
+              </div>
               <div className="text-center text-gray-200">
                 Complete at least 1 task per day to climb. Missing a day resets you to the last milestone.
+
               </div>
             </div>
             <div className="absolute top-[-8px] right-[25px] w-4 h-4 bg-black/95 transform rotate-45"></div>
