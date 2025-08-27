@@ -58,21 +58,21 @@ export const EditProfile = () => {
 
   const validateField = (field, value) => {
     const errors = {};
-    
+
     if (field === 'firstName' || field === 'lastName') {
       const fieldName = field === 'firstName' ? 'First name' : 'Last name';
-      
+
       if (!value || value.trim() === '') {
         if (field === 'firstName') {
           errors[field] = 'First name is required';
         }
-      } else if (value.length > 30) {
-        errors[field] = `${fieldName} must be 30 characters or less`;
+      } else if (value.length > 10) {
+        errors[field] = `${fieldName} must be 10 characters or less`;
       } else if (!/^[a-zA-Z\s'-]+$/.test(value)) {
         errors[field] = `${fieldName} can only contain letters, spaces, hyphens, and apostrophes`;
       }
     }
-    
+
     if (field === 'email') {
       if (!value || value.trim() === '') {
         errors[field] = 'Email is required';
@@ -82,7 +82,7 @@ export const EditProfile = () => {
         errors[field] = 'Enter a valid email address';
       }
     }
-    
+
     if (field === 'mobile') {
       if (!value || value.trim() === '') {
         errors[field] = 'Mobile number is required';
@@ -92,7 +92,7 @@ export const EditProfile = () => {
         errors[field] = 'Mobile number can only contain numbers, spaces, hyphens, parentheses, and plus sign';
       }
     }
-    
+
     if (field === 'socialTag') {
       if (value && value.length > 20) {
         errors[field] = 'Social Tag must be 20 characters or less';
@@ -100,15 +100,15 @@ export const EditProfile = () => {
         errors[field] = 'Social Tag can only contain letters, numbers, and underscores';
       }
     }
-    
+
     return errors;
   };
 
   const handleInputChange = (field, value) => {
     // Truncate input if it exceeds maximum length
     let truncatedValue = value;
-    if ((field === 'firstName' || field === 'lastName') && value.length > 30) {
-      truncatedValue = value.substring(0, 30);
+    if ((field === 'firstName' || field === 'lastName') && value.length > 10) {
+      truncatedValue = value.substring(0, 10);
     } else if (field === 'email' && value.length > 50) {
       truncatedValue = value.substring(0, 50);
     } else if (field === 'mobile' && value.length > 15) {
@@ -116,14 +116,14 @@ export const EditProfile = () => {
     } else if (field === 'socialTag' && value.length > 20) {
       truncatedValue = value.substring(0, 20);
     }
-    
+
     setFormData((prev) => ({ ...prev, [field]: truncatedValue }));
-    
+
     // Validate field and set errors
     const fieldError = validateField(field, truncatedValue);
-    setFieldErrors((prev) => ({ 
-      ...prev, 
-      [field]: fieldError[field] || null 
+    setFieldErrors((prev) => ({
+      ...prev,
+      [field]: fieldError[field] || null
     }));
   };
 
@@ -136,7 +136,7 @@ export const EditProfile = () => {
       ...validateField('mobile', formData.mobile),
       ...validateField('socialTag', formData.socialTag),
     };
-    
+
     return Object.keys(errors).length === 0 && formData.firstName.trim() !== '';
   };
 
@@ -428,11 +428,10 @@ export const EditProfile = () => {
             <button
               type="submit"
               disabled={isSaving || !isFormValid()}
-              className={`w-full h-[42px] rounded-lg transition-opacity flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed ${
-                isFormValid() && !isSaving 
-                  ? 'bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] hover:opacity-90 cursor-pointer' 
-                  : 'bg-gray-500 cursor-not-allowed'
-              }`}
+              className={`w-full h-[42px] rounded-lg transition-opacity flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed ${isFormValid() && !isSaving
+                ? 'bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] hover:opacity-90 cursor-pointer'
+                : 'bg-gray-500 cursor-not-allowed'
+                }`}
             >
               <span className="[font-family:'Poppins',Helvetica] font-semibold text-white text-sm tracking-[0] leading-[normal]">
                 {isSaving ? "Saving..." : "Save Changes"}

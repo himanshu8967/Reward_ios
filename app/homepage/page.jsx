@@ -179,7 +179,7 @@ export const Frame = () => {
             className="absolute top-[480px] right-[-12px] z-50 w-[320px] bg-black/95 backdrop-blur-sm rounded-[12px] px-4 py-3 shadow-2xl animate-fade-in"
           >
             <div className="text-white font-medium text-sm [font-family:'Poppins',Helvetica] leading-normal">
-              
+
               <div className="text-center  text-gray-200">
                 As a new user, you can undo as many times as needed.
               </div>
@@ -490,7 +490,11 @@ const HeaderSection = () => {
           </button>
           <div className="flex flex-col items-start gap-1 flex-1 min-w-0">
             <div className="[font-family:'Poppins',Helvetica] font-semibold text-white text-lg tracking-[-0.37px] leading-[22px] truncate w-full max-w-[160px]">
-              Hi! {firstName}👋
+              <div className="flex items-baseline ...">
+                <span className="flex-shrink-0">Hi!&nbsp;</span>
+                <span className="truncate">{firstName}</span>
+                <span className="flex-shrink-0">👋</span>
+              </div>
             </div>
             <div className="[font-family:'Poppins',Helvetica] font-light text-white text-sm tracking-[-0.17px] leading-[18px] opacity-60">
               Welcome back
@@ -936,9 +940,9 @@ const MainContentSection = () => {
           </button>
         </div>
 
-        <RaceModal 
-          isOpen={isRaceModalOpen} 
-          onClose={() => setIsRaceModalOpen(false)} 
+        <RaceModal
+          isOpen={isRaceModalOpen}
+          onClose={() => setIsRaceModalOpen(false)}
         />
       </div>
       <div className="flex flex-col w-full items-start gap-4 relative">
@@ -1046,7 +1050,7 @@ const MainContentSection = () => {
             className="absolute top-[34px]  -right-[10px] z-50 w-[340px] bg-black/95 backdrop-blur-sm rounded-[12px] px-4 py-3 shadow-2xl animate-fade-in"
           >
             <div className="text-white font-medium text-sm [font-family:'Poppins',Helvetica] leading-normal">
-        
+
               <div className="text-center text-gray-200">
                 Complete at least 1 task per day to climb. Missing a day resets you to the last milestone.
               </div>
