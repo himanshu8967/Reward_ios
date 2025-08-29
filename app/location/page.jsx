@@ -128,7 +128,7 @@ export default function LocationPage() {
               />
             </button>
 
-            <h1 className="relative w-[255px] [font-family:'Poppins',Helvetica] font-semibold text-white text-xl tracking-[0] leading-5">
+            <h1 className="relative w-[255px] text-[#FFFFFF] [font-family:'Poppins',Helvetica] font-semibold text-[20px] tracking-[0] leading-5">
               Location Access
             </h1>
 
@@ -146,15 +146,21 @@ export default function LocationPage() {
         </header>
 
         {/* Main content area with proper centering */}
-        <div className="flex-1 flex flex-col items-center justify-center px-8 py-8">
-          <div className="flex flex-col items-center space-y-12">
+        <div className="flex-1 flex flex-col items-center  justify-center mb-14 px-8 py-8">
+          <div className="flex flex-col items-center ">
             <img
-              className="w-[285px] h-[285px] aspect-[1] object-cover"
+              className="w-full h-full object-contain transform scale-100 transition-transform duration-300"
               alt="Location access illustration showing a map pin on a colorful map"
               src="https://c.animaapp.com/gGYGC01x/img/image-4028@2x.png"
+              loading="eager"
+              style={{
+                imageRendering: 'crisp-edges',
+                WebkitBackfaceVisibility: 'hidden',
+                backfaceVisibility: 'hidden'
+              }}
             />
 
-            <p className="w-full max-w-[310px] [font-family:'Poppins',Helvetica] font-normal text-white text-xl text-center tracking-[0] leading-[1.4]">
+            <p className="w-full max-w-[310px] [font-family:'Poppins',Helvetica] font-normal text-[#F4F3FC] text-[20px] text-center tracking-[0] leading-[1.4]">
               You must select &quot;Allow While Using the App&quot; on the next
               screen for Jackson app to work
             </p>
@@ -162,7 +168,7 @@ export default function LocationPage() {
         </div>
 
         {/* Bottom button area */}
-        <div className="w-full px-4 pb-8">
+        <div className="w-full px-4 pb-8 flex flex-col items-center justify-center">
           {/* Added a small error display that doesn't affect the layout */}
           {
             error && (
@@ -171,9 +177,10 @@ export default function LocationPage() {
           }
           {!showSkipWarning ? (
             // DEFAULT VIEW
-            <>
+            <div className="w-full flex flex-col items-center justify-center  max-w-[310px]">
+
               <button
-                className="w-full h-12 rounded-[12.97px] bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] cursor-pointer transition-opacity duration-200 hover:opacity-90 active:opacity-80 disabled:opacity-50 flex items-center justify-center"
+                className="w-full  text-[16px] text-semibold h-12 rounded-[12.97px] bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] cursor-pointer transition-opacity duration-200 hover:opacity-90 active:opacity-80 disabled:opacity-50 flex items-center justify-center"
                 onClick={handleContinue}
                 disabled={isLoading || isSkipping}
                 aria-label="Continue to location permission request"
@@ -185,15 +192,16 @@ export default function LocationPage() {
               <button
                 onClick={handleSkip}
                 disabled={isLoading || isSkipping}
-                className="w-full mt-4 [font-family:'Poppins',Helvetica] font-normal text-gray-400 text-sm text-center tracking-[0] leading-[normal] hover:text-white transition-colors duration-200 disabled:opacity-50"
+                className="w-full mt-4 [font-family:'Poppins',Helvetica] font-smibold text-[#FFFFFF] text-[16px] text-center tracking-[0] leading-[normal] hover:text-white transition-colors duration-200 disabled:opacity-50"
               >
                 {isSkipping ? "Updating..." : "Skip for now (Jackson won't work)"}
               </button>
-            </>
+            </div>
           ) : (
             // WARNING VIEW
-            <div className="text-center">
-              <p className="mb-4 text-yellow-300 [font-family:'Poppins',Helvetica] text-sm leading-6">
+            <div className="w-full flex flex-col  justify-center items-center max-w-[300px]">
+
+              <p className="mb-4  text-yellow-300 [font-family:'Poppins',Helvetica] text-sm leading-6">
                 Warning: Location-dependent features won't work correctly if you skip this step.
               </p>
               <button
