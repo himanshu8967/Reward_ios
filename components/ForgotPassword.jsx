@@ -97,10 +97,11 @@ export const ForgotPassword = () => {
         <div className="absolute w-[358px] h-[358px] top-0 left-[9px] bg-[#af7de6] rounded-[179px] blur-[250px]" />
         <div className="absolute inset-0 bg-[#20202033] backdrop-blur-[5px]" />
         <div className="absolute w-[271px] h-[481px] top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-[15px] overflow-hidden [background:radial-gradient(50%_50%_at_50%_50%,rgba(134,47,148,1)_0%,rgba(6,9,78,1)_100%)] z-10">
-          <div className="absolute w-[168px] h-[81px] top-[25px] left-[51px]">
+          <div className="absolute w-[168px] h-[81px] top-[16px] left-[51px]">
             <div className="absolute w-28 top-px left-[33px] [font-family:'Poppins',Helvetica] font-medium text-white text-[64px] text-center">
               🔐
             </div>
+
           </div>
 
           <h1 className="absolute top-[117px] left-[31px] [font-family:'Poppins',Helvetica] font-extrabold text-[#efefef] text-2xl">
@@ -108,7 +109,7 @@ export const ForgotPassword = () => {
           </h1>
 
           <div className="absolute w-[240px] h-[140px] top-[164px] left-4">
-            <p className="absolute w-[220px] top-0 left-[10px] [font-family:'Poppins',Helvetica] font-medium text-white text-[13px] text-center">
+            <p className="absolute w-[220px] top-0 left-[10px] [font-family:'Poppins',Helvetica] font-light text-[#efefef] text-[13px] text-center">
               Don&#39;t worry! Enter your email and we&#39;ll send you a link to
               reset your password.
             </p>
@@ -145,7 +146,7 @@ export const ForgotPassword = () => {
           <button
             onClick={handleEmailSubmit}
             disabled={!isEmailValid || isLoading}
-            className={`absolute w-[210px] h-[39px] top-[320px] left-[30px] rounded-lg overflow-hidden transition-all duration-200 ${isEmailValid && !isLoading
+            className={`absolute w-[210px] h-[39px] top-[320px] left-[30px] rounded-lg mt-6 overflow-hidden transition-all duration-200 ${isEmailValid && !isLoading
               ? 'bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] hover:opacity-90 cursor-pointer'
               : 'bg-gray-500 cursor-not-allowed opacity-50'
               }`}
@@ -159,7 +160,7 @@ export const ForgotPassword = () => {
             onClick={handleBackToLogin}
             className="absolute top-[380px] left-[90px] text-center"
           >
-            <div className="[font-family:'Poppins',Helvetica] font-normal text-neutral-400 text-sm cursor-pointer">
+            <div className="[font-family:'Poppins',Helvetica] font-normal mt-5 text-[#FEFEFE] text-[14px] cursor-pointer">
               Back to Login
             </div>
           </button>
