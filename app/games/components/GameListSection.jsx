@@ -630,9 +630,9 @@ export const GameListSection = ({ searchQuery = "", showSearch = false }) => {
                 <div className="absolute w-[154px] top-1.5 left-[5px] [font-family:'Poppins',Helvetica] font-bold text-white text-base tracking-[0.02px] leading-[normal]">
                   {userStats ? `${userStats.gamesPlayed}/5 Games Played` : "3/5 Games Played"}
                 </div>
-                <div className="absolute w-36 h-[20px] top-[38px] left-[5px] bg-[#ffffff40] rounded-[10px]">
+                <div className="absolute w-[177px] h-[20px] top-[38px] border-[4px] border-[#FFFFFF33]  bg-transparent left-[5px] rounded-[10px]">
                   <div className="w-[60%] h-full bg-[linear-gradient(90deg,rgba(255,221,143,1)_0%,rgba(255,183,77,1)_100%)] rounded-[10px]"></div>
-                  <div className="absolute w-6 h-6 bg-white rounded-full top-[-3px] border-[3px] border-[#FFB74D]" style={{ left: 'calc(60% - 12px)' }}></div>
+                  <div className="absolute bg-white w-7 h-7   rounded-full top-[-8px] border-[5px] border-[#FFB74D]" style={{ left: 'calc(60% - 12px)' }}></div>
                 </div>
                 <div className="relative w-[70px] h-[55px] left-[226px] top-1 rounded-[12px] overflow-hidden bg-[linear-gradient(331deg,rgba(237,131,0,1)_0%,rgba(237,166,0,1)_100%)] flex items-center justify-center">
                   {/* Main container for the two columns */}
@@ -678,9 +678,9 @@ export const GameListSection = ({ searchQuery = "", showSearch = false }) => {
                 <div className="absolute w-[178px] top-1.5 left-[5px] [font-family:'Poppins',Helvetica] font-bold text-white text-base tracking-[0.02px] leading-[normal]">
                   {userStats ? `${userStats.balance}/900 Coins Earned (Daily)` : "100/900 Coins Earned (Daily)"}
                 </div>
-                <div className="absolute w-[177px] h-[20px] top-[68px] left-[5px] bg-[#ffffff40] rounded-[10px]">
+                <div className="absolute w-[177px] h-[20px] top-[68px] left-[5px] border-[4px] border-[#FFFFFF33]  bg-transparent rounded-[10px]">
                   <div className="w-[25%] h-full bg-[linear-gradient(90deg,rgba(255,221,143,1)_0%,rgba(255,183,77,1)_100%)] rounded-[10px]"></div>
-                  <div className="absolute w-6 h-6 bg-white rounded-full top-[-3px] border-[3px] border-[#FFB74D]" style={{ left: 'calc(25% - 12px)' }}></div>
+                  <div className="absolute  bg-white w-7 h-7   rounded-full top-[-8px] border-[5px]  border-[#FFB74D]" style={{ left: 'calc(25% - 12px)' }}></div>
                 </div>
                 <div className="relative w-[70px] h-[55px] left-[226px] top-1 rounded-[12px] overflow-hidden bg-[linear-gradient(331deg,rgba(237,131,0,1)_0%,rgba(237,166,0,1)_100%)] flex items-center justify-center">
                   {/* Main container for the two columns */}
@@ -726,9 +726,9 @@ export const GameListSection = ({ searchQuery = "", showSearch = false }) => {
                 <div className="absolute w-[178px] top-1.5 left-[5px] [font-family:'Poppins',Helvetica] font-bold text-white text-base tracking-[0.02px] leading-[normal]">
                   {userStats ? `${userStats.surveysCompleted + userStats.racesCompleted}/3 Challenges Finished (Daily)` : "0/3 Challenges Finished (Daily)"}
                 </div>
-                <div className="absolute w-[177px] h-[20px] top-[68px] left-[5px] bg-[#ffffff40] rounded-[10px]">
+                <div className="absolute w-[177px] h-[20px] top-[68px] left-[5px] border-[4px] border-[#FFFFFF33]  bg-transparent rounded-[10px]">
                   <div className="w-[10%] h-full bg-[linear-gradient(90deg,rgba(255,221,143,1)_0%,rgba(255,183,77,1)_100%)] rounded-[10px]"></div>
-                  <div className="absolute w-6 h-6 bg-white rounded-full top-[-3px] border-[3px] border-[#FFB74D]" style={{ left: 'calc(10% - 12px)' }}></div>
+                  <div className="absolute  bg-white w-7 h-7   rounded-full top-[-8px] border-[5px]  border-[#FFB74D]" style={{ left: 'calc(10% - 12px)' }}></div>
                 </div>
                 <div className="relative w-[70px] h-[55px] left-[226px] top-1 rounded-[12px] overflow-hidden bg-[linear-gradient(331deg,rgba(237,131,0,1)_0%,rgba(237,166,0,1)_100%)] flex items-center justify-center">
                   {/* Main container for the two columns */}
