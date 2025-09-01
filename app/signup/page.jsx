@@ -253,7 +253,7 @@ const SignUp = () => {
         className="relative w-full min-h-screen bg-[#272052] flex  justify-center"
         data-model-id="1322:2980"
       >
-        <div className="relative w-[375px] min-h-screen bg-[#272052] overflow-x-hidden overflow-y-auto"
+        <div className="relative w-[460px] min-h-screen bg-[#272052] overflow-x-hidden overflow-y-auto"
         >
           <div className="absolute  w-full h-[883px] -top-32 -left-3.5">
             <div className="absolute w-[358px] h-[358px] top-0 left-7 bg-[#af7de6] rounded-[179px] blur-[250px]" />
@@ -402,7 +402,7 @@ const SignUp = () => {
                   <select
                     value={countryCode}
                     onChange={(e) => setCountryCode(e.target.value)}
-                    className="absolute top-1/2 -translate-y-1/2 left-[50px] appearance-none [font-family:'Poppins',Helvetica] font-medium text-[#d3d3d3] text-[14.3px] bg-transparent border-none outline-none pr-2 disabled:opacity-50"
+                    className="absolute top-7 -translate-y-1/2 left-[50px] appearance-none [font-family:'Poppins',Helvetica] font-medium text-[#d3d3d3] text-[14.3px] bg-transparent border-none outline-none pr-2 disabled:opacity-50"
                     disabled={isOtpSent || isMobileVerified}
                     aria-label="Country code"
                   >
@@ -416,8 +416,8 @@ const SignUp = () => {
                     value={formData.mobile}
                     onChange={(e) => handleInputChange("mobile", e.target.value.replace(/\D/g, ''))}
                     maxLength={10}
-                    className="absolute top-[17px] left-[105px] [font-family:'Poppins',Helvetica] font-medium text-[#d3d3d3] text-[14.3px] tracking-[0] leading-[normal] bg-transparent border-none outline-none w-[100px] disabled:opacity-50"
-                    placeholder="Mobile Num"
+                    className="absolute top-[17px] left-[87px] [font-family:'Poppins',Helvetica] font-medium text-[#d3d3d3] text-[14.3px] tracking-[0] leading-[normal] bg-transparent border-none outline-none w-[240px] disabled:opacity-50"
+                    placeholder="Enter your mobile number"
                     required
                     disabled={isOtpSent || isMobileVerified}
                     aria-label="Mobile number"
@@ -427,7 +427,7 @@ const SignUp = () => {
                       type="button"
                       onClick={handleSendOtp}
                       disabled={isLoadingss}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 h-[35px] px-3 rounded-lg bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] text-white text-[14px] font-semibold shadow-md disabled:opacity-50 transition-all"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-[35px] px-3 rounded-sm bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] text-white text-[14px] font-semibold shadow-md disabled:opacity-50 transition-all"
                     >
                       {isLoadingss ? 'Sending...' : 'Send OTP'}
                     </button>
@@ -653,7 +653,7 @@ const SignUp = () => {
               <p className="absolute top-11 left-0 [font-family:'Poppins',Helvetica] font-medium text-neutral-400 text-sm tracking-[0] leading-[normal]">
                 Create account to earn &amp; withdraw money
               </p>
-              <h1 className="absolute top-0 left-[19px] [font-family:'Poppins',Helvetica] font-semibold text-[#efefef] text-2xl tracking-[0] leading-[normal]">
+              <h1 className="absolute top-0 left-[14px] [font-family:'Poppins',Helvetica] font-semibold text-[#efefef] text-2xl tracking-[0] leading-[normal]">
                 Welcome to Jackson!
               </h1>
             </div>
