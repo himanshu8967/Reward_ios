@@ -43,6 +43,10 @@ const SignUp = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadings, setIsLoadings] = useState(false);
+  const [isLoadingss, setIsLoadingss] = useState(false);
+
+
   const [error, setError] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -105,7 +109,7 @@ const SignUp = () => {
       setError({ mobile: "Please enter a valid 10-digit Indian mobile number." });
       return;
     }
-    setIsLoading(true);
+    setIsLoadingss(true);
     try {
       await sendOtp(`${countryCode}${formData.mobile}`);
       setIsOtpSent(true);
@@ -114,7 +118,7 @@ const SignUp = () => {
     } catch (err) {
       setError({ mobile: err.message || "Failed to send OTP. Please try again." });
     } finally {
-      setIsLoading(false);
+      setIsLoadingss(false);
     }
   };
 
@@ -140,7 +144,7 @@ const SignUp = () => {
       setError({ otp: "Please enter the full 4-digit code." });
       return;
     }
-    setIsLoading(true);
+    setIsLoadings(true);
     try {
       await verifyOtp(`${countryCode}${formData.mobile}`, otpCode);
       setIsMobileVerified(true);
@@ -148,7 +152,7 @@ const SignUp = () => {
     } catch (err) {
       setError({ otp: err.message || "An unknown verification error occurred." });
     } finally {
-      setIsLoading(false);
+      setIsLoadings(false);
     }
   }
 
@@ -422,10 +426,10 @@ const SignUp = () => {
                     <button
                       type="button"
                       onClick={handleSendOtp}
-                      disabled={isLoading}
+                      disabled={isLoadingss}
                       className="absolute right-4 top-1/2 -translate-y-1/2 h-[35px] px-3 rounded-lg bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] text-white text-[14px] font-semibold shadow-md disabled:opacity-50 transition-all"
                     >
-                      {isLoading ? 'Sending...' : 'Send OTP'}
+                      {isLoadingss ? 'Sending...' : 'Send OTP'}
                     </button>
                   )}
                   {isMobileVerified && (
@@ -441,15 +445,14 @@ const SignUp = () => {
 
 
               {isOtpSent && !isMobileVerified && (
-                <div className="w-full flex flex-col items-center gap-4 pt-3">
-                  <h3 className="[font-family:'Poppins',Helvetica] font-semibold text-white text-lg text-center">
-                    We have sent a verification code to your phone number
-                  </h3>
-                  <p className="[font-family:'Poppins',Helvetica] font-medium text-neutral-400 text-sm text-center">
-                    Verify it's you
-                  </p>
+                <div className="w-full flex flex-col ">
+                  {/* Main Title */}
+                  <h3 className="[font-family:'Poppins',Helvetica] mb-1  ml-4 font-medium text-[#A4A4A4] text-[14.3px] tracking-[0]  leading-[normal]">
 
-                  {/* OTP Input Boxes */}
+                    Verify OTP sent to your mobile number
+                  </h3>
+
+                  {/* OTP Input Boxes with Glassmorphism Effect */}
                   <div className="flex justify-center gap-3 pt-2">
                     {formData.otp.map((data, index) => (
                       <input
@@ -462,31 +465,43 @@ const SignUp = () => {
                         onFocus={e => e.target.select()}
                         ref={el => otpInputs.current[index] = el}
                         disabled={isMobileVerified}
-                        className={`w-14 h-14 text-center text-2xl font-semibold text-white bg-black/10 backdrop-blur-sm rounded-xl border ${error.otp ? 'border-red-500' : 'border-gray-600'} focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors disabled:opacity-50`}
+                        className={`w-[65px] h-[55px] text-center text-2xl font-semibold text-white bg-black/10 backdrop-blur-sm rounded-[8px] border ${error.otp ? 'border-red-500' : 'border-gray-600'} focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors disabled:opacity-50`}
                         aria-label={`OTP Digit ${index + 1}`}
                       />
                     ))}
                   </div>
+                  {error.otp && <p className="text-red-400 text-xs mt-1 text-center">{error.otp}</p>}
 
-                  {error.otp && <p className="text-red-400 text-xs text-center">{error.otp}</p>}
 
-                  {/* Action Buttons */}
-                  <div className="w-full flex flex-col items-center gap-3 pt-4">
-                    <button
-                      type="button"
-                      onClick={handleVerifyOtp}
-                      disabled={isLoading || formData.otp.join('').length < 4}
-                      className="w-full h-12 rounded-xl  bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] text-white  text-lg font-semibold shadow-md disabled:opacity-50 transition-opacity"
-                    >
-                      {isLoading ? 'Verifying...' : 'Verify'}
-                    </button>
+                  {/* Layout for Timer and Resend Button, matching the Figma design */}
+                  <div className="w-[315px] flex justify-between items-center mt-1">
+                    <p className="font-medium text-[#FFFFFF] text-[14px] mt-2 ml-4">
+                      {/* We format the countdown timer to look like the design */}
+                      {`00:${countdown.toString().padStart(2, '0')} sec remaining`}
+                    </p>
                     <button
                       type="button"
                       onClick={handleResendOtp}
                       disabled={countdown > 0 || isResending}
-                      className="text-[#9098f2] text-sm font-semibold disabled:text-gray-500 transition-colors"
+                      className=" mt-2 mr-4
+           w-[96px] h-[32px] rounded-[4px] border-1 border-[#9EADF7] 
+          text-[#9EADF7] text-[13px] font-semibold
+          disabled:cursor-not-allowed
+        "
                     >
-                      {isResending ? 'Sending...' : (countdown > 0 ? `Resend in ${countdown}s` : 'Resend Code')}
+                      {isResending ? 'Sending...' : 'Resend OTP'}
+                    </button>
+                  </div>
+
+                  {/* Primary "Verify" Button */}
+                  <div className="w-[180px] pt-4">
+                    <button
+                      type="button"
+                      onClick={handleVerifyOtp}
+                      disabled={isLoadings || formData.otp.join('').length < 4}
+                      className="w-full h-12 rounded-xl ml-16 bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] text-white  text-lg font-semibold shadow-md disabled:opacity-50 transition-opacity"
+                    >
+                      {isLoadings ? 'Verifying...' : 'Verify'}
                     </button>
                   </div>
                 </div>
