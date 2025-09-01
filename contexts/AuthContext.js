@@ -98,6 +98,10 @@ export function AuthProvider({ children }) {
       console.log("🛡️ [Gatekeeper] Waiting for session to load...");
       return;
     }
+    if (pathname === "/") {
+      console.log("🛡️ [Gatekeeper] On AppLoader page, deferring redirection.");
+      return;
+    }
 
     const isAuthenticated = !!user;
     console.log(
@@ -192,6 +196,7 @@ export function AuthProvider({ children }) {
     try {
       localStorage.removeItem("user");
       localStorage.removeItem("authToken");
+      localStorage.removeItem("onboarding-storage");
       console.log("🧹 Cleared user + token from localStorage");
     } catch (err) {
       console.error("❌ Failed to clear localStorage", err);

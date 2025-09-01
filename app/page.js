@@ -36,7 +36,7 @@ export default function AppLoader() {
           router.replace("/location");
           return; // Stop further execution
         }
-
+        router.replace("/homepage");
         return;
       } catch (e) {
         setLoadingMessage("Resuming your session...");
