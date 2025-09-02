@@ -62,7 +62,7 @@ export const HomeIndicator = ({ activeTab }) => {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 w-full h-[157px] z-[9999]"
+      className="fixed bottom-0 left-0 right-0 w-full h-[130px] z-[9999]"
       data-model-id="730:32095"
       role="navigation"
       aria-label="Main navigation"
@@ -78,16 +78,19 @@ export const HomeIndicator = ({ activeTab }) => {
       <div className="absolute bottom-0 left-0 right-0 bg-black w-full h-[78px]"></div>
 
       <div className="relative h-[120px] -top-px z-10">
-        <div
-          className="absolute w-[135px] h-[5px] top-[115px] left-[120px] bg-white rounded-[100px]"
-          role="presentation"
-          aria-hidden="true"
-        />
+        <div className="relative h-[120px] -top-px z-10 flex justify-center">
+          <div
+            className="w-[135px] h-[5px] mt-30 bg-white rounded-[100px]"
+            role="presentation"
+            aria-hidden="true"
+          />
+        </div>
+
 
         <div className="absolute w-full max-w-[375px] h-20 top-9 left-1/2 transform -translate-x-1/2">
           <div className="relative h-[113px] -top-5">
 
-            <div className=" absolute w-full h-[60px] top-2.5 left-0 bg-[#000000] "></div>
+            <div className=" absolute w-full h-[60px] top-6 left-0 bg-[#000000] "></div>
 
             <button
               className="flex flex-col w-[60px] items-center gap-2 absolute top-[39px] left-4 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-lg p-1"
