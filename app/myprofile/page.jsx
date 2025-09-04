@@ -147,7 +147,7 @@ export default function MyProfile() {
     <div className="min-h-screen overflow-x-hidden bg-black flex justify-center">
       <div className="relative w-full max-w-md min-h-screen bg-black pb-8">
         {/* App version */}
-        <div className="absolute top-[37px] left-4 sm:left-5 font-normal text-white text-[10px] leading-3">
+        <div className="absolute top-[12px] left-4 sm:left-5 font-normal text-white text-[10px] leading-3">
           App Version: V0.0.1
         </div>
 

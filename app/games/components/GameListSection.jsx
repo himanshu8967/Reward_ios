@@ -843,11 +843,11 @@ export const GameListSection = ({ searchQuery = "", showSearch = false }) => {
                   5
                 </span>
                 <Image
-                  className="w-[30px] h-[28px] mb-[3px] object-contain"
+                  className="w-[34px] h-[30px] mb-[2px] object-contain"
                   alt="XP"
                   src="https://c.animaapp.com/3mn7waJw/img/pic-7.svg"
-                  width={30}
-                  height={28}
+                  width={34}
+                  height={30}
                 />
               </div>
             </div>
@@ -926,7 +926,7 @@ export const GameListSection = ({ searchQuery = "", showSearch = false }) => {
       </div>
 
       {/* Extra spacing to ensure content isn't hidden behind navigation */}
-      <div className="h-[8px]"></div>
+      <div className="h-[6px]"></div>
     </div>
   );
 };

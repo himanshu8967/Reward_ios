@@ -269,10 +269,10 @@ const SignUp = () => {
 
               <div className="absolute w-[41px] h-72 top-[33px] left-[348px]">
                 <Image
-                  className="absolute w-[41px] h-[106px] top-0 left-0"
+                  className="absolute w-[43px] h-[106px] top-0 left-1.5"
                   alt="Front shapes"
                   src="https://c.animaapp.com/bkGH9LUL/img/front-shapes-1@2x.png"
-                  width={41}
+                  width={43}
                   height={106}
                 />
 
@@ -287,7 +287,7 @@ const SignUp = () => {
             </div>
 
             <Image
-              className="absolute w-[21px] h-[22px] top-[184px] left-[334px]"
+              className="absolute w-[26px] h-[23px] top-[187px] left-[338px]"
               alt="Gem"
               src="https://c.animaapp.com/bkGH9LUL/img/gem-1@2x.png"
               width={21}
@@ -296,7 +296,7 @@ const SignUp = () => {
 
             <form
               onSubmit={handleSubmit}
-              className="w-full absolute top-[274px]  flex flex-col items-center justify-center gap-5 pb-20"
+              className="w-full absolute top-[274px]  flex flex-col items-center justify-center gap-5 pb-10"
             >
               <div className="flex flex-col">
                 <label className="[font-family:'Poppins',Helvetica] font-medium text-neutral-400 text-[14.3px] tracking-[0] mb-[1px] leading-[normal]">
@@ -610,7 +610,7 @@ const SignUp = () => {
                 </div>
               )}
               {/* CAPTCHA */}
-              <div className="w-full flex justify-center mt-4">
+              <div className="w-full flex justify-center mt-2">
                 <Image
                   className="w-[314px] h-[70px]"
                   alt="Captcha verification"
@@ -625,7 +625,7 @@ const SignUp = () => {
                 <button
                   onClick={handleSubmit} disabled={isLoading || !isMobileVerified}
 
-                  className="all-[unset] box-border w-full h-[50px] cursor-pointer disabled:opacity-50 mt-4"
+                  className="all-[unset] box-border w-full h-[50px] cursor-pointer disabled:opacity-50 mt-1"
                   type="submit"
                 >
                   <div className="flex justify-center items-center w-80   h-[50px] rounded-[12.97px] bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)]">
@@ -637,7 +637,7 @@ const SignUp = () => {
               </div>
 
               {/* Sign In Link */}
-              <div className="w-full text-center mt-6">
+              <div className="w-full text-center mt-1">
                 <p className="[font-family:'Poppins',Helvetica] font-medium text-sm tracking-[0] leading-[normal]">
                   <span className="text-white">Already have an account? </span>
                   <button
@@ -654,7 +654,7 @@ const SignUp = () => {
               <h1 className="[font-family:'Poppins',Helvetica] font-semibold text-[#efefef] text-2xl tracking-[0] leading-[normal]">
                 Welcome to Jackson!
               </h1>
-              <p className="[font-family:'Poppins',Helvetica]  font-medium text-neutral-400 text-sm tracking-[0] leading-[normal] mt-3">
+              <p className="[font-family:'Poppins',Helvetica]  font-medium text-neutral-400 text-sm tracking-[0] leading-[normal] mt-[3px]">
                 Create account to earn &amp; withdraw money
               </p>
             </div>

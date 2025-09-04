@@ -49,12 +49,12 @@ export default function PlayerTypeSelection() {
       <div className='absolute w-[300px] h-[300px] top-10 left-1/2 transform -translate-x-1/2 bg-[#af7de6] rounded-full blur-[150px] opacity-50' />
 
       {/* Main container with flex center alignment */}
-      <div className='relative w-full max-w-[375px] h-full mx-auto flex flex-col items-center justify-center px-6 py-8'>
-        <div className='w-full max-w-sm flex flex-col items-center justify-center space-y-4'>
+      <div className='relative w-full max-w-[375px] h-full mx-auto flex flex-col items-center px-6 pt-20 pb-6'>
+        <div className='w-full max-w-sm flex flex-col items-center space-y-2'>
 
           {/* Header section */}
-          <div className=' mt-13 font-poppins ml-2'>
-            <h1 className='text-white text-4xl font-light leading-tight mb-4'>
+          <div className='font-poppins ml-2'>
+            <h1 className='text-white text-4xl font-light leading-tight mb-2'>
               Which of these sounds most like you?
             </h1>
             <p className='text-white/70 text-base mb-1 font-light'>
@@ -63,7 +63,7 @@ export default function PlayerTypeSelection() {
           </div>
 
           {/* Main content - player type options */}
-          <div className='w-full space-y-4'>
+          <div className='w-full space-y-4 flex flex-col  mt-1 items-center'>
             {isLoading && (
               <div className='flex items-center justify-center py-8'>
                 <p className='text-white text-center font-poppins text-sm'>
@@ -86,13 +86,13 @@ export default function PlayerTypeSelection() {
                   <button
                     key={option.id}
                     onClick={() => handleSelectGameHabit(option.id)}
-                    className='relative w-full h-14 group focus:outline-none'
+                    className='relative w-full h-14 group focus:outline-none max-w-[300px]'
                   >
                     <div
                       className={`absolute inset-x-0 top-0 h-16 bg-[#D8D5E9] rounded-full transition-transform duration-300 ${isSelected ? 'scale-105' : ''}`}
                     />
                     <div
-                      className={`absolute inset-x-0 top-0 h-14 px-5 rounded-full transition-all duration-300 flex items-center justify-center bg-white group-hover:translate-y-0.5 ${isSelected ? 'scale-105 shadow-lg shadow-[#AF7DE6]/50' : ''}`}
+                      className={`absolute inset-0 h-14 px-5 rounded-full transition-all duration-300 flex items-center justify-center bg-white group-hover:translate-y-0.5 ${isSelected ? 'scale-105 shadow-lg shadow-[#AF7DE6]/50' : ''}`}
                     >
                       <span
                         className={`text-sm font-semibold font-poppins tracking-wide transition-colors duration-200 text-center ${isSelected ? 'text-[#272052]' : 'text-[#2D2D2D]'}`}
@@ -105,7 +105,7 @@ export default function PlayerTypeSelection() {
               })}
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }

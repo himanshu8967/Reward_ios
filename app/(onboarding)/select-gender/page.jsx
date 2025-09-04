@@ -44,8 +44,8 @@ export default function GenderSelection() {
     <div className='relative w-full h-screen bg-[#272052] overflow-hidden flex flex-col'>
       <div className='absolute w-[542px] h-[542px] top-0 left-0 bg-[#af7de6] rounded-full blur-[250px]' />
 
-      <div className='relative z-10 px-6 pt-20 font-poppins'>
-        <h1 className='text-white text-4xl font-light leading-tight mb-4'>
+      <div className='relative  z-10 px-6 pt-20 font-poppins'>
+        <h1 className='text-white text-4xl font-light leading-tight mt-1 mb-4'>
           Select your gender
         </h1>
         <p className='text-white/70 text-base font-light'>
@@ -53,7 +53,7 @@ export default function GenderSelection() {
         </p>
       </div>
 
-      <div className='relative z-10 flex-1 flex flex-col mt-30  px-6 space-y-6'>
+      <div className='relative z-10 flex-1 flex   flex-col justify-center items-center  px-6 space-y-6'>
 
 
         {!isLoading && !error && genderOptions.map((option) => {
@@ -82,15 +82,14 @@ export default function GenderSelection() {
             </button>
           );
         })}
-      </div>
-      <div className='relative z-10 flex-1 flex flex-col mb-80 px-6 space-y-6'>
         {isLoading && (
-          <p className="text-white text-center font-poppins">Loading options...</p>
+          <p className="text-white mb-190text-center font-poppins">Loading options...</p>
         )}
         {error && (
           <p className="text-red-400 text-center font-poppins">{error}</p>
         )}
       </div>
+
     </div>
   );
 }

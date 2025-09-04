@@ -20,15 +20,18 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-purple-600 to-blue-800">
       {/* Background Image */}
       <Image
         src="/welcome.png"
         alt="Jackson Welcome Screen"
-        width={1920}
-        height={1080}
+        width={360}
+        height={640}
         className="w-full h-full object-cover absolute inset-0"
         priority
+        sizes="(max-width: 480px) 100vw, (max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        placeholder="blur"
+        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
       />
 
       {/* Navigation Button with improved touch handling */}
@@ -38,9 +41,9 @@ export default function Home() {
         className="absolute z-20 touch-manipulation active:scale-95 transition-transform duration-100 hover:opacity-80 disabled:opacity-50"
         style={{
           right: "4px",
-          bottom: "185px",
-          width: "90px", // Increased touch target
-          height: "200px", // Increased touch target
+          bottom: "100px",
+          width: "100px", // Increased touch target
+          height: "300px", // Increased touch target
           // background: "transparent",
           borderRadius: "50%",
           WebkitTapHighlightColor: "transparent", // Remove tap highlight
