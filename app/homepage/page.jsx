@@ -279,7 +279,7 @@ const Homepage = () => {
       data-model-id="972:9945"
     >
       <div className="absolute w-full h-[49px] top-0 left-0 z-10 px-5">
-        <div className="absolute top-[8px] left-5 [font-family:'Poppins',Helvetica] font-normal text-white text-[10px] tracking-[0] leading-3 whitespace-nowrap">
+        <div className="absolute top-[10px] left-5 [font-family:'Poppins',Helvetica] font-normal text-white text-[10px] tracking-[0] leading-3 whitespace-nowrap">
           App Version: V0.0.1
         </div>
       </div>
@@ -546,7 +546,7 @@ const HeaderSection = () => {
   const greeting = `Hi ${firstName}! 👋`;
 
   return (
-    <header className="absolute top-[66px] left-0 w-full px-5 bg-transparent z-20">
+    <header className="absolute top-[60px] left-0 w-full px-5 bg-transparent z-20">
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-3">
           <button

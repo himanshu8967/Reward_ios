@@ -56,11 +56,11 @@ export const XPPointsModal = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 flex items-center justify-center px-4 py-4 z-50 overflow-y-auto"
+      className="fixed inset-0 bg-black/80 flex items-center justify-center px-4 py-4 z-50  overflow-x-hidden  overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="relative w-[335px] max-w-full max-h-[80vh] rounded-[20px] overflow-y-auto border border-solid border-[#ffffff80] bg-[linear-gradient(0deg,rgba(0,0,0,1)_0%,rgba(0,0,0,1)_100%)]"
+        className="relative w-[335px] max-w-full max-h-[80vh] rounded-[20px] overflow-y-auto overflow-x-hidden border border-solid border-[#ffffff80] bg-[linear-gradient(0deg,rgba(0,0,0,1)_0%,rgba(0,0,0,1)_100%)]"
         data-model-id="2103:7095"
         role="dialog"
         aria-labelledby="xp-points-title"

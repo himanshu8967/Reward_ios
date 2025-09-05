@@ -91,7 +91,7 @@ export const HomeIndicator = ({ activeTab }) => {
               {/* Games Button */}
               <button
                 className={`
-                  group flex flex-col items-center gap-1 cursor-pointer focus:outline-none rounded-lg p-1 min-w-[50px] relative
+                  group flex flex-col mr-6 items-center gap-1 cursor-pointer focus:outline-none rounded-lg p-1 min-w-[50px] relative
                 `}
                 onClick={() => handleTabClick("games", "/games")}
                 aria-label="Navigate to My Games"

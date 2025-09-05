@@ -147,12 +147,12 @@ export default function MyProfile() {
     <div className="min-h-screen overflow-x-hidden bg-black flex justify-center">
       <div className="relative w-full max-w-md min-h-screen bg-black pb-8">
         {/* App version */}
-        <div className="absolute top-[12px] left-4 sm:left-5 font-normal text-white text-[10px] leading-3">
+        <div className="absolute top-[8px] left-4 sm:left-5 font-normal text-white text-[10px] leading-3">
           App Version: V0.0.1
         </div>
 
         {/* Header */}
-        <header className="flex flex-col w-full items-start gap-2 px-4 sm:px-5 py-3 absolute top-[54px] left-0">
+        <header className="flex flex-col w-full items-start gap-2 px-4 sm:px-5 py-3 absolute top-[40px] left-0">
           <div className="flex items-center gap-4 w-full">
             <button
               className="relative w-6 h-6 flex-shrink-0"

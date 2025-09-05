@@ -504,7 +504,7 @@ export const GameListSection = ({ searchQuery = "", showSearch = false }) => {
   );
 
   return (
-    <div className={`flex flex-col max-w-[335px] w-full mx-auto items-start gap-8 relative ${showSearch ? 'top-[200px]' : 'top-[146px]'}`}>
+    <div className={`flex flex-col max-w-[335px] w-full mx-auto items-start gap-8 relative ${showSearch ? 'top-[180px]' : 'top-[130px]'}`}>
       <div className="flex flex-col items-start gap-2.5 relative self-stretch w-full flex-[0_0_auto]">
         <div className="flex flex-col w-full items-start gap-[49px] relative flex-[0_0_auto]">
           <div className="inline-flex items-center gap-0.5 relative flex-[0_0_auto]">
