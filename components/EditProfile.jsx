@@ -1,13 +1,17 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-// Using regular img tag for avatar to avoid CORS issues
 import { useAuth } from "@/contexts/AuthContext";
-import { getProfile, updateProfile, uploadAvatar } from "@/lib/api";
+import { uploadAvatar } from "@/lib/api";
+import { useSelector, useDispatch } from "react-redux";
+import { updateUserProfile, fetchUserProfile } from "@/lib/redux/slice/profileSlice";
 
 export const EditProfile = () => {
   const router = useRouter();
-  const { user, token, updateUserInContext } = useAuth();
+  const { token } = useAuth();
+  const dispatch = useDispatch();
+  const { details: profile, detailsStatus: profileStatus } = useSelector((state) => state.profile);
+  console.log(profile)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -15,50 +19,33 @@ export const EditProfile = () => {
     mobile: "",
     socialTag: "",
   });
-  const [profileData, setProfileData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
   const [originalAvatar, setOriginalAvatar] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState(null); // For immediate
+  const [avatarPreview, setAvatarPreview] = useState(null);
   const fileInputRef = useRef(null);
 
-
-  // 1. Fetch profile data to pre-fill the form
   useEffect(() => {
-    if (token && user) {
-      const fetchProfileData = async () => {
-        try {
-          const profileData = await getProfile(token);
-          console.log("Profile data received:", profileData);
-          console.log("Avatar URL:", profileData.profile?.avatar);
-          setProfileData(profileData);
-          setFormData({
-            firstName: profileData.firstName || "",
-            lastName: profileData.lastName || "",
-            email: profileData.email || "",
-            mobile: profileData.mobile || "",
-            socialTag: profileData.socialTag || "",
-          });
-          if (profileData.profile?.avatar) {
-            setAvatarPreview(profileData.profile.avatar);
-            setOriginalAvatar(profileData.profile.avatar);
-          }
-        } catch (err) {
-          setError("Could not load your profile data.");
-          console.error("Failed to load profile for editing:", err);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchProfileData();
+    if (profileStatus === 'succeeded' && profile) {
+      setFormData({
+        firstName: profile.firstName || "",
+        lastName: profile.lastName || "",
+        email: profile.email || "",
+        mobile: profile.mobile || "",
+        socialTag: profile.socialTag || "",
+      });
+      if (profile.profile?.avatar) {
+        setAvatarPreview(profile.profile.avatar);
+        setOriginalAvatar(profile.profile.avatar);
+      }
     }
-  }, [token, user]);
+  }, [profile, profileStatus]);
+
+
 
   const validateField = (field, value) => {
     const errors = {};
-
     const trimmedValue = value ? value.trim() : '';
 
     if (field === 'firstName' || field === 'lastName') {
@@ -95,8 +82,6 @@ export const EditProfile = () => {
       }
     }
 
-
-
     if (field === 'lastName') {
       if (!trimmedValue) {
         errors[field] = 'Last name is required';
@@ -107,7 +92,6 @@ export const EditProfile = () => {
       }
     }
 
-    // Social Tag validation
     if (field === 'socialTag') {
       if (!trimmedValue) {
         errors[field] = 'Social Tag is required';
@@ -119,12 +103,10 @@ export const EditProfile = () => {
         errors[field] = 'Social Tag can only contain letters, numbers, and underscores';
       }
     }
-
     return errors;
   };
 
   const handleInputChange = (field, value) => {
-    // Truncate input if it exceeds maximum length
     let truncatedValue = value;
     if ((field === 'firstName' || field === 'lastName') && value.length > 10) {
       truncatedValue = value.substring(0, 10);
@@ -137,8 +119,6 @@ export const EditProfile = () => {
     }
 
     setFormData((prev) => ({ ...prev, [field]: truncatedValue }));
-
-    // Validate field and set errors
     const fieldError = validateField(field, truncatedValue);
     setFieldErrors((prev) => ({
       ...prev,
@@ -159,9 +139,8 @@ export const EditProfile = () => {
     return Object.keys(errors).length === 0 && formData.firstName.trim() !== '';
   };
 
-  // 2. Handle saving changes to the backend
   const handleSaveChanges = async (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
     if (!token) {
       setError("Session expired. Please log in again.");
       return;
@@ -173,23 +152,22 @@ export const EditProfile = () => {
 
     setIsSaving(true);
     setError(null);
-
     const dataToUpdate = {
       firstName: formData.firstName,
       lastName: formData.lastName || "-",
       mobile: formData.mobile,
       status: "active",
-      bio: profileData?.profile?.bio || "Financial enthusiast",
-      theme: profileData?.profile?.theme || "light",
       socialTag: formData.socialTag,
+      theme: profile?.profile?.theme || "light",
     };
-
     try {
-      await updateProfile(dataToUpdate, token);
-      if (updateUserInContext) {
-        updateUserInContext({ ...user, ...dataToUpdate });
+      const resultAction = await dispatch(updateUserProfile({ profileData: dataToUpdate, token }));
+
+      if (updateUserProfile.rejected.match(resultAction)) {
+        throw new Error(resultAction.payload);
       }
-      router.replace('/myprofile');
+      // Use router.back() for smoother navigation without re-render
+      router.back();
     } catch (err) {
       setError(err.message || "Failed to save profile.");
       console.error("Failed to save profile:", err);
@@ -202,20 +180,15 @@ export const EditProfile = () => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // A. Optimistic UI: Show a local preview immediately
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setAvatarPreview(reader.result);
-    };
+    reader.onloadend = () => setAvatarPreview(reader.result);
     reader.readAsDataURL(file);
 
-    // B. Upload the file to the backend
     if (token) {
       const upload = async () => {
         try {
-          const response = await uploadAvatar(file, token);
-          setAvatarPreview(response.avatar);
-          setOriginalAvatar(response.avatar);
+          await uploadAvatar(file, token);
+          dispatch(fetchUserProfile(token));
           alert("Avatar updated successfully!");
         } catch (err) {
           setError(err.message || "Failed to upload avatar.");
@@ -228,14 +201,19 @@ export const EditProfile = () => {
   };
 
   const triggerFileInput = () => fileInputRef.current.click();
-  const handleClose = () => router.replace('/myprofile');
+  const handleClose = () => router.back();
 
-  if (isLoading) {
-    return <div className="bg-[#272052] flex h-screen justify-center items-center text-white">Loading Editor...</div>;
+  // Only show loading if we don't have any profile data at all
+  if (profileStatus === 'loading' && !profile) {
+    return <div className="bg-[#272052] flex h-screen justify-center items-center text-white">Loading Profile Editor...</div>;
+  }
+  if (profileStatus === 'failed' && !profile) {
+    return <div className="bg-[#272052] flex h-screen justify-center items-center text-red-500">Could not load profile data to edit.</div>;
   }
 
+
   return (
-    <div className="bg-[#272052] flex min-h-screen flex-row justify-center w-full relative overflow-auto">
+    <div className="bg-[#272052] flex min-h-screen flex-row justify-center w-full relative overflow-auto scrollbar-hide">
       <div
         className="relative w-full max-w-[390px] min-h-full bg-[#272052] mx-auto"
         data-model-id="2739:7886"
@@ -274,7 +252,7 @@ export const EditProfile = () => {
         <div className="absolute w-[132px] h-[132px] top-[140px] left-1/2 transform -translate-x-1/2">
           <div className="relative w-full h-full">
             <img
-              src={avatarPreview || "https://c.animaapp.com/mFM2C37Z/img/component-1.svg"}
+              src={avatarPreview}
               alt="Profile avatar preview"
               width={132}
               height={132}
@@ -316,7 +294,7 @@ export const EditProfile = () => {
               First Name
             </label>
             <div className="relative w-full">
-              <img className="w-full h-[54px]" alt="Input background" src="https://c.animaapp.com/mFM2C37Z/img/card-4@2x.png" />
+              <img className="w-full h-[54px]" alt="Input background" src="/editprofilebg.png" />
               <input
                 id="firstName"
                 type="text"
@@ -344,7 +322,7 @@ export const EditProfile = () => {
               Last Name
             </label>
             <div className="relative w-full">
-              <img className="w-full h-[54px]" alt="Input background" src="https://c.animaapp.com/mFM2C37Z/img/card-4@2x.png" />
+              <img className="w-full h-[54px]" alt="Input background" src="/editprofilebg.png" />
               <input
                 id="lastName"
                 type="text"
@@ -372,7 +350,7 @@ export const EditProfile = () => {
               Email Address
             </label>
             <div className="relative w-full">
-              <img className="w-full h-[54px]" alt="Input background" src="https://c.animaapp.com/mFM2C37Z/img/card-4@2x.png" />
+              <img className="w-full h-[54px]" alt="Input background" src="/editprofilebg.png" />
               <input
                 id="emailAddress"
                 type="email"
@@ -401,7 +379,7 @@ export const EditProfile = () => {
               Phone Number
             </label>
             <div className="relative w-full">
-              <img className="w-full h-[54px]" alt="Input background" src="https://c.animaapp.com/mFM2C37Z/img/card-4@2x.png" />
+              <img className="w-full h-[54px]" alt="Input background" src="/editprofilebg.png" />
               <input
                 id="phoneNumber"
                 type="tel"
@@ -430,7 +408,7 @@ export const EditProfile = () => {
               Social Tag
             </label>
             <div className="relative w-full">
-              <img className="w-full h-[54px]" alt="Input background" src="https://c.animaapp.com/mFM2C37Z/img/card-4@2x.png" />
+              <img className="w-full h-[54px]" alt="Input background" src="/editprofilebg.png" />
               <input
                 id="socialTag"
                 type="text"
