@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { fetchUserData, fetchGamesBySection } from "@/lib/redux/slice/gameSlice";
 import { useAuth } from "@/contexts/AuthContext";
 import GameItemCard from "./GameItemCard";
-import NonGamingOffersCarousel from "./NonGamingOffersCarousel";
 import WatchAdCard from "./WatchAdCard";
 
 // Static data for non-gaming offers carousel

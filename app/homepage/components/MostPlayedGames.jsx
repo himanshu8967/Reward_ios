@@ -3,8 +3,7 @@ import React, { useEffect, useMemo, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { handleGameDownload, isGameAvailable, debugBesitosUrl } from "@/lib/gameDownloadUtils";
-import { fetchGamesBySection, clearSpecificSection } from "@/lib/redux/slice/gameSlice";
+import { fetchGamesBySection } from "@/lib/redux/slice/gameSlice";
 
 const MostPlayedGames = () => {
     const router = useRouter();
@@ -32,7 +31,7 @@ const MostPlayedGames = () => {
         return allGames.map(game => ({
             ...game,
             // Simplified image selection for faster processing
-            optimizedImage: game.images?.square_image || game.details?.image || "/placeholder-game.png"
+            optimizedImage: game.details?.square_image
         }));
     }, [allGames]);
 
@@ -97,16 +96,6 @@ const MostPlayedGames = () => {
         }
     }, []);
 
-    // REMOVED: Debug calculations to improve performance
-
-    // REMOVED: Loading state for better Android UX - show content immediately
-    // Games will load in background without blocking UI
-
-    // REMOVED: Failed/empty state for better Android UX - show default content
-    // Always show the section header and placeholder content
-
-    // REMOVED: Filtered out games state for better Android UX - show default content
-    // Always show the section with available games
 
     return (
         <div className="flex flex-col items-start gap-4 relative w-full animate-fade-in">
@@ -132,35 +121,36 @@ const MostPlayedGames = () => {
                                 onClick={() => handleGameClick(game)}
                             >
                                 <div
-                                    className="relative w-[72px] h-[72px] rounded-full overflow-hidden"
+                                    className="relative w-[72px] h-[72px] rounded-full bg-gradient-to-br from-[#983EFF] to-[#FFB700] p-[2.5px]"
                                     style={{
-                                        border: `2px solid ${game.borderColor || '#FF69B4'}`,
-                                        boxShadow: `0 0 0 1px rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.3), 0 0 8px ${game.borderColor || '#FF69B4'}40`,
+                                        boxShadow: `0 0 0 1px rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.3), 0 0 8px #983EFF40`,
                                     }}
                                 >
-                                    <img
-                                        className="w-full h-full object-cover"
-                                        alt={game.details?.name || game.name || "Game"}
-                                        src={game.optimizedImage}
-                                        loading="lazy"
-                                        decoding="async"
-                                        onError={(e) => {
-                                            e.target.src = "/placeholder-game.png";
-                                        }}
-                                    />
+                                    <div className="w-full h-full rounded-full bg-black p-[1.8px]">
+                                        <img
+                                            className="w-full h-full object-cover rounded-full"
+                                            alt={game.details?.name}
+                                            src={game.optimizedImage}
+                                            loading="lazy"
+                                            decoding="async"
+                                            onError={(e) => {
+                                                e.target.src = "/placeholder-game.png";
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                                 <div className="relative w-[72px] [font-family:'Poppins',Helvetica] font-medium text-white text-xs text-center tracking-[0] leading-4 overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
-                                    {(game.details?.name || game.name || game.title || "Game").split(' - ')[0]}
+                                    {(game.details?.name).split(' - ')[0]}
                                 </div>
 
                                 {/* New tag - only for first game */}
-                                {index < 1 && (
+                                {/* {index < 1 && (
                                     <div className="absolute w-11 h-4 top-[59px] left-3.5 rounded overflow-hidden bg-[linear-gradient(90deg,rgba(34,197,94,1)_0%,rgba(16,185,129,1)_100%)]">
                                         <div className="absolute w-[33px] -top-px left-[5px] [font-family:'Poppins',Helvetica] font-semibold text-white text-xs text-center tracking-[0] leading-4 overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
                                             New
                                         </div>
                                     </div>
-                                )}
+                                )} */}
                             </div>
                         );
                     })

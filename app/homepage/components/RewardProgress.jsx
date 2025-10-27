@@ -17,8 +17,6 @@ const RewardProgress = ({ stats }) => {
             100
         );
 
-
-
         return {
             currentPoints: currentProgress,
             targetPoints: rewardGoal,
@@ -79,7 +77,7 @@ const RewardProgress = ({ stats }) => {
                                         {/* Next level indicator - MOVED & FIXED */}
                                         <div className="absolute w-[23px] h-[24px] top-0.3 right-[-1px] bg-[#ffd700] rounded-full border-0.5 border-[#b8860b] flex items-center justify-center ">
                                             <div className="[font-family:'Poppins',Helvetica] font-semibold text-[#815c23] text-[12px] tracking-[0.02px] leading-[normal]">
-                                                3
+                                                2
                                             </div>
                                         </div>
                                     </div>
@@ -91,7 +89,7 @@ const RewardProgress = ({ stats }) => {
                                     <span
                                         role="img"
                                         aria-label="star"
-                                        className="inline-block relative"
+                                        className="inline-block relative "
                                         style={{
                                             filter: 'drop-shadow(0 0 2px rgba(255, 215, 0, 0.5))',
                                             transform: 'translateY(-1px)'

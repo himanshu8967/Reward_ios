@@ -12,7 +12,7 @@ const GameItemCard = ({
             onClick(game, e)
         }
     }
-
+    console.log("game", game)
     // Empty state component
     if (isEmpty) {
         return (
@@ -51,7 +51,7 @@ const GameItemCard = ({
             iconAlt: "Coin",
         },
         {
-            value: "50", // Hardcoded XP as requested
+            value: game.xp, // Hardcoded XP as requested
             icon: "https://c.animaapp.com/3btkjiTJ/img/pic.svg",
             iconAlt: "XP",
         },
@@ -84,13 +84,13 @@ const GameItemCard = ({
                 </div>
 
                 {/* Game Details */}
-                <div className="flex flex-col gap-2 flex-1 min-w-0">
+                <div className="flex flex-col  flex-1 min-w-0">
                     {/* Game Name */}
                     <h1 className="[font-family:'Poppins',Helvetica] font-bold text-white text-base leading-tight truncate">
                         {cleanGameName}
                     </h1>
-                    <h1 className="[font-family:'Poppins',Helvetica] font-light text-white text-sm leading-tight truncate">
-                        {genre}
+                    <h1 className="[font-family:'Poppins',Helvetica] mb-2  mt-[2px] font-light text-white text-[12px] leading-tight truncate">
+                        ({genre})
                     </h1>
 
                     {/* Stats */}

@@ -86,7 +86,7 @@ const HeaderSection = () => {
                 <div className="flex items-center">
                     <button
                         onClick={handleWalletClick}
-                        className="w-[87px] h-9 rounded-3xl bg-[linear-gradient(180deg,rgba(158,173,247,0.4)_0%,rgba(113,106,231,0.4)_100%)] flex items-center justify-between px-2.5 hover:opacity-80 transition-opacity duration-200 cursor-pointer"
+                        className="min-w-[87px] h-9 gap-[2px] rounded-3xl bg-[linear-gradient(180deg,rgba(158,173,247,0.4)_0%,rgba(113,106,231,0.4)_100%)] flex items-center justify-between px-2.5 hover:opacity-80 transition-opacity duration-200 cursor-pointer"
                         type="button"
                         aria-label="Go to Wallet"
                     >

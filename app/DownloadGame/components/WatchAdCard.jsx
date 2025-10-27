@@ -191,7 +191,7 @@ const WatchAdCard = ({
                     } transition-all duration-200 ${className}`}
                 onClick={handleAdClick}
             >
-                <div className="relative h-[99px] top-px bg-[url(https://c.animaapp.com/3mn7waJw/img/clip-path-group-3@2x.png)] bg-[100%_100%]">
+                <div className="relative h-[99px] top-px bg-[url(https://c.animaapp.com/3mn7waJw/img/clip-path-group-3@2x.png)] bg-[length:100%_100%] bg-no-repeat bg-center">
                     {/* Content Section */}
                     <div className="flex flex-col w-[205px] h-12 items-start absolute top-[25px] left-[116px]">
                         <div className="flex flex-col items-start pt-0 pb-2 px-0 relative self-stretch w-full flex-[0_0_auto] mt-[2.4px]">

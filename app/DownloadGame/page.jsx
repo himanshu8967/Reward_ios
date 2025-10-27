@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { GameListSection } from "./components/GameListSection";
+import { MostPlayedCategories } from "./components/MostPlayedCategories";
 import { HomeIndicator } from "../../components/HomeIndicator";
 
 export default function GamesPage() {
@@ -19,6 +19,10 @@ export default function GamesPage() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
   };
+
+  const handleGoBack = () => {
+    router.back();
+  };
   return (
     <div className="flex justify-center ">
       <div
@@ -33,7 +37,23 @@ export default function GamesPage() {
 
         <div className="flex flex-col w-full justify-center items-start gap-2 px-5 py- absolute top-[50px] left-0">
           <div className="flex h-12 items-center justify-between w-full max-w-sm mx-auto rounded-[32px]">
-            <h1 className="font-semibold text-white text-xl tracking-[0] leading-5 [font-family:'Poppins',Helvetica] flex-1">
+            <button
+              onClick={handleGoBack}
+              className="py-2 pr-2 -ml-2 rounded-full hover:bg-white/10 transition-colors duration-200"
+              aria-label="Go back"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-6 h-6 text-white"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <h1 className="font-semibold text-white text-xl ml-2 tracking-[0] leading-5 [font-family:'Poppins',Helvetica] flex-1">
               Most Played Games
             </h1>
 
@@ -78,7 +98,7 @@ export default function GamesPage() {
           )}
         </div>
 
-        <GameListSection searchQuery={searchQuery} showSearch={showSearch} />
+        <MostPlayedCategories searchQuery={searchQuery} showSearch={showSearch} />
 
         <HomeIndicator activeTab="games" />
       </div>
