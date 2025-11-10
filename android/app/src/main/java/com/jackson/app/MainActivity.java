@@ -1,6 +1,7 @@
 package com.jackson.app;
 
 import android.os.Bundle;
+import android.webkit.WebView;
 import androidx.core.splashscreen.SplashScreen;
 import com.getcapacitor.BridgeActivity;
 
@@ -20,6 +21,32 @@ public class MainActivity extends BridgeActivity {
         // Hide the action bar again after super.onCreate
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
+        }
+        
+        // Configure WebView to hide scrollbars after initialization
+        try {
+            // Use post to ensure WebView is initialized
+            getWindow().getDecorView().post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        WebView webView = getBridge().getWebView();
+                        if (webView != null) {
+                            // Completely disable horizontal and vertical scrollbars
+                            webView.setVerticalScrollBarEnabled(false);
+                            webView.setHorizontalScrollBarEnabled(false);
+                            // Set scrollbar style to hide overlay
+                            webView.setScrollBarStyle(WebView.SCROLLBARS_INSIDE_OVERLAY);
+                            // Disable overscroll bounce effect (over-scroll mode)
+                            webView.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
+                        }
+                    } catch (Exception e) {
+                        // Ignore if WebView is not available
+                    }
+                }
+            });
+        } catch (Exception e) {
+            // Ignore if bridge is not available yet
         }
         
         // Keep the splash screen visible for a minimum duration

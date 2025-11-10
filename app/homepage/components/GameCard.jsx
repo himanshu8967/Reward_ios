@@ -564,8 +564,16 @@ const GameCard = ({ onClose: onCloseProp }) => {
                 {/* Footer */}
                 <footer className="absolute w-[335px] h-[51px] top-[429px] left-0 rounded-[0px_0px_10px_10px] overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.4)_0%,rgba(113,106,231,0.4)_100%)] flex items-center justify-between px-3">
                     <div className="flex flex-col text-white [font-family:'Poppins',Helvetica]">
-                        <p className="text-[13px] leading-tight font-light">
-                            Complete Tasks to Earn
+                        <p className="text-[13px] leading-tight font-light flex items-center gap-1">
+                            {(() => {
+                                const gameName = currentGame?.details?.name || currentGame?.title || gameData?.title || "Game";
+                                const cleanGameName = gameName.split(' - ')[0].split(':')[0].trim();
+                                return (
+                                    <>
+                                        <span> Complete <span className="text-base font-bold">{cleanGameName}</span> task and earn</span>
+                                    </>
+                                );
+                            })()}
                         </p>
                         <div className="flex items-center gap-x-1.5 text-sm font-semibold">
                             <span>Earn up to {currentGame?.rewards?.coins || currentGame?.amount || 0}</span>
@@ -715,8 +723,16 @@ const GameCard = ({ onClose: onCloseProp }) => {
             <>
                 <footer className="absolute w-[335px] h-[51px] top-[429px] left-0 rounded-[0px_0px_10px_10px] overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.4)_0%,rgba(113,106,231,0.4)_100%)] flex items-center justify-between px-3">
                     <div className="flex flex-col text-white [font-family:'Poppins',Helvetica]">
-                        <p className="text-[13px] leading-tight font-light">
-                            Complete Tasks to Earn
+                        <p className="text-[13px] leading-tight font-light flex items-center gap-1">
+                            {(() => {
+                                const gameName = currentGame?.details?.name || currentGame?.title || gameData?.title || "Game";
+                                const cleanGameName = gameName.split(' - ')[0].split(':')[0].trim();
+                                return (
+                                    <>
+                                        <span> Complete <span className="text-base font-bold">{cleanGameName}</span> task and earn</span>
+                                    </>
+                                );
+                            })()}
                         </p>
                         <div className="flex items-center gap-x-1.5 text-sm font-semibold">
                             <span>Earn up to {currentGame?.rewards?.coins || currentGame?.amount || 0}</span>

@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import useOnboardingStore from '@/stores/useOnboardingStore';
@@ -244,7 +245,8 @@ const SignUp = () => {
     }
   };
 
-  const handleSignInClick = () => {
+  const handleSignInClick = (e) => {
+    e.preventDefault();
     router.push('/login');
   };
   return (
@@ -321,7 +323,7 @@ const SignUp = () => {
                   />
                 </div>
                 {error.firstname && (
-                  <p className="text-red-400 text-xs mt-1 ml-2">
+                  <p className="text-red-400 text-xs mt-1 ml-2 max-w-[314px] break-words">
                     {error.firstname}
                   </p>
                 )}
@@ -351,7 +353,7 @@ const SignUp = () => {
                   />
                 </div>
                 {error.lastname && (
-                  <p className="text-red-400 text-xs mt-1 ml-2">
+                  <p className="text-red-400 text-xs mt-1 ml-2 max-w-[314px] break-words">
                     {error.lastname}
                   </p>
                 )}
@@ -381,7 +383,7 @@ const SignUp = () => {
                   />
                 </div>
                 {error.email && (
-                  <p className="text-red-400 text-xs mt-1 ml-2">
+                  <p className="text-red-400 text-xs mt-1 ml-2 max-w-[314px] break-words">
                     {error.email}
                   </p>
                 )}
@@ -437,7 +439,7 @@ const SignUp = () => {
                   )}
                 </div>
                 {error.mobile && (
-                  <p className="text-red-400 text-xs mt-1 ml-2">
+                  <p className="text-red-400 text-xs mt-1 ml-2 max-w-[314px] break-words">
                     {error.mobile}
                   </p>
                 )}
@@ -470,7 +472,7 @@ const SignUp = () => {
                       />
                     ))}
                   </div>
-                  {error.otp && <p className="text-red-400 text-xs mt-1 text-center">{error.otp}</p>}
+                  {error.otp && <p className="text-red-400 text-xs mt-1 text-center max-w-[314px] mx-auto break-words px-2">{error.otp}</p>}
 
 
                   {/* Layout for Timer and Resend Button, matching the Figma design */}
@@ -547,7 +549,7 @@ const SignUp = () => {
                   </button>
                 </div>
                 {error.password && (
-                  <p className="text-red-400 text-xs mt-1 ml-2">
+                  <p className="text-red-400 text-xs mt-1 ml-2 max-w-[314px] break-words">
                     {error.password}
                   </p>
                 )}
@@ -598,15 +600,15 @@ const SignUp = () => {
                   </button>
                 </div>
                 {error.confirmPassword && (
-                  <p className="text-red-400 text-xs mt-1 ml-2">
+                  <p className="text-red-400 text-xs mt-1 ml-2 max-w-[314px] break-words">
                     {error.confirmPassword}
                   </p>
                 )}
               </div>
               {/* Error Message Display */}
               {error.form && (
-                <div className="w-full text-center">
-                  <p className="text-red-400 text-sm">{error.form}</p>
+                <div className="w-full max-w-[314px] mx-auto text-center px-2">
+                  <p className="text-red-400 text-sm break-words">{error.form}</p>
                 </div>
               )}
               {/* CAPTCHA */}
@@ -628,9 +630,13 @@ const SignUp = () => {
                   className="all-[unset] box-border w-full h-[50px] cursor-pointer disabled:opacity-50 mt-1"
                   type="submit"
                 >
-                  <div className="flex justify-center items-center w-80   h-[50px] rounded-[12.97px] bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)]">
-                    <div className=" flex justify-center items-center   [font-family:'Poppins',Helvetica] font-semibold text-white text-lg tracking-[0] leading-[normal]">
-                      {isLoading ? "Signing Up..." : "Sign up"}
+                  <div className="flex justify-center items-center w-80 h-[50px] rounded-[12.97px] bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)]">
+                    <div className={`flex justify-center items-center w-full h-full [font-family:'Poppins',Helvetica] font-semibold text-white text-lg tracking-[0] leading-[normal]`}>
+                      {isLoading ? (
+                        <span className="w-full text-center">Signing Up.</span>
+                      ) : (
+                        <span className="w-full text-center">Sign up</span>
+                      )}
                     </div>
                   </div>
                 </button>
@@ -640,12 +646,12 @@ const SignUp = () => {
               <div className="w-full text-center mt-1">
                 <p className="[font-family:'Poppins',Helvetica] font-medium text-sm tracking-[0] leading-[normal]">
                   <span className="text-white">Already have an account? </span>
-                  <button
-                    onClick={handleSignInClick}
-                    className="text-[#9098f2] cursor-pointer bg-transparent border-none outline-none [font-family:'Poppins',Helvetica] font-medium text-sm"
+                  <Link
+                    href="/login"
+                    className="text-[#9098f2] cursor-pointer bg-transparent border-none outline-none [font-family:'Poppins',Helvetica] font-medium text-sm hover:text-[#a5aef5] transition-colors duration-200"
                   >
                     Sign In
-                  </button>
+                  </Link>
                 </p>
               </div>
             </form>

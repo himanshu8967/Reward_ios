@@ -11,13 +11,13 @@ export default function PrivacyPolicyPage() {
 
     return (
         <div className="w-full min-h-screen bg-black">
-            <div className="w-full max-w-[335px] mx-auto mt-2">
-                <div className="[font-family:'Poppins',Helvetica] font-normal text-neutral-400 text-[10px] tracking-[0] leading-3">
+            <div className="w-full max-w-[335px] mx-auto mt-2 ">
+                <div className="[font-family:'Poppins',Helvetica] ml-3 font-normal text-[#A4A4A4] text-[10px] tracking-[0] leading-3">
                     App Version: {process.env.NEXT_PUBLIC_APP_VERSION || "V0.0.1"}
                 </div>
             </div>
             {/* Header Section */}
-            <div className="px-5 py-4 bg-black mt-2">
+            <div className="px-5 py-4 bg-black mt-3">
                 <div className="flex items-center gap-5 w-full max-w-[335px] mx-auto">
                     <button
                         onClick={handleBackClick}

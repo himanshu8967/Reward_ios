@@ -32,9 +32,9 @@ export const BannerSection = () => {
                 loading="eager"
                 fetchPriority="high"
             />
-            <div className="relative w-[340px] h-[176px]">
+            <div className="relative w-full max-w-[340px] h-[176px]">
                 <div
-                    className="relative w-[335px] h-full border border-white/30 rounded-[22px] overflow-hidden bg-cover bg-center bg-no-repeat bg-black"
+                    className="relative w-full max-w-[335px] h-full border border-white/30 rounded-[22px] overflow-hidden bg-cover bg-center bg-no-repeat bg-black"
                     style={{ backgroundImage: "url('/arhievegolasbanner.png')" }}
                 >
 

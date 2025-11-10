@@ -1,7 +1,11 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { updateUserEarnings } from "@/lib/redux/slice/gameSlice";
-import { fetchWalletScreen, fetchWalletTransactions, fetchFullWalletTransactions } from "@/lib/redux/slice/walletTransactionsSlice";
+import {
+  fetchWalletScreen,
+  fetchWalletTransactions,
+  fetchFullWalletTransactions,
+} from "@/lib/redux/slice/walletTransactionsSlice";
 import { fetchProfileStats } from "@/lib/redux/slice/profileSlice";
 
 const BASE_URL = "https://rewardsapi.hireagent.co";
@@ -16,6 +20,14 @@ export const useDailyRewards = () => {
   const [isNavigating, setIsNavigating] = useState(false);
   const [isCurrentWeek, setIsCurrentWeek] = useState(true);
   const [isFutureWeek, setIsFutureWeek] = useState(false);
+
+  // Use ref to always have the latest currentWeekStart value
+  const currentWeekStartRef = useRef(currentWeekStart);
+
+  // Update ref whenever currentWeekStart changes
+  useEffect(() => {
+    currentWeekStartRef.current = currentWeekStart;
+  }, [currentWeekStart]);
 
   // Hydrate from localStorage cache immediately to avoid initial loading flicker
   useEffect(() => {
@@ -36,132 +48,167 @@ export const useDailyRewards = () => {
   }, []);
 
   // Fetch week data (with cache)
-  const fetchWeekData = useCallback(async (date = null, forceRefresh = false) => {
-    try {
-      const cacheKey = date
-        ? `week_${date.toISOString().split("T")[0]}`
-        : "current_week";
-      const cachedData = localStorage.getItem(`daily_rewards_${cacheKey}`);
+  const fetchWeekData = useCallback(
+    async (date = null, forceRefresh = false) => {
+      try {
+        const cacheKey = date
+          ? `week_${date.toISOString().split("T")[0]}`
+          : "current_week";
+        const cachedData = localStorage.getItem(`daily_rewards_${cacheKey}`);
 
-      // Only use cache if not forcing refresh and cache is fresh
-      if (cachedData && !date && !forceRefresh) {
-        try {
-          const parsedData = JSON.parse(cachedData);
-          const cacheTime = parsedData.cacheTime;
-          const now = Date.now();
+        // Only use cache if not forcing refresh and cache is fresh
+        if (cachedData && !date && !forceRefresh) {
+          try {
+            const parsedData = JSON.parse(cachedData);
+            const cacheTime = parsedData.cacheTime;
+            const now = Date.now();
 
-          // Use cache if less than 2 minutes old (reduced from 5 minutes for better freshness)
-          if (now - cacheTime < 2 * 60 * 1000) {
-            setWeekData(parsedData.data);
-            setCurrentWeekStart(new Date(parsedData.data.weekStart));
-            return parsedData.data;
+            // Use cache if less than 2 minutes old (reduced from 5 minutes for better freshness)
+            if (now - cacheTime < 2 * 60 * 1000) {
+              setWeekData(parsedData.data);
+              setCurrentWeekStart(new Date(parsedData.data.weekStart));
+              return parsedData.data;
+            }
+          } catch (e) {
+            // Ignore cache parse error
           }
-        } catch (e) {
-          // Ignore cache parse error
         }
-      }
 
-      // Only show loading if nothing to display yet
-      if (!weekData) setLoading(true);
-      setError(null);
+        // Show loading state when navigating to a different week
+        setLoading(true);
+        setError(null);
 
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("Please log in to view daily rewards.");
-      }
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          throw new Error("Please log in to view daily rewards.");
+        }
 
-      const url = date
-        ? `${BASE_URL}/api/daily-rewards/week?date=${
-            date.toISOString().split("T")[0]
-          }`
-        : `${BASE_URL}/api/daily-rewards/week`;
+        const url = date
+          ? `${BASE_URL}/api/daily-rewards/week?date=${
+              date.toISOString().split("T")[0]
+            }`
+          : `${BASE_URL}/api/daily-rewards/week`;
 
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!data.success) {
-        throw new Error(
-          data.error || data.message || "Failed to load week data"
-        );
-      }
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error("Session expired. Please log in again.");
-        } else if (response.status === 404) {
-          throw new Error("No reward data found for this week.");
-        } else {
+        if (!data.success) {
           throw new Error(
-            data.error ||
-              data.message ||
-              `Failed to load week data (${response.status})`
+            data.error || data.message || "Failed to load week data"
           );
         }
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Session expired. Please log in again.");
+          } else if (response.status === 404) {
+            throw new Error("No reward data found for this week.");
+          } else {
+            throw new Error(
+              data.error ||
+                data.message ||
+                `Failed to load week data (${response.status})`
+            );
+          }
+        }
+
+        if (data.success && data.data) {
+          // Update state with new week data
+          const newWeekData = data.data;
+          const newWeekStart = new Date(newWeekData.weekStart);
+
+          setWeekData(newWeekData);
+          setCurrentWeekStart(newWeekStart);
+
+          // Check if this is the current week or future week
+          const now = new Date();
+          const weekStart = new Date(newWeekData.weekStart);
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+
+          const isCurrentWeek = now >= weekStart && now <= weekEnd;
+          const isFutureWeek = weekStart > now;
+          setIsCurrentWeek(isCurrentWeek);
+          setIsFutureWeek(isFutureWeek);
+
+          const cacheData = {
+            data: newWeekData,
+            cacheTime: Date.now(),
+          };
+          localStorage.setItem(
+            `daily_rewards_${cacheKey}`,
+            JSON.stringify(cacheData)
+          );
+
+          // Also update the current week cache if this is the current week
+          if (isCurrentWeek) {
+            localStorage.setItem(
+              `daily_rewards_current_week`,
+              JSON.stringify(cacheData)
+            );
+          }
+
+          return newWeekData;
+        } else {
+          throw new Error(
+            data.error || data.message || "Failed to fetch week data"
+          );
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-
-      if (data.success && data.data) {
-        setWeekData(data.data);
-        setCurrentWeekStart(new Date(data.data.weekStart));
-
-        // Check if this is the current week or future week
-        const now = new Date();
-        const weekStart = new Date(data.data.weekStart);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-
-        const isCurrentWeek = now >= weekStart && now <= weekEnd;
-        const isFutureWeek = weekStart > now;
-        setIsCurrentWeek(isCurrentWeek);
-        setIsFutureWeek(isFutureWeek);
-
-        const cacheData = {
-          data: data.data,
-          cacheTime: Date.now(),
-        };
-        localStorage.setItem(
-          `daily_rewards_${cacheKey}`,
-          JSON.stringify(cacheData)
-        );
-
-        return data.data;
-      } else {
-        throw new Error(
-          data.error || data.message || "Failed to fetch week data"
-        );
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [] // Remove weekData dependency to avoid stale closures
+  );
 
   // Go to previous week
   const goToPreviousWeek = useCallback(async () => {
     if (isNavigating) return;
 
-    const previousWeek = new Date(currentWeekStart);
-    previousWeek.setDate(previousWeek.getDate() - 7);
-    await fetchWeekData(previousWeek);
-  }, [currentWeekStart, fetchWeekData, isNavigating]);
+    setIsNavigating(true);
+    try {
+      // Use ref to get the latest currentWeekStart value (not from closure)
+      const current = currentWeekStartRef.current;
+      const previousWeek = new Date(current);
+      previousWeek.setDate(previousWeek.getDate() - 7);
+
+      // Fetch data for the previous week
+      await fetchWeekData(previousWeek);
+    } catch (error) {
+      console.error("Error navigating to previous week:", error);
+    } finally {
+      setIsNavigating(false);
+    }
+  }, [fetchWeekData, isNavigating]);
 
   // Go to next week
   const goToNextWeek = useCallback(async () => {
     if (isNavigating) return;
 
-    const nextWeek = new Date(currentWeekStart);
-    nextWeek.setDate(nextWeek.getDate() + 7);
+    setIsNavigating(true);
+    try {
+      // Use ref to get the latest currentWeekStart value (not from closure)
+      const current = currentWeekStartRef.current;
+      const nextWeek = new Date(current);
+      nextWeek.setDate(nextWeek.getDate() + 7);
 
-    // Allow navigation to future weeks but mark them as future
-    await fetchWeekData(nextWeek);
-  }, [currentWeekStart, fetchWeekData, isNavigating]);
+      // Fetch data for the next week
+      await fetchWeekData(nextWeek);
+    } catch (error) {
+      console.error("Error navigating to next week:", error);
+    } finally {
+      setIsNavigating(false);
+    }
+  }, [fetchWeekData, isNavigating]);
 
   // Claim reward
   const handleRewardClaim = useCallback(
@@ -238,11 +285,21 @@ export const useDailyRewards = () => {
           try {
             await Promise.all([
               dispatch(fetchWalletTransactions({ token, limit: 5 })),
-              dispatch(fetchFullWalletTransactions({ token, page: 1, limit: 20, type: "all" }))
+              dispatch(
+                fetchFullWalletTransactions({
+                  token,
+                  page: 1,
+                  limit: 20,
+                  type: "all",
+                })
+              ),
             ]);
             console.log("✅ Transaction history refreshed after reward claim");
           } catch (transactionError) {
-            console.warn("⚠️ Failed to refresh transaction history:", transactionError);
+            console.warn(
+              "⚠️ Failed to refresh transaction history:",
+              transactionError
+            );
             // Don't throw error - reward was still claimed successfully
           }
 
@@ -259,13 +316,13 @@ export const useDailyRewards = () => {
           const cacheKey = "current_week";
           localStorage.removeItem(`daily_rewards_${cacheKey}`);
           localStorage.removeItem(`daily_rewards_current_week`);
-          
+
           // Small delay to ensure API has updated, then force refresh
-          await new Promise(resolve => setTimeout(resolve, 300));
-          await fetchWeekData(currentWeekStart, true);
-          
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          await fetchWeekData(currentWeekStartRef.current, true);
+
           setSuccessMessage(
-            `🎉 Reward claimed! You earned ${data.data.coins} coins and ${data.data.xp} XP!`
+            `Reward claimed! You earned ${data.data.coins} coins and ${data.data.xp} XP!`
           );
           setError(null);
           return data.data;
@@ -279,7 +336,7 @@ export const useDailyRewards = () => {
         throw err;
       }
     },
-    [fetchWeekData, currentWeekStart]
+    [fetchWeekData, dispatch]
   );
 
   // Clear error

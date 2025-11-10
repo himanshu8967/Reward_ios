@@ -1,172 +1,192 @@
 "use client";
-import React, { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { resetPassword } from '@/lib/api'; // <-- IMPORT THE API FUNCTION
+import React, { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { resetPassword } from "@/lib/api";
 
 const ResetPasswordComponent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [token, setToken] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const [token, setToken] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState('');
+
+  const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
 
+  const [showPassword1, setShowPassword1] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
+
   useEffect(() => {
-    const tokenFromUrl = searchParams.get('token');
+    const tokenFromUrl = searchParams.get("token");
     if (tokenFromUrl) {
       setToken(tokenFromUrl);
     } else {
-      setMessage('Invalid or missing reset token. Please request a new link.');
+      setMessage("Invalid or missing reset token. Please request a new link.");
       setIsError(true);
     }
   }, [searchParams]);
 
-  // Enhanced validation function
+  // ✅ Validation function
   const validatePasswords = () => {
-    if (!newPassword || !confirmPassword) {
-      return 'Both password fields are required.';
-    }
-    if (newPassword !== confirmPassword) {
-      return 'Passwords do not match.';
-    }
-    if (newPassword.length < 8) {
-      return 'Password must be at least 8 characters long.';
-    }
-    if (!/[A-Z]/.test(newPassword)) {
-      return 'Password must contain at least one uppercase letter.';
-    }
-    if (!/[a-z]/.test(newPassword)) {
-      return 'Password must contain at least one lowercase letter.';
-    }
-    if (!/[0-9]/.test(newPassword)) {
-      return 'Password must contain at least one number.';
-    }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
-      return 'Password must contain at least one special character.';
-    }
-    return ''; // All good
+    const errs = {};
+
+    if (!newPassword) errs.newPassword = "New password is required";
+    if (!confirmPassword) errs.confirmPassword = "Confirm password is required";
+
+    if (newPassword && newPassword.length < 8)
+      errs.newPassword = "Password must be at least 8 characters";
+
+    if (newPassword && !/[A-Z]/.test(newPassword))
+      errs.newPassword = "Must include at least 1 uppercase letter";
+
+    if (newPassword && !/[a-z]/.test(newPassword))
+      errs.newPassword = "Must include at least 1 lowercase letter";
+
+    if (newPassword && !/[0-9]/.test(newPassword))
+      errs.newPassword = "Must include at least 1 number";
+
+    if (newPassword && !/[!@#$%^&*(),.?\":{}|<>]/.test(newPassword))
+      errs.newPassword = "Must include at least 1 special character";
+
+    if (newPassword && confirmPassword && newPassword !== confirmPassword)
+      errs.confirmPassword = "Passwords do not match";
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
   };
 
-  const isFormValid = newPassword && confirmPassword && validatePasswords() === '' && token;
+  const isFormValid =
+    newPassword && confirmPassword && Object.keys(errors).length === 0 && token;
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    const validationError = validatePasswords();
-    if (validationError) {
-      setMessage(validationError);
-      setIsError(true);
-      return;
-    }
+
+    if (!validatePasswords()) return;
 
     setIsLoading(true);
-    setMessage('');
+    setMessage("");
     setIsError(false);
 
     try {
-      // Use the centralized API function
       const data = await resetPassword(token, newPassword);
-
-      setMessage(data.message || 'Password reset successful! Redirecting to login...');
+      setMessage(data.message || "Password reset successful!");
       setIsError(false);
-      setTimeout(() => {
-        router.push('/login');
-      }, 1000); // Increased timeout to let user read the message
+      router.replace("/login");
     } catch (error) {
-      console.error('Reset password error:', error);
-      setMessage(error.message || 'Failed to reset password. The link may be invalid or expired.');
+      setMessage(error.message || "Failed to reset password.");
       setIsError(true);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleBackToLogin = () => {
-    router.push('/login');
-  };
-
   return (
-    <div className="bg-[#272052] flex h-screen flex-row justify-center w-full relative overflow-hidden">
-      <div className="bg-[#272052] overflow-hidden w-full max-w-[375px] relative">
-        {/* Background effects */}
+    <div className="bg-[#272052] flex h-screen justify-center w-full relative overflow-hidden">
+      <div className="bg-[#272052] w-full max-w-[375px] relative">
         <div className="absolute w-[358px] h-[358px] top-0 left-[9px] bg-[#af7de6] rounded-[179px] blur-[250px]" />
         <div className="absolute inset-0 bg-[#20202033] backdrop-blur-[5px]" />
 
-        {/* Main content card */}
-        <div className="absolute w-[280px] h-auto min-h-[520px] top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-[15px] overflow-hidden [background:radial-gradient(50%_50%_at_50%_50%,rgba(134,47,148,1)_0%,rgba(6,9,78,1)_100%)] z-10 p-4">
-          <div className="relative w-full h-[81px] mt-2 flex justify-center items-center">
-            <div className="text-white text-[64px]" role="img" aria-label="Key icon">🔑</div>
-          </div>
-          <h1 className="text-center mt-4 [font-family:'Poppins',Helvetica] font-extrabold text-[#efefef] text-2xl">
+        <div className="absolute w-[280px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[15px] p-4 [background:radial-gradient(50%_50%_at_50%_50%,rgba(134,47,148,1)_0%,rgba(6,9,78,1)_100%)]">
+          <div className="text-white text-[64px] flex justify-center mt-3">🔑</div>
+
+          <h1 className="text-center text-[#efefef] text-2xl font-extrabold mt-3">
             Reset Password
           </h1>
 
           <form onSubmit={handleResetPassword} className="mt-4 px-2">
-            <p className="[font-family:'Poppins',Helvetica] font-medium text-white text-[13px] text-center mb-4">
-              Enter your new password below to complete the reset process.
+            <p className="text-white text-[13px] text-center mb-4">
+              Enter your new password below to finish resetting.
             </p>
 
-            {/* New Password Field */}
-            <div className="mb-4">
-              <label className="block [font-family:'Poppins',Helvetica] font-medium text-neutral-400 text-[14.3px] mb-2">
-                New Password
-              </label>
-              <div className="relative w-full h-[45px] bg-[rgba(255,255,255,0.1)] rounded-lg border border-[rgba(255,255,255,0.2)] backdrop-blur-sm">
+            {/* ✅ New Password */}
+            <div className="mb-3">
+              <label className="text-neutral-400 text-[14px]">New Password</label>
+
+              <div className="relative w-full h-[45px] bg-white/10 rounded-lg border border-white/20 flex items-center">
                 <input
-                  type="password"
+                  type={showPassword1 ? "text" : "password"}
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full h-full px-4 bg-transparent border-none outline-none text-white [font-family:'Poppins',Helvetica] font-medium text-[14.3px] placeholder:text-[#d3d3d3]"
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    validatePasswords();
+                  }}
+                  className="w-full h-full px-4 bg-transparent text-white outline-none"
                   placeholder="Enter new password"
-                  required
                 />
+
+                <span
+                  className="absolute right-4 text-white cursor-pointer"
+                  onClick={() => setShowPassword1(!showPassword1)}
+                >
+                  {showPassword1 ? "🙈" : "👁️"}
+                </span>
               </div>
+
+              {errors.newPassword && (
+                <p className="text-red-400 text-xs mt-1">{errors.newPassword}</p>
+              )}
             </div>
 
-            {/* Confirm Password Field */}
-            <div className="mb-4">
-              <label className="block [font-family:'Poppins',Helvetica] font-medium text-neutral-400 text-[14.3px] mb-2">
+            {/* ✅ Confirm Password */}
+            <div className="mb-3">
+              <label className="text-neutral-400 text-[14px]">
                 Confirm Password
               </label>
-              <div className="relative w-full h-[45px] bg-[rgba(255,255,255,0.1)] rounded-lg border border-[rgba(255,255,255,0.2)] backdrop-blur-sm">
+
+              <div className="relative w-full h-[45px] bg-white/10 rounded-lg border border-white/20 flex items-center">
                 <input
-                  type="password"
+                  type={showPassword2 ? "text" : "password"}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full h-full px-4 bg-transparent border-none outline-none text-white [font-family:'Poppins',Helvetica] font-medium text-[14.3px] placeholder:text-[#d3d3d3]"
-                  placeholder="Confirm new password"
-                  required
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    validatePasswords();
+                  }}
+                  className="w-full h-full px-4 bg-transparent text-white outline-none"
+                  placeholder="Confirm password"
                 />
+
+                <span
+                  className="absolute right-4 text-white cursor-pointer"
+                  onClick={() => setShowPassword2(!showPassword2)}
+                >
+                  {showPassword2 ? "🙈" : "👁️"}
+                </span>
               </div>
+
+              {errors.confirmPassword && (
+                <p className="text-red-400 text-xs mt-1">{errors.confirmPassword}</p>
+              )}
             </div>
 
-            {/* Error/Success Message */}
+            {/* ✅ Message */}
             {message && (
-              <div className={`w-full mt-2 text-xs [font-family:'Poppins',Helvetica] font-medium text-center ${isError ? 'text-red-400' : 'text-green-400'}`}>
+              <p className={`text-center text-xs mt-2 ${isError ? "text-red-400" : "text-green-400"}`}>
                 {message}
-              </div>
+              </p>
             )}
 
+            {/* ✅ Submit */}
             <button
               type="submit"
               disabled={!isFormValid || isLoading}
-              className={`w-full h-[39px] mt-6 rounded-lg transition-all duration-200 ${isFormValid && !isLoading ? 'bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] hover:opacity-90' : 'bg-gray-500 cursor-not-allowed opacity-50'}`}
+              className={`w-full h-[40px] mt-4 rounded-lg text-white font-semibold transition ${
+                isFormValid && !isLoading
+                  ? "bg-gradient-to-b from-[#9eadf7] to-[#716ae7] hover:opacity-90"
+                  : "bg-gray-500 opacity-50 cursor-not-allowed"
+              }`}
             >
-              <div className="[font-family:'Poppins',Helvetica] font-semibold text-white text-sm">
-                {isLoading ? 'Resetting...' : 'Reset Password'}
-              </div>
+              {isLoading ? "Resetting..." : "Reset Password"}
             </button>
           </form>
 
           <button
-            onClick={handleBackToLogin}
-            className="w-full mt-4 text-center"
-            type="button"
+            onClick={() => router.push("/login")}
+            className="text-neutral-400 text-center w-full mt-3"
           >
-            <div className="[font-family:'Poppins',Helvetica] font-normal text-neutral-400 text-sm cursor-pointer">
-              Back to Login
-            </div>
+            Back to Login
           </button>
         </div>
       </div>
@@ -174,13 +194,10 @@ const ResetPasswordComponent = () => {
   );
 };
 
-
-// Wrap with Suspense for useSearchParams
 const ResetPassword = () => (
   <Suspense fallback={<div>Loading...</div>}>
     <ResetPasswordComponent />
   </Suspense>
 );
-
 
 export default ResetPassword;

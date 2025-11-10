@@ -61,21 +61,25 @@ const RewardProgress = ({ stats }) => {
 
                                         {/* Progress bar fill */}
                                         <div
-                                            className="absolute h-full rounded-full bg-gradient-to-r from-[#ffd700] via-[#ffed4e] to-[#f4d03f] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+                                            className="absolute h-full bg-gradient-to-r from-[#ffd700] via-[#ffed4e] to-[#f4d03f] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
                                             style={{
-                                                width: `${(pointsData.currentPoints / pointsData.targetPoints) *
-                                                    100
-                                                    }%`,
+                                                left: '10px', // Start from circle center to create curved connection
+                                                width: `calc(${(pointsData.currentPoints / pointsData.targetPoints) * 100}% - 10px)`,
+                                                borderRadius: '9999px',
+                                                borderTopLeftRadius: '12px', // Curved left edge to flow from circle
+                                                borderBottomLeftRadius: '12px',
+                                                borderTopRightRadius: '9999px',
+                                                borderBottomRightRadius: '9999px',
                                             }}
                                         ></div>
                                         {/* Current level indicator */}
-                                        <div className="absolute w-[23px] h-[24px] top-0.3 left-[-1px] bg-[#ffd700] rounded-full border-0.5 border-[#b8860b] flex items-center justify-center ">
+                                        <div className="absolute w-[24px] h-[25px] top-0.3 left-[-1px] bg-[#d4af37] rounded-full border-0.5 border-[#b8860b] flex items-center justify-center shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
                                             <div className="[font-family:'Poppins',Helvetica] font-semibold text-[#815c23] text-[12px] tracking-[0.02px] leading-[normal]">
                                                 {pointsData.currentLevel}
                                             </div>
                                         </div>
                                         {/* Next level indicator - MOVED & FIXED */}
-                                        <div className="absolute w-[23px] h-[24px] top-0.3 right-[-1px] bg-[#ffd700] rounded-full border-0.5 border-[#b8860b] flex items-center justify-center ">
+                                        <div className="absolute w-[24px] h-[25px] top-0.3 right-[-1px] bg-[#d4af37] rounded-full border-0.5 border-[#b8860b] flex items-center justify-center shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
                                             <div className="[font-family:'Poppins',Helvetica] font-semibold text-[#815c23] text-[12px] tracking-[0.02px] leading-[normal]">
                                                 2
                                             </div>

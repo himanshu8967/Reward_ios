@@ -159,11 +159,11 @@ export const WelcomeOffer = () => {
           </div>
         </div>
 
-        <div className={`absolute w-[122px] h-[37px] top-[166px] left-36 rounded-[10px] overflow-hidden ${isExpired
+        <div className={`absolute w-[122px] h-[37px] top-[166px] left-36 rounded-[10px] overflow-hidden flex items-center justify-center ${isExpired
           ? 'bg-[linear-gradient(107deg,rgba(255,0,0,0.8)_0%,rgba(139,0,0,1)_100%)]'
           : 'bg-[linear-gradient(107deg,rgba(200,117,251,1)_0%,rgba(16,4,147,1)_100%)]'
           }`}>
-          <div className="absolute top-1.5 left-[15px] [font-family:'Poppins',Helvetica] font-medium text-white text-base tracking-[0] leading-[normal]">
+          <div className="[font-family:'Poppins',Helvetica] font-medium text-white text-base tracking-[0] leading-[normal] text-center">
             {isLoading ? 'Loading...' : (isExpired ? 'EXPIRED' : formatTime)}
           </div>
         </div>

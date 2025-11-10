@@ -458,7 +458,8 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
         const baseHeight = (cardCount * cardHeight) + ((cardCount - 1) * gapBetweenCards);
 
         // Only apply reduction to locked lines to prevent over-extension
-        const totalHeight = isLocked ? baseHeight - 60 : baseHeight;
+        // Reduced at both start and end for locked tasks
+        const totalHeight = isLocked ? baseHeight - 100 : baseHeight;
 
         return totalHeight;
     };
@@ -737,21 +738,21 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
                 <div className="w-[43px] flex-shrink-0" />
 
                 {/* Container for the button, matches width of level cards */}
-                <div className="w-[256px] flex justify-center">
+                <div className="w-[256px] relative rounded-[10px] flex items-center justify-center">
                     <div
-                        className={`flex items-center gap-2 px-1 py-2 rounded-b-md rounded-t-sm shadow-[0px_4px_4px_#00000040] 
+                        className={`w-full flex items-center gap-1.5 px-1.5 py-1 rounded-[10px] shadow-[0px_4px_4px_#00000040] 
                              bg-[linear-gradient(141deg,#F4BB40_0%,#FBEA8D_80%,#F7CE46_98%,#F4BB40_100%)]
                         transition-all duration-200
                         ${isClaimed ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'hover:scale-[1.02]'}`}
                     >
-                        <p className="text-center text-[10px] sm:text-xs md:text-sm font-semibold text-black [text-shadow:0px_2px_2px_#00000040] font-[Poppins] leading-snug">
+                        <p className="flex-1 text-center text-[10px] sm:text-xs md:text-sm font-semibold text-black [text-shadow:0px_2px_2px_#00000040] font-[Poppins] leading-tight">
                             Reach Here To Claim Your Rewards
                         </p>
 
                         <button
                             onClick={() => setShowRulesModal(true)}
                             disabled={isClaimed}
-                            className={`flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 bg-[#716ae7] rounded-full 
+                            className={`flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 bg-[#716ae7] rounded-full flex-shrink-0
                             hover:bg-[#5a52d4] transition-colors duration-200 
                             ${isClaimed ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}`}
                         >
@@ -794,7 +795,7 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
                 {/* Progress Line for Locked Levels - Dynamic Height - Connects first to last card */}
                 {lockedLevels.length > 0 && (
                     <div
-                        className="absolute left-[40px] top-0 z-0 bg-[#2f344a] "
+                        className="absolute left-[40px] top-6 z-0 bg-[#2f344a] "
                         style={{
                             width: '2px',
                             height: `${lockedLineHeight}px`

@@ -48,7 +48,7 @@ export const TicketSuccess = () => {
     return (
         <div className="flex flex-col w-full h-screen bg-black">
             {/* App Version */}
-            <div className="px-5 ml-2 [font-family:'Poppins',Helvetica] font-normal text-neutral-400 text-[10px] tracking-[0] leading-3">
+            <div className="px-5 ml-2 [font-family:'Poppins',Helvetica] font-normal text-[#A4A4A4] text-[10px] tracking-[0] leading-3">
                 App Version: V0.0.1
             </div>
 

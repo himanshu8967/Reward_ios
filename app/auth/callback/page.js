@@ -50,11 +50,12 @@ const ErrorIcon = () => (
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { handleSocialAuthCallback } = useAuth();
+  const { handleSocialAuthCallback, user, isLoading } = useAuth();
 
   // State to manage UI: 'processing', 'success', or 'error'
   const [status, setStatus] = useState("processing");
   const [errorMessage, setErrorMessage] = useState("");
+  const [authCompleted, setAuthCompleted] = useState(false);
 
   useEffect(() => {
     const processAuth = async () => {
@@ -78,7 +79,7 @@ function AuthCallbackContent() {
       if (authError) {
         setErrorMessage(authError || "An unknown error occurred.");
         setStatus("error");
-        setTimeout(() => router.push("/login"), 4000);
+        setTimeout(() => router.replace("/login"), 4000);
         return;
       }
 
@@ -86,26 +87,39 @@ function AuthCallbackContent() {
         const result = await handleSocialAuthCallback(token);
         if (result.ok) {
           setStatus("success");
-          setTimeout(() => router.push("/homepage"), 1000); // Shorter delay for web success
+          setAuthCompleted(true);
+          // Wait for auth state to be fully set before redirecting
+          // This prevents the login page from flashing
         } else {
           setErrorMessage(
             result.error ||
               "Failed to process authentication. Please try again."
           );
           setStatus("error");
-          setTimeout(() => router.push("/login"), 4000);
+          setTimeout(() => router.replace("/login"), 4000);
         }
       } else {
         setErrorMessage(
           "Authentication token not found. Redirecting to login..."
         );
         setStatus("error");
-        setTimeout(() => router.push("/login"), 3000);
+        setTimeout(() => router.replace("/login"), 3000);
       }
     };
 
     processAuth();
   }, [router, searchParams, handleSocialAuthCallback]);
+
+  // Wait for auth state to be ready before redirecting
+  useEffect(() => {
+    if (authCompleted && !isLoading && user) {
+      // Small delay to ensure state is fully propagated
+      const redirectTimer = setTimeout(() => {
+        router.replace("/homepage");
+      }, 500);
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [authCompleted, isLoading, user, router]);
 
   // Helper function to render content based on status
   const renderContent = () => {
@@ -116,7 +130,10 @@ function AuthCallbackContent() {
             <SuccessIcon />
             <h1 className="text-2xl font-semibold text-white mt-4">Success!</h1>
             <p className="text-neutral-400 mt-2">
-              Redirecting you to the app...
+              Welcome! Setting up your account...
+            </p>
+            <p className="text-neutral-500 text-sm mt-1">
+              Please wait, we&apos;re almost there...
             </p>
           </>
         );

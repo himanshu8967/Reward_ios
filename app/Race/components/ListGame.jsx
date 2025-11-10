@@ -211,12 +211,12 @@ export const ListGame = () => {
     return (
         <section className="relative w-full min-h-screen bg-black max-w-sm mx-auto flex flex-col items-center">
             {/* App Version */}
-            <div className="absolute top-[2px] left-6 [font-family:'Poppins',Helvetica] font-light text-neutral-400 text-[10px] tracking-[0] leading-3 whitespace-nowrap">
+            <div className="absolute top-[8px] left-8 [font-family:'Poppins',Helvetica] font-light text-[#A4A4A4] text-[10px] tracking-[0] leading-3 whitespace-nowrap">
                 App Version: V0.0.1
             </div>
 
             {/* Header */}
-            <div className="flex flex-col w-full items-start gap-2 pl-7 pr-4 py-4 mt-4">
+            <div className="flex flex-col w-full items-start gap-2 pl-7 pr-4 py-4 mt-[34px]">
                 <div className="flex items-center gap-4 relative self-stretch w-full flex-[0_0_auto] rounded-[32px]">
                     <button
                         aria-label="Go back"

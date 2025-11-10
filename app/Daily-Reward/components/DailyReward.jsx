@@ -141,7 +141,7 @@ const DailyReward = () => {
                 </div>
 
                 {/* App Version */}
-                <div className="absolute top-[12px]  mb-3 left-4 [font-family:'Poppins',Helvetica] font-normal text-neutral-400 text-[10px] tracking-[0] leading-3 whitespace-nowrap">
+                <div className="absolute top-[12px]  mb-3 left-4 [font-family:'Poppins',Helvetica] font-normal text-[#A4A4A4] text-[10px] tracking-[0] leading-3 whitespace-nowrap">
                     App Version: V0.0.1
                 </div>
 
@@ -171,7 +171,7 @@ const DailyReward = () => {
     return (
         <div className="relative w-full min-h-screen bg-black max-w-sm mx-auto flex flex-col items-center">
             {/* Header */}
-            <div className="flex flex-col w-full items-start gap-2 px-4 py-4 mt-8">
+            <div className="flex flex-col w-full items-start gap-2 px-4 py-4 mt-[36px]">
                 <div className="flex items-center gap-4 relative self-stretch w-full flex-[0_0_auto] rounded-[32px]">
                     <MemoizedButton
                         className="relative w-6 h-6"
@@ -225,7 +225,7 @@ const DailyReward = () => {
             </div>
 
             {/* App Version */}
-            <div className="absolute top-[10px] left-5 [font-family:'Poppins',Helvetica] font-normal text-neutral-400 text-[10px] tracking-[0] leading-3 whitespace-nowrap">
+            <div className="absolute top-[8px] left-5 [font-family:'Poppins',Helvetica] font-normal text-[#A4A4A4] text-[10px] tracking-[0] leading-3 whitespace-nowrap">
                 App Version: V0.0.1
             </div>
 
@@ -274,7 +274,7 @@ const DailyReward = () => {
             <UserFriendlyModal
                 isVisible={!!error}
                 onClose={clearError}
-                title="⚠️ Error"
+                title="Error"
                 showCloseButton={true}
                 autoClose={true}
                 autoCloseDelay={3000}

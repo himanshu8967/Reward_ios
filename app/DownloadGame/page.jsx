@@ -31,11 +31,11 @@ export default function GamesPage() {
         style={{ paddingBottom: '250px' }}
       >
         {/* App version */}
-        <div className="absolute top-[10px] left-5 font-normal text-white text-[10px] leading-3 z-10 [font-family:'Poppins',Helvetica]">
+        <div className="absolute top-[8px] left-5 font-normal text-[#A4A4A4] text-[10px] leading-3 z-10 [font-family:'Poppins',Helvetica]">
           App Version: V0.0.1
         </div>
 
-        <div className="flex flex-col w-full justify-center items-start gap-2 px-5 py- absolute top-[50px] left-0">
+        <div className="flex flex-col w-full justify-center items-start gap-2 px-5 py- absolute top-[36px] left-0">
           <div className="flex h-12 items-center justify-between w-full max-w-sm mx-auto rounded-[32px]">
             {/* 
               Back button not working: For Android, use window.history.back() for navigation. 

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useAuth } from "../../contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import LoadingOverlay from "@/components/LoadingOverlay";
+import BiometricLoginButton from "@/components/BiometricLoginButton";
 
 import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false)
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [biometricMessage, setBiometricMessage] = useState(null);
 
   // Prevent overscroll behavior on mobile and hide scrollbars
   useEffect(() => {
@@ -147,6 +149,15 @@ export default function LoginPage() {
 
   const handlePhoneLogin = () => {
     window.location.href = "/login/phone";
+  };
+
+  const handleBiometricSuccess = () => {
+    setBiometricMessage(null);
+    router.push("/homepage");
+  };
+
+  const handleBiometricError = (message) => {
+    setBiometricMessage(message || "Biometric login unavailable. Please try again.");
   };
 
   return (
@@ -398,62 +409,59 @@ export default function LoginPage() {
                   />
                 </div>
 
-                <div className="inline-flex items-center gap-5 relative flex-[0_0_auto]">
-                  <button
-                    className="relative w-[58.1px] h-11 rounded-[12px] border border-gray-600 bg-black/10 backdrop-blur-sm cursor-pointer flex items-center justify-center hover:bg-black/20 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onClick={() => handleSocialLogin("google")}
-                    type="button"
-                    aria-label="Sign in with Google"
-                  >
-                    <div className="w-[20px] h-[20px] flex items-center justify-center">
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path
-                          d="M19.99 10.1871C19.99 9.36767 19.9246 8.76973 19.7839 8.14966H10.2041V11.848H15.8276C15.7201 12.7667 15.0977 14.1144 13.7747 15.0813L13.7539 15.2051L16.7747 17.4969L16.9913 17.5173C18.9478 15.7789 19.99 13.2211 19.99 10.1871Z"
-                          fill="#4285F4"
-                        />
-                        <path
-                          d="M10.2041 19.9313C12.9592 19.9313 15.2429 19.0454 16.9913 17.5173L13.7747 15.0813C12.8849 15.6682 11.7239 16.0779 10.2041 16.0779C7.50474 16.0779 5.24951 14.3395 4.39989 11.9366L4.27989 11.9465L1.13052 14.3273L1.08789 14.4391C2.82606 17.8945 6.25071 19.9313 10.2041 19.9313Z"
-                          fill="#34A853"
-                        />
-                        <path
-                          d="M4.39989 11.9366C4.19405 11.3165 4.07251 10.6521 4.07251 9.96565C4.07251 9.27909 4.19405 8.61473 4.38608 7.99463L4.38037 7.86244L1.19677 5.44366L1.08789 5.49214C0.397541 6.84305 0.000976562 8.36002 0.000976562 9.96565C0.000976562 11.5713 0.397541 13.0882 1.08789 14.4391L4.39989 11.9366Z"
-                          fill="#FBBC04"
-                        />
-                        <path
-                          d="M10.2041 3.85336C12.1276 3.85336 13.406 4.66168 14.1425 5.33718L17.0207 2.59107C15.2375 0.984447 12.9592 0 10.2041 0C6.25071 0 2.82606 2.03672 1.08789 5.49214L4.38608 7.99463C5.24951 5.59166 7.50474 3.85336 10.2041 3.85336Z"
-                          fill="#EB4335"
-                        />
-                      </svg>
-                    </div>
-                  </button>
+                <div className="flex flex-col items-center gap-2 relative flex-[0_0_auto]">
+                  <div className="inline-flex items-center gap-5 relative flex-[0_0_auto]">
+                    <button
+                      className="relative w-[58.1px] h-11 rounded-[12px] border border-gray-600 bg-black/10 backdrop-blur-sm cursor-pointer flex items-center justify-center hover:bg-black/20 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onClick={() => handleSocialLogin("google")}
+                      type="button"
+                      aria-label="Sign in with Google"
+                    >
+                      <div className="w-[20px] h-[20px] flex items-center justify-center">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                          <path
+                            d="M19.99 10.1871C19.99 9.36767 19.9246 8.76973 19.7839 8.14966H10.2041V11.848H15.8276C15.7201 12.7667 15.0977 14.1144 13.7747 15.0813L13.7539 15.2051L16.7747 17.4969L16.9913 17.5173C18.9478 15.7789 19.99 13.2211 19.99 10.1871Z"
+                            fill="#4285F4"
+                          />
+                          <path
+                            d="M10.2041 19.9313C12.9592 19.9313 15.2429 19.0454 16.9913 17.5173L13.7747 15.0813C12.8849 15.6682 11.7239 16.0779 10.2041 16.0779C7.50474 16.0779 5.24951 14.3395 4.39989 11.9366L4.27989 11.9465L1.13052 14.3273L1.08789 14.4391C2.82606 17.8945 6.25071 19.9313 10.2041 19.9313Z"
+                            fill="#34A853"
+                          />
+                          <path
+                            d="M4.39989 11.9366C4.19405 11.3165 4.07251 10.6521 4.07251 9.96565C4.07251 9.27909 4.19405 8.61473 4.38608 7.99463L4.38037 7.86244L1.19677 5.44366L1.08789 5.49214C0.397541 6.84305 0.000976562 8.36002 0.000976562 9.96565C0.000976562 11.5713 0.397541 13.0882 1.08789 14.4391L4.39989 11.9366Z"
+                            fill="#FBBC04"
+                          />
+                          <path
+                            d="M10.2041 3.85336C12.1276 3.85336 13.406 4.66168 14.1425 5.33718L17.0207 2.59107C15.2375 0.984447 12.9592 0 10.2041 0C6.25071 0 2.82606 2.03672 1.08789 5.49214L4.38608 7.99463C5.24951 5.59166 7.50474 3.85336 10.2041 3.85336Z"
+                            fill="#EB4335"
+                          />
+                        </svg>
+                      </div>
+                    </button>
 
-                  <button
-                    className="relative w-[58.1px] h-11 rounded-[12px] border border-gray-600 bg-black/10 backdrop-blur-sm cursor-pointer flex items-center justify-center hover:bg-black/20 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onClick={() => handleSocialLogin("apple")}
-                    type="button"
-                    aria-label="Sign in with Apple"
-                  >
-                    <Image
-                      className="absolute w-7 h-[30px] top-[7px] left-4 object-cover"
-                      alt="Apple logo"
-                      src="https://c.animaapp.com/2Y7fJDnh/img/image-3961@2x.png"
-                      width={28}
-                      height={30}
+                    <BiometricLoginButton
+                      onSuccess={handleBiometricSuccess}
+                      onError={handleBiometricError}
                     />
-                  </button>
 
-                  <button
-                    className="relative w-[58.1px] h-11 rounded-[12px] border border-gray-600 bg-black/10 backdrop-blur-sm cursor-pointer flex items-center justify-center hover:bg-black/20 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    onClick={() => handleSocialLogin("facebook")}
-                    type="button"
-                    aria-label="Sign in with Facebook"
-                  >
-                    <div className="w-[20px] h-[20px] flex items-center justify-center">
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M20 10C20 4.477 15.523 0 10 0S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z" fill="#1877F2" />
-                      </svg>
-                    </div>
-                  </button>
+                    <button
+                      className="relative w-[58.1px] h-11 rounded-[12px] border border-gray-600 bg-black/10 backdrop-blur-sm cursor-pointer flex items-center justify-center hover:bg-black/20 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onClick={() => handleSocialLogin("facebook")}
+                      type="button"
+                      aria-label="Sign in with Facebook"
+                    >
+                      <div className="w-[20px] h-[20px] flex items-center justify-center">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                          <path d="M20 10C20 4.477 15.523 0 10 0S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z" fill="#1877F2" />
+                        </svg>
+                      </div>
+                    </button>
+                  </div>
+                  {biometricMessage && (
+                    <p className="text-red-400 text-xs text-center w-full max-w-[305px] break-words">
+                      {biometricMessage}
+                    </p>
+                  )}
                 </div>
               </div>
 

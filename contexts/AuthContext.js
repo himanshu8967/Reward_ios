@@ -79,7 +79,7 @@ export function AuthProvider({ children }) {
   const { status: accountOverviewStatus } = useSelector(
     (state) => state.accountOverview
   );
-  // Deep link listener useEffect (No changes needed here)
+  // Deep link listener useEffect - Handles both custom scheme and HTTPS deep links
   useEffect(() => {
     let listener = null;
 
@@ -88,18 +88,37 @@ export function AuthProvider({ children }) {
       try {
         listener = App.addListener("appUrlOpen", (event) => {
           const urlString = event.url;
-          const urlScheme = "com.jackson.app://";
+          console.log("Deep link received:", urlString);
 
-          if (urlString.startsWith(urlScheme)) {
-            const parsableUrl = new URL(
-              urlString.replace(urlScheme, "http://app/")
+          let parsableUrl;
+          let path;
+          let token;
+
+          // Handle custom URL scheme (com.jackson.app://)
+          if (urlString.startsWith("com.jackson.app://")) {
+            parsableUrl = new URL(
+              urlString.replace("com.jackson.app://", "http://app/")
             );
-            const path = parsableUrl.pathname;
-            const token = parsableUrl.searchParams.get("token");
+            path = parsableUrl.pathname;
+            token = parsableUrl.searchParams.get("token");
+          }
+          // Handle HTTPS deep links (Android App Links)
+          else if (urlString.startsWith("https://")) {
+            parsableUrl = new URL(urlString);
+            path = parsableUrl.pathname;
+            token = parsableUrl.searchParams.get("token");
+          }
 
-            if (path === "/reset-password" && token) {
+          // Process the deep link
+          if (path && token) {
+            console.log("Processing deep link:", {
+              path,
+              token: token.substring(0, 10) + "...",
+            });
+
+            if (path === "/reset-password") {
               router.push(`/reset-password?token=${token}`);
-            } else if (path === "/auth/callback" && token) {
+            } else if (path === "/auth/callback") {
               handleSocialAuthCallback(token).then((result) => {
                 router.replace(result.ok ? "/homepage" : "/login");
               });
@@ -306,6 +325,9 @@ export function AuthProvider({ children }) {
     if (isLoading) return;
     if (pathname === "/") return;
 
+    // Skip gatekeeper logic during auth callback to prevent redirect loop
+    if (pathname === "/auth/callback") return;
+
     const isAuthenticated = !!user;
     const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
       pathname.startsWith(route)
@@ -320,10 +342,34 @@ export function AuthProvider({ children }) {
         localStorage.getItem("permissionsAccepted") === "true";
       const locationCompleted =
         localStorage.getItem("locationCompleted") === "true";
+      const faceVerificationCompleted =
+        localStorage.getItem("faceVerificationCompleted") === "true";
+      const faceVerificationSkipped =
+        localStorage.getItem("faceVerificationSkipped") === "true";
+      const hasCompletedOnboarding =
+        localStorage.getItem("onboardingComplete") === "true";
 
-      if (permissionsAccepted && locationCompleted) {
-        // User has completed the flow, go to homepage
+      // Check if this is a new signup (onboarding not complete) or existing user login
+      const isNewSignup = !hasCompletedOnboarding;
+
+      if (
+        permissionsAccepted &&
+        locationCompleted &&
+        (faceVerificationCompleted || faceVerificationSkipped || !isNewSignup)
+      ) {
+        // User has completed the flow OR this is an existing user login
+        // Existing users skip face verification and go directly to homepage
         router.replace("/homepage");
+      } else if (
+        isNewSignup &&
+        permissionsAccepted &&
+        locationCompleted &&
+        !faceVerificationCompleted &&
+        !faceVerificationSkipped
+      ) {
+        // Only show face verification for NEW SIGNUPS, not for login
+        // User completed location but hasn't completed face verification (new signup only)
+        router.replace("/face-verification");
       } else if (permissionsAccepted && !locationCompleted) {
         // User accepted permissions but hasn't completed location
         router.replace("/location");
@@ -431,6 +477,77 @@ export function AuthProvider({ children }) {
       dispatch(clearWalletTransactions());
       dispatch(clearProfile());
       dispatch(clearAccountOverview());
+
+      // Save credentials for biometric login (following capacitor-native-biometric documentation)
+      // Only save if on native platform
+      if (
+        typeof window !== "undefined" &&
+        window.Capacitor &&
+        window.Capacitor.isNativePlatform()
+      ) {
+        try {
+          const {
+            setCredentials,
+            enableBiometricLocally,
+            checkBiometricAvailability,
+          } = await import("@/lib/biometricAuth");
+
+          // Check if biometric is available before saving
+          const availability = await checkBiometricAvailability();
+          if (availability.isAvailable) {
+            // Save credentials securely using native biometric storage
+            // Store username and a JSON string containing token and user data
+            // This way we don't rely on localStorage for user data during biometric login
+            const credentialPayload = {
+              token: data.token,
+              user: data.user,
+            };
+
+            console.log(
+              "💾 [AuthContext] Attempting to save biometric credentials..."
+            );
+            console.log("💾 [AuthContext] Username:", emailOrMobile);
+            console.log(
+              "💾 [AuthContext] Token length:",
+              data.token?.length || 0
+            );
+            console.log("💾 [AuthContext] User ID:", data.user?._id);
+
+            const credentialResult = await setCredentials({
+              username: emailOrMobile,
+              password: JSON.stringify(credentialPayload), // Store token + user as JSON
+            });
+
+            if (credentialResult.success) {
+              // Enable biometric locally
+              enableBiometricLocally(availability.biometryTypeName);
+              console.log(
+                "✅ [AuthContext] Biometric credentials saved successfully"
+              );
+              console.log(
+                "✅ [AuthContext] Biometric type:",
+                availability.biometryTypeName
+              );
+            } else {
+              console.warn(
+                "⚠️ [AuthContext] Failed to save biometric credentials:",
+                credentialResult.error
+              );
+              console.warn(
+                "⚠️ [AuthContext] Error code:",
+                credentialResult.errorCode
+              );
+            }
+          }
+        } catch (biometricError) {
+          console.error(
+            "❌ [AuthContext] Error setting up biometric:",
+            biometricError
+          );
+          // Don't fail login if biometric setup fails
+        }
+      }
+
       return handleAuthSuccess(data);
     } catch (error) {
       return { ok: false, error: error.body || { error: error.message } };
@@ -442,14 +559,27 @@ export function AuthProvider({ children }) {
       const data = await signup(signupData);
       useOnboardingStore.getState().resetOnboarding();
       setIsNewUserFlow(true);
+
+      // Clear permission/location flags for new signups so they go through the flow
+      localStorage.removeItem("permissionsAccepted");
+      localStorage.removeItem("locationCompleted");
+      localStorage.removeItem("faceVerificationCompleted");
+      localStorage.removeItem("faceVerificationSkipped");
+
+      // DON'T save biometric credentials here for new users
+      // New users will go through: Permissions → Location → Face Verification
+      // Biometric credentials will be saved AFTER face verification is complete
+      // This ensures proper onboarding flow
+
       return handleAuthSuccess(data);
     } catch (error) {
       return { ok: false, error: error.body || { error: error.message } };
     }
   };
 
-  // MODIFIED: signOut now also clears the profile state in the Redux store
-  const signOut = () => {
+  // MODIFIED: signOut clears the profile state in the Redux store but KEEPS biometric credentials
+  // Biometric credentials are preserved so users can login with biometric after signout
+  const signOut = async () => {
     console.log("🚪 signOut called. Clearing session...");
     dispatch(clearProfile()); // NEW: Dispatch action to reset the profile slice
     dispatch(clearGames()); // NEW: Clear games data when logging out
@@ -457,6 +587,14 @@ export function AuthProvider({ children }) {
     dispatch(clearAccountOverview());
     setUser(null);
     setToken(null);
+
+    // DON'T delete biometric credentials on signout
+    // This allows users to use biometric login after signout without needing to login manually first
+    // Biometric credentials are stored in native secure storage and remain available
+    console.log(
+      "ℹ️ [AuthContext] Biometric credentials preserved for next login"
+    );
+
     try {
       localStorage.removeItem("user");
       localStorage.removeItem("authToken");
@@ -466,10 +604,26 @@ export function AuthProvider({ children }) {
       localStorage.removeItem("persist:profile");
       localStorage.removeItem("persist:accountOverview");
 
+      // Don't clear permission/location flags on logout
+      // Existing users should be able to login without re-doing permissions
+      // Only new signups will clear these flags
+
+      // Don't clear biometric flags (biometricEnabled, biometricType) on logout
+      // Biometric credentials are preserved in native secure storage
+      // This allows users to use biometric login after signout without manual login
+
       // Clear daily rewards data from localStorage
       // Remove all daily rewards cache entries
       Object.keys(localStorage).forEach((key) => {
         if (key.startsWith("daily_rewards_")) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      // Clear quest timer data from localStorage
+      // Remove all quest timer cache entries
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("questTimer_")) {
           localStorage.removeItem(key);
         }
       });
@@ -522,6 +676,7 @@ export function AuthProvider({ children }) {
     signOut,
     updateUserInContext,
     handleSocialAuthCallback,
+    refreshSession: handleAuthSuccess,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

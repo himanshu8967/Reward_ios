@@ -1,26 +1,65 @@
 "use client";
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { RaceModal } from "../../../components/RaceModel";
 
 const RaceSection = () => {
     const router = useRouter();
     const [isRaceModalOpen, setIsRaceModalOpen] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
 
-    // OPTIMIZED: Memoize event handlers
+    // Prevent body scroll when modal is open
+    useEffect(() => {
+        if (isRaceModalOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isRaceModalOpen]);
+
+    // Handle Escape key to close modal
+    useEffect(() => {
+        const handleEscape = (e) => {
+            if (e.key === 'Escape' && isRaceModalOpen) {
+                setIsAnimating(false);
+                setTimeout(() => {
+                    setIsRaceModalOpen(false);
+                }, 500);
+            }
+        };
+        if (isRaceModalOpen) {
+            window.addEventListener('keydown', handleEscape);
+        }
+        return () => window.removeEventListener('keydown', handleEscape);
+    }, [isRaceModalOpen]);
+
+    // Go to Race page
     const handleRaceClick = useCallback(() => {
         router.push('/Race');
     }, [router]);
 
+    // Open the tooltip/modal
     const handleModalOpen = useCallback(() => {
         setIsRaceModalOpen(true);
+        // Small delay to ensure DOM is updated before animation starts
+        setTimeout(() => {
+            setIsAnimating(true);
+        }, 100);
     }, []);
 
+    // Close the tooltip/modal
     const handleModalClose = useCallback(() => {
-        setIsRaceModalOpen(false);
+        setIsAnimating(false);
+        // Delay closing to allow animation to complete
+        setTimeout(() => {
+            setIsRaceModalOpen(false);
+        }, 500);
     }, []);
 
-    // OPTIMIZED: Memoize large SVG content to prevent recreation
+    // Memoize SVG icon
     const infoIconSvg = useMemo(() => (
         <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 0L28 0C32.4183 0 36 3.58172 36 8V36H8C3.58172 36 0 32.4183 0 28L0 0Z" fill="#2C1D87" />
@@ -30,29 +69,30 @@ const RaceSection = () => {
 
     return (
         <div className="flex flex-col w-full items-start gap-2 relative">
-            <div className="h-36 rounded-[20px] overflow-hidden bg-[linear-gradient(51deg,rgba(88,41,171,1)_0%,rgba(59,41,171,1)_100%)]  relative w-full">
+            <div
+                className="h-36 rounded-[20px] overflow-hidden bg-[linear-gradient(51deg,rgba(88,41,171,1)_0%,rgba(59,41,171,1)_100%)] relative w-full cursor-pointer hover:opacity-95 transition-opacity duration-200"
+                onClick={handleRaceClick} // Go to /Race on main card click
+            >
                 <div className="relative w-[371px] h-[198px] -top-4 left-2">
                     <div
-                        className="top-[81px] left-1 font-normal absolute [font-family:'Poppins',Helvetica] text-white text-base tracking-[0] leading-6 whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity duration-200"
-                        onClick={handleRaceClick}
+                        className="top-[81px] left-1 font-normal absolute [font-family:'Poppins',Helvetica] text-white text-base tracking-[0] leading-6 whitespace-nowrap pointer-events-none"
                     >
                         Take Part & Win
                     </div>
                     <div className="absolute w-[371px] h-[198px] top-0 left-0">
                         <div
-                            className="top-[107px] left-1 text-[#fff57f] absolute [font-family:'Poppins',Helvetica] font-semibold text-[26px] tracking-[0] leading-6 whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity duration-200"
-                            onClick={handleRaceClick}
+                            className="top-[107px] left-1 text-[#fff57f] absolute [font-family:'Poppins',Helvetica] font-semibold text-[26px] tracking-[0] leading-6 whitespace-nowrap pointer-events-none"
                         >
                             Exciting Rewards
                         </div>
                         <img
-                            className="absolute w-[198px] h-[198px] top-0 left-[173px] aspect-[1] object-cover"
+                            className="absolute w-[198px] h-[198px] top-0 left-[173px] aspect-[1] object-cover pointer-events-none"
                             alt="Race character"
                             src="https://c.animaapp.com/xCaMzUYh/img/image-219@2x.png"
                             loading="eager"
                         />
                         <img
-                            className="absolute w-[211px] h-[42px] top-[38px] left-0 mix-blend-lighten"
+                            className="absolute w-[211px] h-[42px] top-[38px] left-0 mix-blend-lighten pointer-events-none"
                             alt="Race banner"
                             src="https://c.animaapp.com/xCaMzUYh/img/banner---don-t-remove@2x.png"
                             loading="eager"
@@ -60,8 +100,11 @@ const RaceSection = () => {
                     </div>
                 </div>
                 <button
-                    onClick={handleModalOpen}
-                    className="absolute w-10 h-9 top-[-3px] right-[-4px] z-20 cursor-pointer hover:opacity-80 transition-opacity duration-200 rounded-tr-lg rounded-bl-lg overflow-hidden "
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleModalOpen();
+                    }}
+                    className="absolute w-10 h-9 top-[-3px] right-[-4px] z-20 cursor-pointer hover:opacity-80 transition-opacity duration-200 rounded-tr-lg rounded-bl-lg overflow-hidden"
                     aria-label="More information"
                 >
                     {infoIconSvg}
@@ -70,6 +113,7 @@ const RaceSection = () => {
 
             <RaceModal
                 isOpen={isRaceModalOpen}
+                isAnimating={isAnimating}
                 onClose={handleModalClose}
             />
         </div>

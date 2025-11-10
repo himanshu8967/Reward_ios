@@ -12,18 +12,18 @@ export const DailyChallenge = ({ game }) => {
             bgImage: "https://c.animaapp.com/efaCLdlC/img/bg.svg",
             bannerImage: "https://c.animaapp.com/efaCLdlC/img/banner.svg",
             reward: "Earn $20",
-            title: "Purchase from game",
+            title: "Accept the Challenge",
             mainImage: "https://c.animaapp.com/efaCLdlC/img/image@2x.png"
         }
     ];
 
     return (
         <section
-            className="flex flex-col w-[375px] ml-4 mt-4 items-start gap-4 relative"
+            className="flex flex-col w-[375px] mt-4 mb-30 items-start gap-4 relative"
             data-model-id="2247:7132"
             aria-label="Daily Challenges Section"
         >
-            <header className="flex flex-col w-[375px] items-star pt-2 pb-0 px-4 relative flex-[0_0_auto]">
+            <header className="flex flex-col w-[375px] items-star pt-2 pb-0 px-2 relative flex-[0_0_auto]">
                 <h1 className="relative w-fit mt-[-1.00px] [font-family:'Poppins',Helvetica] mr-3 font-semibold text-white text-xl tracking-[0] leading-[normal]">
                     Daily Challenges
                 </h1>
@@ -65,13 +65,13 @@ export const DailyChallenge = ({ game }) => {
                                         {banner.title}
                                     </p>
 
-                                    <div
+                                    {/* <div
                                         className="absolute top-[119px] left-[268px] w-[106px] h-[106px] rounded-[53.01px] rotate-[-177.48deg] bg-[linear-gradient(149deg,rgba(185,1,231,1)_0%,rgba(89,245,255,1)_100%)]"
                                         aria-hidden="true"
-                                    />
+                                    /> */}
 
                                     <img
-                                        className="absolute top-[21px] left-[170px] w-[239px] h-[195px] object-cover"
+                                        className="absolute top-[100px] right-[-1px] w-[90px] h-[100px] object-cover"
                                         alt="Gaming controller illustration"
                                         src={banner.mainImage}
                                     />

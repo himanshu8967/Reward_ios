@@ -28,8 +28,8 @@ export const Breakdown = ({ game, sessionCoins = 0, sessionXP = 0 }) => {
             label: "Game Install",
             points: gamesInstalled, // Show actual number of games installed
             bonus: `+${gamesInstalled}`, // Show actual games installed
-            bgColor: "bg-[#ffd890]",
-            textColor: "text-[#292929]",
+            bgColor: "bg-[linear-gradient(180deg,rgba(220,195,34,1)_0%,rgba(80,50,146,0.7)_100%)] ", // Same gradient as LevelsSection for "Install The Game"
+            textColor: "text-white",
             vectorLeft: "https://c.animaapp.com/OGuKwK7i/img/vector-4235-2.svg",
             vectorRight: "https://c.animaapp.com/OGuKwK7i/img/vector-4234-2.svg",
             pic: "https://c.animaapp.com/OGuKwK7i/img/pic-2.svg",
@@ -39,8 +39,8 @@ export const Breakdown = ({ game, sessionCoins = 0, sessionXP = 0 }) => {
             label: "My Earnings",
             points: totalEarnings, // Show total earnings from all completed tasks
             bonus: `+${1}`, // Show total earnings
-            bgColor: "bg-[#b7bdff]",
-            textColor: "text-[#292929]",
+            bgColor: "bg-[linear-gradient(180deg,rgba(255,0,238,0.4)_0%,rgba(113,106,231,0.4)_100%)] ",
+            textColor: "text-white",
             vectorLeft: "https://c.animaapp.com/OGuKwK7i/img/vector-4235-3.svg",
             vectorRight: "https://c.animaapp.com/OGuKwK7i/img/vector-4234-3.svg",
             pic: "https://c.animaapp.com/OGuKwK7i/img/pic-3.svg",
@@ -69,7 +69,7 @@ export const Breakdown = ({ game, sessionCoins = 0, sessionXP = 0 }) => {
                         className={`${item.bgColor} relative self-stretch w-full h-10 rounded-[10px] flex items-center justify-between px-3`}
                     >
                         {/* Left side - Label */}
-                        <div className="[font-family:'Poppins',Helvetica] font-bold text-[#585858] text-sm tracking-[0] leading-[normal]">
+                        <div className="[font-family:'Poppins',Helvetica] font-bold text-white text-sm tracking-[0] leading-[normal]">
                             {item.label}
                         </div>
 

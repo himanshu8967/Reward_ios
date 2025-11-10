@@ -59,6 +59,7 @@ export const RaiseATicket = () => {
     // ============================================================================
     const { inProgressGames, userDataStatus, available, completed } = useSelector((state) => state.games);
     const { userGames, loading, errors: ticketErrors } = useSelector((state) => state.tickets);
+    const profile = useSelector((state) => state.profile.details);
 
     // ============================================================================
     // EFFECTS
@@ -291,7 +292,7 @@ export const RaiseATicket = () => {
                 }
             };
 
-            const resultAction = await dispatch(createTicket({ ticketData, token }));
+            const resultAction = await dispatch(createTicket({ ticketData, token, profile }));
 
             if (createTicket.fulfilled.match(resultAction)) {
                 // Fast redirect on success
@@ -315,12 +316,12 @@ export const RaiseATicket = () => {
         <div className="flex flex-col w-full h-screen bg-black">
 
             {/* App Version */}
-            <div className="px-5 ml-2   [font-family:'Poppins',Helvetica] font-normal text-neutral-400 text-[10px] tracking-[0] leading-3">
+            <div className="px-5 ml-1   [font-family:'Poppins',Helvetica] font-normal text-[#A4A4A4] text-[10px] mt-[8px] tracking-[0] leading-3">
                 App Version: V0.0.1
             </div>
 
             {/* Header */}
-            <header className="flex flex-col w-full items-start gap-2 px-5 py-3 pt-4">
+            <header className="flex flex-col w-full items-start gap-2 px-5 pb-6 mt-[28px]">
                 <div className="flex items-center gap-4 relative self-stretch w-full flex-[0_0_auto] rounded-[32px]">
                     <button
                         type="button"
@@ -373,7 +374,12 @@ export const RaiseATicket = () => {
                             aria-label="Select Game"
                         >
                             <span className={selectedGame ? "text-white" : "text-neutral-400"}>
-                                {selectedGame ? gameOptions.find(option => option.id === selectedGame)?.name : "Select Game"}
+                                {selectedGame
+                                    ? gameOptions.find(option => option.id === selectedGame)?.name
+                                        ?.replace(/\s*Android\s*/gi, '') // Removes "Android"
+                                        .replace(/-/g, ' ')             // Replaces all hyphens with a space
+                                        .trim()
+                                    : "Select Game"}
                             </span>
                             <svg
                                 className={`w-4 h-4 text-neutral-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}

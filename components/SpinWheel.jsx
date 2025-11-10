@@ -1,41 +1,74 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { getSpinConfig, getSpinStatus, performSpin, redeemSpinReward } from "@/lib/api";
 
 export default function SpinWheel() {
+    const { token } = useAuth();
     const [isSpinning, setIsSpinning] = useState(false);
-    const [spins, setSpins] = useState(10)
+    const [isLoading, setIsLoading] = useState(true);
+    const [spins, setSpins] = useState(0);
     const [showResult, setShowResult] = useState(false);
     const [result, setResult] = useState("");
-    const [coins, setCoins] = useState(1250);
+    const [coins, setCoins] = useState(0);
     const [pendingReward, setPendingReward] = useState(0);
+    const [pendingSpinId, setPendingSpinId] = useState(null);
     const [isAdWatched, setIsAdWatched] = useState(false);
     const [appVersion] = useState("V0.0.1");
     const [dailySpinsUsed, setDailySpinsUsed] = useState(0);
-    const [maxDailySpins] = useState(10);
+    const [maxDailySpins, setMaxDailySpins] = useState(5);
+    const [canSpin, setCanSpin] = useState(false);
+    const [spinConfig, setSpinConfig] = useState(null);
+    const [spinStatus, setSpinStatus] = useState(null);
+    const [error, setError] = useState(null);
 
     // Audio ref for sound effects
     const audioRef = useRef(null);
 
-    // Load daily spins from localStorage on mount
+    // Load spin config and status on mount
     useEffect(() => {
-        const today = new Date().toDateString();
-        const savedDate = localStorage.getItem('spinWheelDate');
-        const savedSpins = parseInt(localStorage.getItem('dailySpinsUsed') || '0');
-
-        if (savedDate === today) {
-            setDailySpinsUsed(savedSpins);
-        } else {
-            // New day, reset spins
-            localStorage.setItem('spinWheelDate', today);
-            localStorage.setItem('dailySpinsUsed', '0');
-            setDailySpinsUsed(0);
+        if (token) {
+            loadSpinData();
         }
-    }, []);
+    }, [token]);
 
-    // Save daily spins to localStorage whenever it changes
-    useEffect(() => {
-        localStorage.setItem('dailySpinsUsed', dailySpinsUsed.toString());
-    }, [dailySpinsUsed]);
+    const loadSpinData = async () => {
+        if (!token) return;
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            console.log("🔄 [SPIN] Loading spin config and status...");
+
+            // Load config and status in parallel
+            const [configResponse, statusResponse] = await Promise.all([
+                getSpinConfig(token),
+                getSpinStatus(token)
+            ]);
+
+            if (configResponse.success && configResponse.data) {
+                const config = configResponse.data;
+                setSpinConfig(config);
+                setMaxDailySpins(config.config?.maxSpinsPerDay || 5);
+                console.log("✅ [SPIN] Config loaded:", config);
+            }
+
+            if (statusResponse.success && statusResponse.data) {
+                const status = statusResponse.data;
+                setSpinStatus(status);
+                setCanSpin(status.canSpin || false);
+                setSpins(status.remainingSpins || 0);
+                setDailySpinsUsed((status.dailyLimit || 5) - (status.remainingSpins || 0));
+                console.log("✅ [SPIN] Status loaded:", status);
+            }
+        } catch (err) {
+            console.error("❌ [SPIN] Error loading spin data:", err);
+            setError(err.message || "Failed to load spin data");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Function to play sound effect
     const playSpinSound = () => {
@@ -51,25 +84,25 @@ export default function SpinWheel() {
         }
     };
 
-    const handleSpin = () => {
-        console.log("Spin button clicked!", { isSpinning, spins, dailySpinsUsed, maxDailySpins });
+    const handleSpin = async () => {
+        console.log("🎰 [SPIN] Spin button clicked!", { isSpinning, spins, canSpin, dailySpinsUsed, maxDailySpins });
 
-        // Check daily spin limit FIRST
-        if (dailySpinsUsed >= maxDailySpins) {
-            setResult(`🚫 Daily Spin Limit Reached!\n\nYou've used all ${maxDailySpins} spins today.\n\nCome back tomorrow for more spins!`);
+        if (!token) {
+            setError("Please log in to spin");
             setShowResult(true);
+            setResult("❌ Please log in to spin");
             setTimeout(() => setShowResult(false), 5000);
             return;
         }
 
-        // Check if already spinning
-        if (isSpinning) {
-            console.log("Already spinning...");
-            return;
-        }
+        // Check if already spinning - COMMENTED OUT: Allow multiple clicks to see loading state
+        // if (isSpinning) {
+        //     console.log("⚠️ [SPIN] Already spinning...");
+        //     return;
+        // }
 
-        if (!isSpinning) {
-            console.log("Starting spin animation...");
+        try {
+            console.log("🎰 [SPIN] Starting spin...");
 
             // Play sound effect when user clicks spin
             playSpinSound();
@@ -77,86 +110,168 @@ export default function SpinWheel() {
             setIsSpinning(true);
             setShowResult(false);
             setPendingReward(0);
+            setPendingSpinId(null);
             setIsAdWatched(false);
+            setError(null);
 
-            // Spin animation duration
-            setTimeout(() => {
-                console.log("Spin animation finished!");
+            // Call API to perform spin - always call API, even if no spins left
+            // Backend will return error message if no spins available
+            const spinResponse = await performSpin(token);
+
+            if (spinResponse.success && spinResponse.data) {
+                const spinData = spinResponse.data;
+                console.log("✅ [SPIN] Spin result:", spinData);
+
+                // Wait for animation to complete (3 seconds)
+                setTimeout(() => {
+                    setIsSpinning(false);
+
+                    if (spinData.reward) {
+                        const rewardAmount = spinData.reward.amount || 0;
+                        const vipMultiplier = spinData.vipMultiplier || 1;
+                        const finalReward = Math.floor(rewardAmount * vipMultiplier);
+
+                        // Store pending reward and spin ID for redemption
+                        setPendingReward(finalReward);
+                        setPendingSpinId(spinData.spinId);
+
+                        setResult(`🎉 Congratulations! You won ${finalReward} coins!\n\n${spinData.message || "Watch ad to redeem your reward."}`);
+                        setShowResult(true);
+                    } else {
+                        setPendingReward(0);
+                        setResult(`😔 Better Luck Next Time!\n\nNo reward this time.\nTry spinning again!`);
+                        setShowResult(true);
+                    }
+
+                    // Reload status to update remaining spins
+                    loadSpinData();
+
+                    // Hide result after 5 seconds
+                    setTimeout(() => {
+                        setShowResult(false);
+                    }, 5000);
+                }, 3000);
+            } else {
+                // Handle backend error response
+                const errorMessage = spinResponse.error || "Spin failed";
+                const errorData = spinResponse.data || {};
+
+                console.error("❌ [SPIN] Backend error:", errorMessage, errorData);
                 setIsSpinning(false);
 
-                // 0.1% chance of winning a reward, 99.9% chance of losing
-                const isWin = Math.random() < 0.001; // 0.1% probability of winning
-                console.log("Win probability check:", isWin);
+                // Show backend error message in modal
+                let displayMessage = errorMessage;
 
-                if (isWin) {
-                    // Calculate random reward (1-100 coins)
-                    const rewardAmount = Math.floor(Math.random() * 100) + 1;
-                    console.log("Reward amount:", rewardAmount);
-
-                    // Store pending reward (not yet credited)
-                    setPendingReward(rewardAmount);
-                    setResult(`🎉 Congratulations! You won ${rewardAmount} coins!\n\nWatch ad to redeem your reward.`);
-                    setShowResult(true);
-                } else {
-                    // 1% chance - no reward
-                    setPendingReward(0);
-                    setResult(`😔 Better Luck Next Time!\n\nNo reward this time.\nTry spinning again!`);
-                    setShowResult(true);
+                // Add "Daily spin limit reached" if it's a limit error
+                if (errorMessage.toLowerCase().includes("limit") || errorMessage.toLowerCase().includes("daily")) {
+                    if (!displayMessage.toLowerCase().includes("daily spin limit reached")) {
+                        displayMessage = `Daily spin limit reached\n\n${displayMessage}`;
+                    }
                 }
 
-                // Update daily spins used
-                setDailySpinsUsed(prev => prev + 1);
-
-                // Only decrement spins if we have more than 0
-                if (spins > 0) {
-                    setSpins(prev => prev - 1);
+                if (errorData.remainingSpins !== undefined && errorData.dailyLimit !== undefined) {
+                    displayMessage = `${displayMessage}\n\nRemaining Spins: ${errorData.remainingSpins}/${errorData.dailyLimit}`;
                 }
+
+                setResult(`🚫 ${displayMessage}`);
+                setShowResult(true);
+
+                // Reload status to update remaining spins
+                loadSpinData();
 
                 // Hide result after 5 seconds
                 setTimeout(() => {
                     setShowResult(false);
                 }, 5000);
-            }, 3000);
-        } else {
-            console.log("Cannot spin:", { isSpinning, spins });
+            }
+        } catch (err) {
+            console.error("❌ [SPIN] Spin error:", err);
+            setIsSpinning(false);
+
+            // Extract error message from API error
+            let errorMessage = "Failed to spin. Please try again.";
+            if (err.message) {
+                errorMessage = err.message;
+            } else if (err.body?.error) {
+                errorMessage = err.body.error;
+            } else if (err.body?.message) {
+                errorMessage = err.body.message;
+            }
+
+            // Add "Daily spin limit reached" if it's a limit error
+            if (errorMessage.toLowerCase().includes("limit") || errorMessage.toLowerCase().includes("daily")) {
+                if (!errorMessage.toLowerCase().includes("daily spin limit reached")) {
+                    errorMessage = `Daily spin limit reached\n\n${errorMessage}`;
+                }
+            }
+
+            // Show error in modal
+            setResult(`🚫 ${errorMessage}`);
+            setShowResult(true);
+
+            // Reload status
+            loadSpinData();
+
+            // Hide result after 5 seconds
+            setTimeout(() => {
+                setShowResult(false);
+            }, 5000);
         }
     };
 
-    const handleWatchToRedeem = () => {
-        if (pendingReward > 0) {
-            console.log("Watch to Redeem clicked - Starting rewarded video ad...");
+    const handleWatchToRedeem = async () => {
+        if (!token) {
+            setError("Please log in to redeem");
+            return;
+        }
 
-            // Simulate rewarded video ad
-            simulateRewardedVideoAd();
+        if (pendingReward > 0 && pendingSpinId) {
+            console.log("💰 [REDEEM] Watch to Redeem clicked - Redeeming reward...");
+
+            try {
+                // Call API to redeem reward
+                const redeemResponse = await redeemSpinReward(pendingSpinId, token);
+
+                if (redeemResponse.success && redeemResponse.data) {
+                    const redeemData = redeemResponse.data;
+                    console.log("✅ [REDEEM] Reward redeemed:", redeemData);
+
+                    // Update coins with new balance
+                    if (redeemData.newBalance !== undefined) {
+                        setCoins(redeemData.newBalance);
+                    }
+
+                    setIsAdWatched(true);
+                    setResult(`✅ ${redeemData.reward || pendingReward}💰 added to your wallet!\n\n${redeemData.message || "Reward claimed successfully!"}`);
+                    setShowResult(true);
+
+                    // Clear pending reward and spin ID
+                    setPendingReward(0);
+                    setPendingSpinId(null);
+
+                    // Reload status to update balance
+                    loadSpinData();
+
+                    // Hide result after 3 seconds
+                    setTimeout(() => {
+                        setShowResult(false);
+                    }, 3000);
+                } else {
+                    throw new Error(redeemResponse.error || "Redemption failed");
+                }
+            } catch (err) {
+                console.error("❌ [REDEEM] Redemption error:", err);
+                setError(err.message || "Failed to redeem reward. Please try again.");
+                setResult(`❌ Error: ${err.message || "Failed to redeem"}`);
+                setShowResult(true);
+                setTimeout(() => setShowResult(false), 5000);
+            }
         } else {
-            console.log("No pending reward to redeem");
+            console.log("⚠️ [REDEEM] No pending reward to redeem");
             setResult("❌ No pending reward to redeem!");
             setShowResult(true);
             setTimeout(() => setShowResult(false), 3000);
         }
-    };
-
-    const simulateRewardedVideoAd = () => {
-        console.log("Simulating rewarded video ad...");
-
-        // Simulate ad loading and watching
-        setTimeout(() => {
-            console.log("Ad watched successfully!");
-
-            // Credit the reward to wallet
-            setCoins(prev => prev + pendingReward);
-            setIsAdWatched(true);
-            setResult(`✅ ${pendingReward}💰 added to your wallet!`);
-            setShowResult(true);
-
-            // Clear pending reward
-            setPendingReward(0);
-
-            // Hide result after 3 seconds
-            setTimeout(() => {
-                setShowResult(false);
-            }, 3000);
-        }, 2000); // Simulate 2-second ad
     };
 
     const handleBackToWallet = () => {
@@ -215,7 +330,7 @@ export default function SpinWheel() {
                             ease: "easeInOut"
                         } : {}}
                     >
-                        {spins}
+                        {isLoading ? "..." : spins}
                     </motion.span>
                     <span
                         className="text-[#2C1810] text-xs font-bold tracking-wide"
@@ -230,11 +345,10 @@ export default function SpinWheel() {
                 </motion.div>
             </div>
 
-            {/* 3D Animated Border for Slot Machine */}
+            {/* 3D Animated Border for Slot Machine - COMMENTED OUT: White transparent overlay over PUSH TO SPIN button */}
+            {/*
             <div className="absolute top-[20px] left-0 w-full h-[563px] z-20 pointer-events-none">
-                {/* Outer 3D border with animated glowing corners and sides */}
                 <div className="relative w-full h-full">
-                    {/* 3D border layers */}
                     <div className="absolute inset-0 rounded-[20px] border-[4px] border-gradient-to-br from-yellow-400 via-orange-500 to-red-700 shadow-[0_0_40px_10px_rgba(255,140,0,0.25),0_8px_32px_0_rgba(0,0,0,0.5)]"
                         style={{
                             boxShadow: `
@@ -245,7 +359,6 @@ export default function SpinWheel() {
                             borderImage: "linear-gradient(120deg, #FFD700 10%, #FF9800 40%, #B45309 90%) 1"
                         }}
                     ></div>
-                    {/* Animated glowing corners */}
                     {["top-0 left-0", "top-0 right-0", "bottom-0 left-0", "bottom-0 right-0"].map((pos, idx) => (
                         <span
                             key={pos}
@@ -260,7 +373,6 @@ export default function SpinWheel() {
                             ></span>
                         </span>
                     ))}
-                    {/* Animated glowing side lines */}
                     {[
                         { className: "top-0 left-8 right-8 h-2", deg: 0 },
                         { className: "bottom-0 left-8 right-8 h-2", deg: 180 },
@@ -283,7 +395,6 @@ export default function SpinWheel() {
                         </span>
                     ))}
                 </div>
-                {/* Keyframes for border glow */}
                 <style jsx>{`
                     @keyframes border-glow {
                         0%, 100% { opacity: 0.7; filter: blur(2px) brightness(1.1);}
@@ -294,6 +405,7 @@ export default function SpinWheel() {
                     }
                 `}</style>
             </div>
+            */}
 
 
             <div className="absolute top-[20px] left-0 w-full h-[563px] aspect-[0.68] z-10">
@@ -352,17 +464,19 @@ export default function SpinWheel() {
                                         whileHover={{ scale: 1.05 }}
                                         animate={isSpinning ? {
                                             rotateY: [0, 10, -10, 10, 0],
-                                            scale: [1, 1.05, 1]
+                                            scale: [1, 1.05, 1.08, 1.05, 1]
                                         } : {}}
                                         transition={isSpinning ? { duration: 3, ease: "easeOut" } : { type: "spring", stiffness: 400 }}
                                     >
-                                        {/* Golden coin with 3D metallic effect */}
+                                        {/* Coin Image */}
                                         <motion.div
                                             className="relative w-[35px] h-[35px]"
                                             animate={isSpinning ? {
-                                                rotateY: [0, 360, 720, 1080, 1440, 1800, 0],
-                                                rotateZ: [0, 180, 360, 540, 720, 0],
-                                                scale: [1, 1.2, 1, 1.2, 1, 1]
+                                                rotateY: [0, 1800, 3600],
+                                                rotateZ: [0, 720, 1440],
+                                                rotateX: [0, 360, 720],
+                                                scale: [1, 1.3, 1.1, 1.3, 1.15, 1],
+                                                y: [0, -15, -10, -15, -5, 0]
                                             } : {
                                                 rotateY: [0, 360],
                                                 scale: [1, 1.05, 1],
@@ -370,91 +484,8 @@ export default function SpinWheel() {
                                             }}
                                             transition={isSpinning ? {
                                                 duration: 3,
-                                                ease: "easeOut"
-                                            } : {
-                                                duration: 4,
-                                                repeat: Infinity,
-                                                ease: "easeInOut"
-                                            }}
-                                        >
-                                            {/* Outer shadow */}
-                                            <div className="absolute inset-0 bg-gradient-to-br from-[#B8860B] to-[#8B4513] rounded-full"></div>
-                                            {/* Main coin body with 3D effect */}
-                                            <div className="absolute inset-[1px] bg-gradient-to-br from-[#FFD700] via-[#FFA500] to-[#CD853F] rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.3)]"></div>
-                                            {/* Inner highlight */}
-                                            <div className="absolute inset-[2px] bg-gradient-to-br from-[#FFE44D] to-[#FFD700] rounded-full shadow-[inset_0_2px_4px_rgba(255,255,255,0.5)]"></div>
-                                            {/* Dollar symbol */}
-                                            <div className="absolute inset-[4px] flex items-center justify-center">
-                                                <motion.span
-                                                    className="text-[#2C1810] text-2xl font-black drop-shadow-[0_3px_4px_rgba(0,0,0,0.5),0_1px_2px_rgba(255,215,0,0.8)]"
-                                                    animate={isSpinning ? {
-                                                        scale: [1, 1.3, 1],
-                                                        rotate: [0, 180, 360, 540, 720, 0]
-                                                    } : {
-                                                        scale: [1, 1.1, 1],
-                                                        rotate: [0, 5, -5, 0],
-                                                    }}
-                                                    transition={isSpinning ? {
-                                                        duration: 3,
-                                                        ease: "easeOut"
-                                                    } : {
-                                                        duration: 3,
-                                                        repeat: Infinity,
-                                                        ease: "easeInOut"
-                                                    }}
-                                                    style={{
-                                                        textShadow: isSpinning ? '0 0 10px rgba(255,215,0,0.8), 0 2px 4px rgba(0,0,0,0.8)' : '0 0 8px rgba(255,215,0,0.6), 0 2px 4px rgba(0,0,0,0.8)',
-                                                        filter: isSpinning ? 'drop-shadow(0 0 6px rgba(255,215,0,0.6))' : 'drop-shadow(0 0 4px rgba(255,215,0,0.4))'
-                                                    }}
-                                                >
-                                                    $
-                                                </motion.span>
-                                            </div>
-                                        </motion.div>
-                                    </motion.div>
-
-                                    {/* Center Panel - Coin Image Only */}
-                                    <motion.div
-                                        className="flex items-center justify-center w-[75px] h-[95px] bg-gradient-to-b from-[#DEB887] via-[#D2B48C] to-[#BC9A6A] border-r-[1px] border-[#8B4513] relative overflow-hidden"
-                                        animate={isSpinning ? {
-                                            boxShadow: [
-                                                "inset 0 0 0 rgba(255,215,0,0)",
-                                                "inset 0 0 30px rgba(255,215,0,0.8)",
-                                                "inset 0 0 0 rgba(255,215,0,0)"
-                                            ],
-                                            scale: [1, 1.1, 1],
-                                            rotateZ: [0, 5, -5, 0]
-                                        } : {
-                                            boxShadow: [
-                                                "inset 0 0 0 rgba(255,215,0,0)",
-                                                "inset 0 0 20px rgba(255,215,0,0.3)",
-                                                "inset 0 0 0 rgba(255,215,0,0)"
-                                            ]
-                                        }}
-                                        transition={isSpinning ? {
-                                            duration: 3,
-                                            ease: "easeOut"
-                                        } : {
-                                            duration: 2,
-                                            repeat: Infinity,
-                                            ease: "easeInOut"
-                                        }}
-                                    >
-                                        {/* Coin Image in Center */}
-                                        <motion.div
-                                            className="relative w-[45px] h-[45px]"
-                                            animate={isSpinning ? {
-                                                rotateY: [0, 360, 720, 1080, 1440, 1800, 0],
-                                                rotateX: [0, 180, 360, 540, 720, 0],
-                                                scale: [1, 1.2, 1, 1.2, 1, 1]
-                                            } : {
-                                                rotateY: [0, 360],
-                                                scale: [1, 1.1, 1],
-                                                y: [0, -2, 0]
-                                            }}
-                                            transition={isSpinning ? {
-                                                duration: 3,
-                                                ease: "easeOut"
+                                                ease: [0.43, 0.13, 0.23, 0.96],
+                                                times: [0, 0.5, 0.7, 0.85, 0.95, 1]
                                             } : {
                                                 duration: 4,
                                                 repeat: Infinity,
@@ -466,7 +497,72 @@ export default function SpinWheel() {
                                                 alt="Coin"
                                                 className="w-full h-full object-contain drop-shadow-[0_4px_8px_rgba(255,215,0,0.6)]"
                                                 style={{
-                                                    filter: isSpinning ? 'drop-shadow(0 0 12px rgba(255,215,0,0.9)) brightness(1.3)' : 'drop-shadow(0 0 6px rgba(255,215,0,0.6))'
+                                                    filter: isSpinning ? 'drop-shadow(0 0 20px rgba(255,215,0,1)) drop-shadow(0 0 35px rgba(255,165,0,0.9)) brightness(1.5) blur(0.3px)' : 'drop-shadow(0 0 6px rgba(255,215,0,0.6))'
+                                                }}
+                                            />
+                                        </motion.div>
+                                    </motion.div>
+
+                                    {/* Center Panel - Coin Image Only */}
+                                    <motion.div
+                                        className="flex items-center justify-center w-[75px] h-[95px] bg-gradient-to-b from-[#DEB887] via-[#D2B48C] to-[#BC9A6A] border-r-[1px] border-[#8B4513] relative overflow-hidden"
+                                        animate={isSpinning ? {
+                                            boxShadow: [
+                                                "inset 0 0 0 rgba(255,215,0,0)",
+                                                "inset 0 0 40px rgba(255,215,0,1)",
+                                                "inset 0 0 30px rgba(255,165,0,0.8)",
+                                                "inset 0 0 40px rgba(255,215,0,1)",
+                                                "inset 0 0 0 rgba(255,215,0,0)"
+                                            ],
+                                            scale: [1, 1.12, 1.08, 1.12, 1.05, 1],
+                                            rotateZ: [0, 8, -8, 5, 0]
+                                        } : {
+                                            boxShadow: [
+                                                "inset 0 0 0 rgba(255,215,0,0)",
+                                                "inset 0 0 20px rgba(255,215,0,0.3)",
+                                                "inset 0 0 0 rgba(255,215,0,0)"
+                                            ]
+                                        }}
+                                        transition={isSpinning ? {
+                                            duration: 3,
+                                            ease: [0.43, 0.13, 0.23, 0.96],
+                                            times: [0, 0.3, 0.6, 0.8, 1]
+                                        } : {
+                                            duration: 2,
+                                            repeat: Infinity,
+                                            ease: "easeInOut"
+                                        }}
+                                    >
+                                        {/* Coin Image in Center */}
+                                        <motion.div
+                                            className="relative w-[45px] h-[45px]"
+                                            animate={isSpinning ? {
+                                                rotateY: [0, 2160, 4320],
+                                                rotateX: [0, 1080, 2160],
+                                                rotateZ: [0, 540, 1080],
+                                                scale: [1, 1.4, 1.2, 1.4, 1.2, 1],
+                                                y: [0, -20, -15, -20, -10, 0]
+                                            } : {
+                                                rotateY: [0, 360],
+                                                scale: [1, 1.1, 1],
+                                                y: [0, -2, 0]
+                                            }}
+                                            transition={isSpinning ? {
+                                                duration: 3,
+                                                ease: [0.43, 0.13, 0.23, 0.96],
+                                                times: [0, 0.4, 0.6, 0.8, 0.9, 1]
+                                            } : {
+                                                duration: 4,
+                                                repeat: Infinity,
+                                                ease: "easeInOut"
+                                            }}
+                                        >
+                                            <img
+                                                src="/dollor.png"
+                                                alt="Coin"
+                                                className="w-full h-full object-contain drop-shadow-[0_4px_8px_rgba(255,215,0,0.6)]"
+                                                style={{
+                                                    filter: isSpinning ? 'drop-shadow(0 0 20px rgba(255,215,0,1)) drop-shadow(0 0 35px rgba(255,165,0,0.9)) brightness(1.5) blur(0.3px)' : 'drop-shadow(0 0 6px rgba(255,215,0,0.6))'
                                                 }}
                                             />
                                         </motion.div>
@@ -478,17 +574,19 @@ export default function SpinWheel() {
                                         whileHover={{ scale: 1.05 }}
                                         animate={isSpinning ? {
                                             rotateY: [0, -10, 10, -10, 0],
-                                            scale: [1, 1.05, 1]
+                                            scale: [1, 1.05, 1.08, 1.05, 1]
                                         } : {}}
-                                        transition={isSpinning ? { duration: 3, ease: "easeOut" } : { type: "spring", stiffness: 400 }}
+                                        transition={isSpinning ? { duration: 3, ease: "easeOut", delay: 0.1 } : { type: "spring", stiffness: 400 }}
                                     >
-                                        {/* Golden coin with 3D metallic effect */}
+                                        {/* Coin Image */}
                                         <motion.div
                                             className="relative w-[35px] h-[35px]"
                                             animate={isSpinning ? {
-                                                rotateY: [0, -360, -720, -1080, -1440, -1800, 0],
-                                                rotateZ: [0, -180, -360, -540, -720, 0],
-                                                scale: [1, 1.2, 1, 1.2, 1, 1]
+                                                rotateY: [0, -1800, -3600],
+                                                rotateZ: [0, -720, -1440],
+                                                rotateX: [0, -360, -720],
+                                                scale: [1, 1.3, 1.1, 1.3, 1.15, 1],
+                                                y: [0, -15, -10, -15, -5, 0]
                                             } : {
                                                 rotateY: [0, -360],
                                                 scale: [1, 1.05, 1],
@@ -496,46 +594,23 @@ export default function SpinWheel() {
                                             }}
                                             transition={isSpinning ? {
                                                 duration: 3,
-                                                ease: "easeOut"
+                                                ease: [0.43, 0.13, 0.23, 0.96],
+                                                times: [0, 0.5, 0.7, 0.85, 0.95, 1],
+                                                delay: 0.1
                                             } : {
                                                 duration: 4,
                                                 repeat: Infinity,
                                                 ease: "easeInOut"
                                             }}
                                         >
-                                            {/* Outer shadow */}
-                                            <div className="absolute inset-0 bg-gradient-to-br from-[#B8860B] to-[#8B4513] rounded-full"></div>
-                                            {/* Main coin body with 3D effect */}
-                                            <div className="absolute inset-[1px] bg-gradient-to-br from-[#FFD700] via-[#FFA500] to-[#CD853F] rounded-full shadow-[0_3px_8px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.3)]"></div>
-                                            {/* Inner highlight */}
-                                            <div className="absolute inset-[2px] bg-gradient-to-br from-[#FFE44D] to-[#FFD700] rounded-full shadow-[inset_0_2px_4px_rgba(255,255,255,0.5)]"></div>
-                                            {/* Dollar symbol */}
-                                            <div className="absolute inset-[4px] flex items-center justify-center">
-                                                <motion.span
-                                                    className="text-[#2C1810] text-2xl font-black drop-shadow-[0_3px_4px_rgba(0,0,0,0.5),0_1px_2px_rgba(255,215,0,0.8)]"
-                                                    animate={isSpinning ? {
-                                                        scale: [1, 1.3, 1],
-                                                        rotate: [0, -180, -360, -540, -720, 0]
-                                                    } : {
-                                                        scale: [1, 1.1, 1],
-                                                        rotate: [0, -5, 5, 0],
-                                                    }}
-                                                    transition={isSpinning ? {
-                                                        duration: 3,
-                                                        ease: "easeOut"
-                                                    } : {
-                                                        duration: 3,
-                                                        repeat: Infinity,
-                                                        ease: "easeInOut"
-                                                    }}
-                                                    style={{
-                                                        textShadow: isSpinning ? '0 0 10px rgba(255,215,0,0.8), 0 2px 4px rgba(0,0,0,0.8)' : '0 0 8px rgba(255,215,0,0.6), 0 2px 4px rgba(0,0,0,0.8)',
-                                                        filter: isSpinning ? 'drop-shadow(0 0 6px rgba(255,215,0,0.6))' : 'drop-shadow(0 0 4px rgba(255,215,0,0.4))'
-                                                    }}
-                                                >
-                                                    $
-                                                </motion.span>
-                                            </div>
+                                            <img
+                                                src="/dollor.png"
+                                                alt="Coin"
+                                                className="w-full h-full object-contain drop-shadow-[0_4px_8px_rgba(255,215,0,0.6)]"
+                                                style={{
+                                                    filter: isSpinning ? 'drop-shadow(0 0 20px rgba(255,215,0,1)) drop-shadow(0 0 35px rgba(255,165,0,0.9)) brightness(1.5) blur(0.3px)' : 'drop-shadow(0 0 6px rgba(255,215,0,0.6))'
+                                                }}
+                                            />
                                         </motion.div>
                                     </motion.div>
 
@@ -655,23 +730,33 @@ export default function SpinWheel() {
                 <div className="absolute top-[67%] left-1/2  mr-2 transform -translate-x-1/2 -translate-y-1/2 z-20">
                     <motion.button
                         onClick={handleSpin}
-                        className="w-[200px] h-12 bg-gradient-to-b from-red-600 to-red-800 text-white text-lg font-bold px-8 rounded-lg shadow-[0_8px_0px_#8f1a1a,inset_0_2px_4px_rgba(255,255,255,0.4)] border-2 border-red-900"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98, y: 4, boxShadow: '0 4px 0px #8f1a1a, inset 0 2px 4px rgba(255,255,255,0.4)' }}
+                        // disabled={isSpinning || isLoading} // COMMENTED OUT: Allow button to remain visible during spinning/loading
+                        className={`w-[200px] h-12 text-white text-lg font-bold px-8 rounded-lg border-2 ${
+                            // (isSpinning || isLoading) // COMMENTED OUT: Don't change styling during spinning/loading
+                            //     ? 'bg-gray-600 border-gray-700 cursor-not-allowed opacity-50'
+                            //     : 
+                            'bg-gradient-to-b from-red-600 to-red-800 border-red-900 shadow-[0_8px_0px_#8f1a1a,inset_0_2px_4px_rgba(255,255,255,0.4)]'
+                            }`}
+                        whileHover={{ scale: 1.02 }} // COMMENTED OUT: Always allow hover effect
+                        whileTap={{
+                            scale: 0.98,
+                            y: 4,
+                            boxShadow: '0 4px 0px #8f1a1a, inset 0 2px 4px rgba(255,255,255,0.4)'
+                        }} // COMMENTED OUT: Always allow tap effect
                     >
-                        PUSH TO SPIN
+                        {isSpinning ? "SPINNING..." : isLoading ? "LOADING..." : "PUSH TO SPIN"}
                     </motion.button>
                 </div>
             </div>
 
             <button
                 onClick={handleWatchToRedeem}
-                className={`top-[500px]     left-[calc(50.00%_-_122px)] w-60 h-[55px] gap-[9.7px] rounded-[12.97px] overflow-hidden flex absolute cursor-pointer transition-all ${pendingReward > 0
+                disabled={pendingReward === 0 || !pendingSpinId || isAdWatched}
+                className={`top-[500px] left-[calc(50.00%_-_122px)] w-60 h-[55px] gap-[9.7px] rounded-[12.97px] overflow-hidden flex absolute cursor-pointer transition-all ${pendingReward > 0 && pendingSpinId && !isAdWatched
                     ? 'bg-[linear-gradient(180deg,rgba(223,131,40,1)_0%,rgba(221,135,42,1)_100%)] hover:scale-105'
                     : 'bg-gray-500 cursor-not-allowed opacity-50'
                     }`}
-                aria-label="Watch video to redeem"
-                disabled={pendingReward === 0}
+                aria-label="Redeem reward"
             >
                 <img
                     className="mt-[7px] w-[42px] h-[42px] ml-[18px] aspect-[1] object-cover"
@@ -680,7 +765,7 @@ export default function SpinWheel() {
                 />
 
                 <span className="mt-[15.1px] w-[146px] h-6 [font-family:'Poppins',Helvetica] font-semibold text-white text-base tracking-[0] leading-[normal]">
-                    {pendingReward > 0 ? `Watch to Redeem ${pendingReward}💰` : 'No Reward to Redeem'}
+                    {isAdWatched ? 'Redeemed!' : pendingReward > 0 ? `Redeem ${pendingReward}💰` : 'No Reward to Redeem'}
                 </span>
             </button>
 
@@ -697,6 +782,19 @@ export default function SpinWheel() {
             </div>
             )} */}
 
+            {/* Error Display */}
+            {error && (
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-red-900/90 text-white px-4 py-2 rounded-lg shadow-lg max-w-sm">
+                    <p className="text-sm font-medium">{error}</p>
+                    <button
+                        onClick={() => setError(null)}
+                        className="mt-2 text-xs underline"
+                    >
+                        Dismiss
+                    </button>
+                </div>
+            )}
+
             {/* Result Modal */}
             {showResult && (
                 <motion.div
@@ -707,7 +805,7 @@ export default function SpinWheel() {
                     transition={{ duration: 0.3 }}
                 >
                     <motion.div
-                        className="bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] rounded-3xl p-8 mx-4 text-center shadow-2xl border-2 border-[#8f4d1e] max-w-sm relative overflow-hidden"
+                        className="bg-gradient-to-br from-[#1a1a1a] to-[#2d2d2d] rounded-3xl p-5 mx-4 text-center shadow-2xl border-2 border-[#8f4d1e] max-w-sm relative overflow-hidden"
                         initial={{ scale: 0.8, opacity: 0, y: 50 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.8, opacity: 0, y: 50 }}
@@ -748,7 +846,7 @@ export default function SpinWheel() {
                         <div className="relative z-10">
                             {/* Animated emoji with coin icons for congratulations */}
                             <motion.div
-                                className="text-6xl mb-6"
+                                className="text-5xl mb-3"
                                 animate={{
                                     scale: [1, 1.2, 1],
                                     rotate: [0, 5, -5, 0]
@@ -761,7 +859,7 @@ export default function SpinWheel() {
                             >
                                 {result.includes("🎉") ? (
                                     <div className="flex items-center justify-center gap-2">
-                                        <span className="text-5xl">🎉</span>
+                                        <span className="text-4xl">🎉</span>
                                         <motion.div
                                             animate={{
                                                 rotate: [0, 360],
@@ -776,20 +874,20 @@ export default function SpinWheel() {
                                             <img
                                                 src="/dollor.png"
                                                 alt="Coin"
-                                                className="w-8 h-8"
+                                                className="w-7 h-7"
                                             />
                                         </motion.div>
                                     </div>
                                 ) : result.includes("🚫") ? (
-                                    <span className="text-5xl">🚫</span>
+                                    <span className="text-4xl">🚫</span>
                                 ) : (
-                                    <span className="text-5xl">😔</span>
+                                    <span className="text-4xl">😔</span>
                                 )}
                             </motion.div>
 
                             {/* Title with improved styling */}
                             <motion.h2
-                                className="text-2xl font-bold mb-6 text-white leading-relaxed"
+                                className="text-xl font-bold mb-3 text-white leading-tight"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2, duration: 0.4 }}
@@ -801,7 +899,7 @@ export default function SpinWheel() {
 
                             {/* Description with coin icons for rewards */}
                             <motion.div
-                                className="text-lg text-gray-300 mb-6 leading-relaxed"
+                                className="text-base text-gray-300 mb-3 leading-snug"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3, duration: 0.4 }}
@@ -823,7 +921,7 @@ export default function SpinWheel() {
                                             <img
                                                 src="/dollor.png"
                                                 alt="Coin"
-                                                className="w-6 h-6"
+                                                className="w-5 h-5"
                                             />
                                         </motion.div>
                                         <span className="font-bold text-yellow-400">{pendingReward}</span>
@@ -831,23 +929,23 @@ export default function SpinWheel() {
                                     </div>
                                 ) : result.includes("🚫") ? (
                                     <div>
-                                        <p>You've used all {maxDailySpins} spins today.</p>
-                                        <p className="text-sm text-gray-400 mt-2">Come back tomorrow for more spins!</p>
+                                        <p className="text-sm">You've used all {maxDailySpins} spins today.</p>
+                                        <p className="text-xs text-gray-400 mt-1">Come back tomorrow!</p>
                                     </div>
                                 ) : (
-                                    <p>No reward this time. Try spinning again!</p>
+                                    <p className="text-sm">No reward this time. Try spinning again!</p>
                                 )}
                             </motion.div>
 
                             {/* Status information */}
                             {!result.includes("🚫") && (
                                 <motion.div
-                                    className="bg-[#2a2a2a] rounded-xl p-4 mb-4"
+                                    className="bg-[#2a2a2a] rounded-xl p-3 mb-2"
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ scale: [1, 1.02, 1] }}
                                     transition={{ delay: 0.4, duration: 0.3 }}
                                 >
-                                    <p className="text-gray-400 text-sm">
+                                    <p className="text-gray-400 text-xs">
                                         Daily Spins: <span className="text-yellow-400 font-semibold">{dailySpinsUsed}/{maxDailySpins}</span>
                                     </p>
                                 </motion.div>
@@ -856,15 +954,15 @@ export default function SpinWheel() {
                             {/* Limit reached info */}
                             {result.includes("🚫") && (
                                 <motion.div
-                                    className="bg-gradient-to-r from-red-900/30 to-red-800/20 rounded-xl p-4 mb-4 border border-red-700/50"
+                                    className="bg-gradient-to-r from-red-900/30 to-red-800/20 rounded-xl p-3 mb-2 border border-red-700/50"
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ delay: 0.4, duration: 0.3 }}
                                 >
-                                    <p className="text-red-300 text-sm font-medium">
+                                    <p className="text-red-300 text-xs font-medium">
                                         Daily Spins Used: {dailySpinsUsed}/{maxDailySpins}
                                     </p>
-                                    <p className="text-gray-400 text-xs mt-1">
+                                    <p className="text-gray-400 text-[10px] mt-0.5">
                                         Resets at midnight
                                     </p>
                                 </motion.div>
@@ -873,7 +971,7 @@ export default function SpinWheel() {
                             {/* Pending reward indicator */}
                             {pendingReward > 0 && (
                                 <motion.div
-                                    className="bg-gradient-to-r from-yellow-900/30 to-orange-800/20 rounded-xl p-4 border border-yellow-600/50"
+                                    className="bg-gradient-to-r from-yellow-900/30 to-orange-800/20 rounded-xl p-3 border border-yellow-600/50"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{
                                         opacity: 1,
@@ -894,13 +992,13 @@ export default function SpinWheel() {
                                         <img
                                             src="/dollor.png"
                                             alt="Coin"
-                                            className="w-5 h-5"
+                                            className="w-4 h-4"
                                         />
-                                        <span className="text-yellow-400 font-bold text-sm">
+                                        <span className="text-yellow-400 font-bold text-xs">
                                             {pendingReward} coins pending
                                         </span>
                                     </div>
-                                    <p className="text-gray-400 text-xs mt-1">
+                                    <p className="text-gray-400 text-[10px] mt-0.5">
                                         Watch ad to redeem
                                     </p>
                                 </motion.div>

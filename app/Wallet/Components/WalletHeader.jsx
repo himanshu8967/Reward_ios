@@ -16,14 +16,14 @@ export default function WalletHeader({ balance = 0, appVersion = "V0.1.1", token
 
     return (
         <>
-            <div className="absolute w-full h-[49px] top-0 left-0 px-4">
-                <div className="absolute top-[8px]   text-startmily:'Poppins',Helvetica] font-normal text-[#A4A4A4] text-[10px] tracking-[0] leading-3 whitespace-nowrap">
+            {/* Move App Version left-aligned, same as "Wallet" heading, top edge spacing */}
+            <div className="w-full max-w-[335px] mx-auto px-4 mt-2 mb-2 flex flex-col">
+                <span className="[font-family:'Poppins',Helvetica] font-normal text-[#A4A4A4] text-[10px] tracking-[0] leading-3 whitespace-nowrap">
                     App Version: {appVersion}
-                </div>
-
+                </span>
             </div>
-            <div className="flex items-center justify-between w-full max-w-[335px] px-1 mt-[32px] mb-8">
-                <div className="[font-family:'Poppins',Helvetica] font-semibold mt-2 text-white text-[20px] tracking-[-0.37px] leading-[22px]">
+            <div className="flex items-center justify-between w-full max-w-[335px]  mt-[10px] mx-auto px-4 mb-4">
+                <div className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[20px] tracking-[-0.37px] leading-[22px]">
                     Wallet
                 </div>
                 <button

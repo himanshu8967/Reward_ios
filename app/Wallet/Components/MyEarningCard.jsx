@@ -67,22 +67,22 @@ export default function MyEarningCard({ token }) {
         <section className="flex flex-col items-center justify-center gap-2.5 w-full">
             <div className="flex justify-center w-full">
                 <div className="relative w-[335px]">
-                    {/* Tooltip - Same style and position as WelcomeOffer */}
+                    {/* Tooltip - Same style and position as 30 Day Streak */}
                     {showTooltip && (
                         <div
                             ref={tooltipRef}
-                            className="absolute top-[37px] right-[-3px] z-50 w-[320px] bg-black/95 backdrop-blur-sm rounded-[12px] px-4 py-3 shadow-2xl"
+                            className="absolute top-[37px] right-[-3px] z-50 w-[320px] bg-black/95 backdrop-blur-sm rounded-[12px] px-4 pt-3 pb-2 shadow-2xl border border-gray-600/50 animate-fade-in"
                         >
                             <div className="text-white font-medium text-sm [font-family:'Poppins',Helvetica] leading-normal">
-                                <div className="text-[#ffe664] font-semibold mb-1 text-center">
+                                <div className="text-[#95f2ec] font-semibold mb-1 text-center">
                                     My Earnings
                                 </div>
-                                <div className="text-center">
+                                <div className="text-center text-gray-200">
                                     Earn XP by completing game tasks. Tier upgrades unlock special features.
                                 </div>
                             </div>
                             {/* Arrow pointing up to the info icon */}
-                            <div className="absolute top-[-8px] right-[25px] w-4 h-4 bg-black/95 transform rotate-45"></div>
+                            <div className="absolute top-[-8px] right-[25px] w-4 h-4 bg-black/95 border-t border-l border-gray-600/50 transform rotate-45"></div>
                         </div>
                     )}
                     <div
@@ -99,7 +99,7 @@ export default function MyEarningCard({ token }) {
                         {/* Info icon for tooltip - custom blue rounded rectangle with white 'i' icon */}
                         <button
                             onClick={toggleTooltip}
-                            className="absolute w-8 h-8 top-[3px] right-[3px] z-20 cursor-pointer hover:opacity-90 transition-opacity duration-200 rounded-lg overflow-hidden flex items-center justify-center"
+                            className="absolute w-8 h-8 top-[3.5px] right-[3px] z-20 cursor-pointer hover:opacity-90 transition-opacity duration-200 rounded-md rounded-tr-2xl overflow-hidden flex items-center justify-center"
                             aria-label="More information"
                             style={{
                                 background: '#6BB5E8',
@@ -153,15 +153,17 @@ export default function MyEarningCard({ token }) {
                                             width: `${progressWidth}%`
                                         }}
                                     />
-                                    <Image
-                                        width={29}
-                                        height={30}
-                                        className="absolute top-1 left-[3px] z-10"
-                                        alt="Level badge"
-                                        src="/dot.svg"
-                                    />
-                                    <div className="absolute top-[8px] left-[8px] font-semibold text-[#815c23] text-[14.9px] z-10">
-                                        {actualLevel}
+                                    <div className="absolute top-1 left-[3px] z-10 w-[29px] h-[30px] flex items-center justify-center">
+                                        <Image
+                                            width={29}
+                                            height={30}
+                                            className="absolute top-0 left-0"
+                                            alt="Level badge"
+                                            src="/dot.svg"
+                                        />
+                                        <div className="relative font-semibold text-[#815c23] text-[14.9px] z-10">
+                                            {actualLevel}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -174,19 +176,16 @@ export default function MyEarningCard({ token }) {
                             </p>
 
                             <div className="absolute top-[3px] left-[146px] opacity-50">
-                                <div className="relative w-[30px] h-[32px]">
-                                    <div className="absolute w-[30px] h-[32px] top-0 left-0">
-                                        <div
-                                            className="h-[32px] 
-                                            "
-                                            style={{
-                                                backgroundImage:
-                                                    "url(/dot.svg)",
-                                                backgroundSize: "cover",
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="absolute top-[5px] left-[6px] font-semibold text-[#815c23] text-[14.9px]">
+                                <div className="relative w-[30px] h-[32px] flex items-center justify-center">
+                                    <div
+                                        className="absolute w-[30px] h-[32px] top-0 left-0"
+                                        style={{
+                                            backgroundImage:
+                                                "url(/dot.svg)",
+                                            backgroundSize: "cover",
+                                        }}
+                                    />
+                                    <div className="relative font-semibold text-[#815c23] text-[14.9px] z-10">
                                         {nextLevel}
                                     </div>
                                 </div>

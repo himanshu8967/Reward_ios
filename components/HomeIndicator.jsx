@@ -11,8 +11,8 @@ const MoreMenu = ({ onClose }) => {
       id: 1,
       icon: "https://c.animaapp.com/vuiLipjk/img/vector.svg",
       label: "Daily Challenges",
-      iconWidth: "w-6",
-      iconHeight: "h-[24.89px]",
+      iconWidth: "w-5",
+      iconHeight: "h-[18px]",
       marginTop: "mt-[45px]",
       marginLeft: "ml-[53px]",
       labelWidth: "w-14",
@@ -23,8 +23,8 @@ const MoreMenu = ({ onClose }) => {
       id: 3,
       icon: "https://c.animaapp.com/vuiLipjk/img/group@2x.png",
       label: "Daily Rewards",
-      iconWidth: "w-[26px]",
-      iconHeight: "h-[26px]",
+      iconWidth: "w-[20px]",
+      iconHeight: "h-[20px]",
       marginTop: "mt-11",
       marginLeft: "",
       labelWidth: "w-[52px]",
@@ -45,7 +45,7 @@ const MoreMenu = ({ onClose }) => {
       aria-label="More menu options"
     >
       <div
-        className="flex flex-row justify-center items-end gap-4 pr- relative z-10"
+        className="flex flex-row justify-center items-end gap-6 pr- relative z-10"
         style={{
           position: "absolute",
           bottom: "28px",
@@ -58,7 +58,7 @@ const MoreMenu = ({ onClose }) => {
             key={item.id}
             className="
               flex flex-col items-center justify-center
-              w-[80px] h-[80px]
+              w-[60px] h-[60px]
               bg-black rounded-full border border-solid border-[#474747]
               shadow-[0px_0px_11px_#d8d8d840] cursor-pointer
               hover:border-[#5a5a5a] transition-colors
@@ -69,11 +69,11 @@ const MoreMenu = ({ onClose }) => {
             type="button"
             onClick={() => handleMenuClick(item.href)}
             style={{
-              minWidth: "80px",
-              minHeight: "80px",
+              minWidth: "60px",
+              minHeight: "60px",
               borderRadius: "50%",
               aspectRatio: "1/1",
-              padding: "8px 4px 4px 4px",
+              padding: "6px 3px 3px 3px",
             }}
           >
             <img
@@ -83,7 +83,7 @@ const MoreMenu = ({ onClose }) => {
               aria-hidden="true"
             />
             <span
-              className={`relative max-w-[72px] [font-family:'Poppins',Helvetica] font-normal text-[#ffffffb2] text-[9px] text-center tracking-[-0.17px] leading-tight mt-1 px-1`}
+              className={`relative max-w-[54px] [font-family:'Poppins',Helvetica] font-normal text-[#ffffffb2] text-[8px] text-center tracking-[-0.17px] leading-tight mt-0.5 px-0.5`}
               style={{
                 wordWrap: "break-word",
                 overflowWrap: "break-word",
@@ -218,7 +218,7 @@ export const HomeIndicator = ({ activeTab }) => {
 
                 {/* More Menu - positioned above the middle button, shifted very far left */}
                 {showMoreMenu && (
-                  <div className="absolute bottom-[70px] left-1/2 transform -translate-x-[200%] z-40">
+                  <div className="absolute bottom-[36px] left-1/2 transform -translate-x-[200%] z-40">
                     <MoreMenu onClose={() => setShowMoreMenu(false)} />
                   </div>
                 )}

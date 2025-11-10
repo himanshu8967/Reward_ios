@@ -81,7 +81,7 @@ export default function ContactUsPage() {
                 <div className="w-full h-2 bg-black" />
 
                 {/* App Version */}
-                <div className="px-5 py-1 [font-family:'Poppins',Helvetica] font-normal text-white text-[10px] tracking-[0] leading-3">
+                <div className="px-5 py-1 [font-family:'Poppins',Helvetica] font-normal text-[#A4A4A4] text-[10px] tracking-[0] leading-3">
                     App Version: {process.env.NEXT_PUBLIC_APP_VERSION || "V0.0.1"}
                 </div>
 

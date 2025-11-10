@@ -41,7 +41,7 @@ export const WeeklyCalendarSection = ({ weekData, currentWeekStart }) => {
     // Memoized button styling
     const getButtonStyle = useCallback((item) => {
         if (item.isActive) {
-            return "w-10 h-[57px] ml-[19px] flex bg-[#716ae7] rounded-[10px]";
+            return "w-10 h-[43px] flex bg-[#716ae7] rounded-[10px]";
         } else if (item.status === 'claimed') {
             return "w-10 h-[57px] ml-[19px] flex bg-green-600 rounded-[10px]";
         } else if (item.status === 'missed') {
@@ -101,18 +101,19 @@ export const WeeklyCalendarSection = ({ weekData, currentWeekStart }) => {
             <div className="w-full max-w-[328px] mr-4 flex justify-center">
                 {calendarDays.map((item, index) => {
                     if (item.isActive) {
+                        const marginClass = getMarginClass(index);
                         return (
                             <MemoizedButton
                                 key={index}
-                                className={getButtonStyle(item)}
+                                className={`${getButtonStyle(item)} ${marginClass} mt-[7px]`}
                                 ariaLabel={`${item.day} ${item.date}, selected`}
                                 aria-current="date"
                             >
-                                <div className="mt-[7px] w-[21px] h-[43px] ml-3 flex flex-col gap-px">
-                                    <div className="ml-0.5 w-3 h-[18px] [font-family:'Poppins',Helvetica] font-medium text-white text-xs tracking-[0] leading-[normal]">
+                                <div className="w-full h-full flex flex-col items-center justify-center gap-px">
+                                    <div className="w-3 h-[18px] [font-family:'Poppins',Helvetica] font-medium text-white text-xs tracking-[0] leading-[normal] text-center">
                                         {item.day}
                                     </div>
-                                    <div className="w-[17px] text-white h-6 [font-family:'Poppins',Helvetica] font-semibold text-base text-center tracking-[0] leading-[normal]">
+                                    <div className="w-5 text-white h-6 [font-family:'Poppins',Helvetica] font-semibold text-base text-center tracking-[0] leading-[normal]">
                                         {item.date}
                                     </div>
                                 </div>

@@ -41,7 +41,7 @@ const AccountOverviewCard = ({ userStats = null, className = "" }) => {
 
     if (isLoading) {
         return (
-            <div className={`flex flex-col w-[335px] max-h-[479px] items-start gap-[16px] relative ${className}`}>
+            <div className={`flex flex-col w-[335px] max-h-[479px] items-start gap-[16px] relative mx-auto ${className}`}>
                 <div className="w-[334px] h-[479px] rounded-[20px] overflow-hidden bg-[linear-gradient(103deg,rgba(121,32,207,1)_0%,rgba(205,73,153,1)_80%)] relative flex items-center justify-center">
                     <div className="flex items-center gap-3">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -54,7 +54,7 @@ const AccountOverviewCard = ({ userStats = null, className = "" }) => {
 
     if (hasError) {
         return (
-            <div className={`flex flex-col w-[335px] max-h-[479px] items-start gap-[16px] relative ${className}`}>
+            <div className={`flex flex-col w-[335px] max-h-[479px] items-start gap-[16px] relative mx-auto ${className}`}>
                 <div className="w-[334px] h-[479px] rounded-[20px] overflow-hidden bg-red-900/20 border border-red-500 relative flex items-center justify-center">
                     <div className="text-center p-4">
                         <p className="text-red-400 font-semibold mb-2">Error loading account overview</p>
@@ -72,7 +72,7 @@ const AccountOverviewCard = ({ userStats = null, className = "" }) => {
     }
 
     return (
-        <div className={`flex flex-col w-[335px] max-h-[479px] items-start gap-[16px] relative ${className}`}>
+        <div className={`flex flex-col w-[335px] max-h-[479px] items-start justify-center gap-[16px] relative mx-auto ${className}`}>
             <div className="flex flex-col items-start gap-2.5 self-stretch w-full relative">
                 <div className="w-[334px] h-[479px] rounded-[20px] overflow-hidden bg-[linear-gradient(103deg,rgba(121,32,207,1)_0%,rgba(205,73,153,1)_80%)] relative overflow-x-scroll">
                     <div className="relative w-[334px] h-[479px]">

@@ -74,7 +74,7 @@ const StreakSection = () => {
 
                 <button
                     onClick={toggleTooltip}
-                    className="absolute w-9 h-9 top-[-3px] right-[-4px] z-20 cursor-pointer hover:opacity-80 transition-opacity duration-200 rounded-tr-lg rounded-bl-lg overflow-hidden "
+                    className="absolute w-9 h-9 top-[-2px] right-[-1px] z-20 cursor-pointer hover:opacity-80 transition-opacity duration-200 rounded-tr-lg rounded-bl-lg overflow-hidden "
                     aria-label="More information"
                 >
                     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -87,7 +87,7 @@ const StreakSection = () => {
             {showTooltip && (
                 <div
                     ref={tooltipRef}
-                    className="absolute top-[34px] -right-[10px] z-50 w-[340px] bg-black/95 backdrop-blur-sm rounded-[12px] px-4 pt-3 pb-2 shadow-2xl border border-gray-600/50 animate-fade-in"
+                    className="absolute top-[34px] -right-[7px] z-50 w-[340px] bg-black/95 backdrop-blur-sm rounded-[12px] px-4 pt-3 pb-2 shadow-2xl border border-gray-600/50 animate-fade-in"
                 >
                     <div className="text-white font-medium text-sm [font-family:'Poppins',Helvetica] leading-normal">
                         <div className="text-[#95f2ec] font-semibold mb-1 text-center">

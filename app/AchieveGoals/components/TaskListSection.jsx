@@ -105,13 +105,13 @@ export const TaskListSection = () => {
     // Show loading state if games are still loading AND we have no data
     if (sectionStatus === 'loading' && sectionGames.length === 0) {
         return (
-            <section className="flex flex-col justify-center items-center gap-2 w-full">
+            <section className="flex flex-col justify-center items-center gap-2 w-full min-w-0 max-w-full">
                 <header>
                     <h2 className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[20px]">
                         💸💸Recommendations💸💸
                     </h2>
                 </header>
-                <div className="flex items-start justify-center gap-3 self-stretch">
+                <div className="flex items-start justify-center gap-3 self-stretch flex-wrap min-w-0 max-w-full">
                     {[1, 2].map((i) => (
                         <div key={i} className="flex flex-col w-[158px] rounded-md overflow-hidden shadow-lg animate-pulse">
                             <div className="w-[158px] h-[158px] bg-gray-700"></div>
@@ -124,13 +124,13 @@ export const TaskListSection = () => {
     }
 
     return (
-        <section className="flex flex-col justify-center items-center gap-2 w-full">
+        <section className="flex flex-col justify-center items-center gap-2 w-full min-w-0 max-w-full">
             <header>
                 <h2 className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[20px]">
                     💸💸Recommendations💸💸
                 </h2>
             </header>
-            <div className="flex items-start justify-center gap-3 self-stretch flex-wrap">
+            <div className="flex items-start justify-center gap-3 self-stretch flex-wrap min-w-0 max-w-full">
                 {recommendationCards.length > 0 ? (
                     recommendationCards.map((card) => (
                         <RecommendationCard

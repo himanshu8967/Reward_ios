@@ -57,7 +57,7 @@ export const TimerBadge = ({ nextUnlockTime, isClaimed, countdown }) => {
     if (!countdown && !nextUnlockTime) return null;
 
     return (
-        <div className="absolute bottom-[135px] left-1/2 transform -translate-x-1/2 w-[120px] h-8 bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg flex items-center justify-center shadow-lg border border-purple-400 z-10">
+        <div className="absolute bottom-[6px] left-1/2 transform -translate-x-1/2 w-[120px] h-8 bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg flex items-center justify-center shadow-lg border border-purple-400 z-10">
             <div className="flex items-center gap-2">
                 {/* Countdown Icon */}
                 <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>

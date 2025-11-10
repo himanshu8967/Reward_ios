@@ -13,7 +13,7 @@ import Earnings from "./components/Earnings";
 import Achievements from "./components/Achievements";
 import Leadership from "./components/Leadership";
 import SpinWin from "./components/SpinWin";
-
+import MyEarningCard from "../Wallet/Components/MyEarningCard";
 
 
 export default function MyProfile() {
@@ -102,11 +102,11 @@ export default function MyProfile() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-black flex justify-center">
       <div className="relative w-full max-w-md min-h-screen bg-black pb-8">
-        <div className="absolute top-[8px] left-4 sm:left-5 font-normal text-white text-[10px] leading-3">
+        <div className="absolute top-[8px] left-4 sm:left-5 font-normal text-[#A4A4A4] text-[10px] leading-3">
           App Version: V0.0.1
         </div>
 
-        <header className="flex flex-col w-full items-start gap-2 px-4 sm:px-5 pb-3 absolute top-[40px] left-0">
+        <header className="flex flex-col w-full items-start gap-2 px-3 sm:px-4 pb-3 absolute top-[44px] left-0">
           <div className="flex items-center gap-4 w-full">
             <button
               className="relative w-6 h-6 flex-shrink-0"
@@ -134,7 +134,7 @@ export default function MyProfile() {
             vipStatus={vipStatus}
             handleEditProfile={handleEditProfile}
           />
-          <Earnings xpCurrent={xpCurrent} xpLevel={xpLevel} coinBalance={coinBalance} />
+          <MyEarningCard token={token} />
           <Achievements />
           <Vip
             vipStatus={vipStatus}

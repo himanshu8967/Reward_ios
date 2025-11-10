@@ -133,7 +133,7 @@ export default function LocationPage() {
         setLoadingStep("Saving location data...");
         await updateLocation(locationData, token);
         localStorage.setItem("locationCompleted", "true");
-        router.push("/homepage");
+        router.push("/face-verification");
 
       } else {
         // Permission denied
@@ -188,7 +188,7 @@ export default function LocationPage() {
   };
 
   const handleConfirmSkip = () => {
-    router.push("/homepage");
+    router.push("/face-verification");
   };
 
   const handleGoBack = () => {
@@ -204,8 +204,15 @@ export default function LocationPage() {
         {/* Background blur effect */}
         <div className="absolute w-[300px] h-[300px] top-20 left-1/2 transform -translate-x-1/2 bg-[#af7de6] rounded-full blur-[200px] opacity-60" />
 
+        {/* App Version */}
+        <div className="absolute top-[1px] left-3 w-full h-[40px] z-10">
+          <div className="absolute top-[10px] left-3 [font-family:'Poppins',Helvetica] font-light text-[#A4A4A4] text-[10px] tracking-[0] leading-3 whitespace-nowrap">
+            App Version: {process.env.NEXT_PUBLIC_APP_VERSION || "V0.0.1"}
+          </div>
+        </div>
+
         {/* Header */}
-        <div className="flex items-center justify-between w-full px-5 pt-12 pb-4 z-10">
+        <div className="flex items-center justify-between w-full px-5 mt-[56px] pb-4 z-10">
           <button
             className="w-6 h-6 cursor-pointer"
             aria-label="Go back"

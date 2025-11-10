@@ -1,6 +1,6 @@
 
 "use client";
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -124,7 +124,13 @@ function GameDetailsContent() {
             }
 
             // Priority 2: Fetch from API if no localStorage data
-            if (gameId && !selectedGame && !loadedFromLocalStorage) {
+            // Clear Redux state first to ensure we fetch fresh data
+            if (gameId && !loadedFromLocalStorage) {
+                // Always clear Redux state when using Method 2 to ensure fresh fetch
+                console.log('🎮 GameDetails: Clearing Redux state before fetching from API');
+                dispatch({ type: 'games/clearCurrentGameDetails' });
+                // Wait a tick for state to clear before fetching
+                await new Promise(resolve => setTimeout(resolve, 0));
                 console.log('🎮 GameDetails: Fetching game from API:', { gameId });
                 dispatch(fetchGameById(gameId));
             } else if (!gameId) {
@@ -149,19 +155,58 @@ function GameDetailsContent() {
         });
 
         if (currentGameDetails && gameDetailsStatus === 'succeeded') {
+            // Get the fetched game ID (check multiple possible fields including nested gameDetails)
+            const fetchedGameId = currentGameDetails.id || currentGameDetails._id || currentGameDetails.gameId || currentGameDetails.gameDetails?.id;
+            // Check if the fetched game matches the requested gameId
+            // Check all possible ID fields: _id, id, gameId, and nested gameDetails.id
+            const isCorrectGame = gameId && (
+                fetchedGameId === gameId ||
+                fetchedGameId?.toString() === gameId?.toString() ||
+                currentGameDetails.gameId === gameId ||
+                currentGameDetails.gameId?.toString() === gameId?.toString() ||
+                currentGameDetails._id === gameId ||
+                currentGameDetails._id?.toString() === gameId?.toString() ||
+                currentGameDetails.gameDetails?.id === gameId ||
+                currentGameDetails.gameDetails?.id?.toString() === gameId?.toString()
+            );
+
             console.log('🎮 Game details loaded from API:', {
-                gameId: currentGameDetails.id || currentGameDetails._id,
-                title: currentGameDetails.title || currentGameDetails.name || currentGameDetails.details?.name,
+                fetchedGameId,
+                _id: currentGameDetails._id,
+                gameId: currentGameDetails.gameId,
+                gameDetailsId: currentGameDetails.gameDetails?.id,
+                title: currentGameDetails.title || currentGameDetails.name || currentGameDetails.gameDetails?.name,
                 requestedGameId: gameId,
-                isCorrectGame: (currentGameDetails.id || currentGameDetails._id) === gameId
+                isCorrectGame
             });
 
             // If we already loaded from localStorage, don't overwrite to avoid flicker/race
-            if (!loadedFromLocalStorage || !selectedGame) {
+            // Only set game if we haven't loaded from localStorage AND we don't have a selected game yet
+            // Trust the API response if it succeeded - the API should return the correct game
+            // Only check gameId match if gameId is provided, otherwise trust the API
+            if (!loadedFromLocalStorage && !selectedGame) {
+                // If gameId is provided, verify it matches, otherwise trust the API response
+                if (gameId && !isCorrectGame) {
+                    console.warn('⚠️ Game ID mismatch, but trusting API response:', {
+                        requestedGameId: gameId,
+                        fetchedGameId,
+                        _id: currentGameDetails._id,
+                        gameId: currentGameDetails.gameId,
+                        gameDetailsId: currentGameDetails.gameDetails?.id
+                    });
+                }
+                console.log('✅ Setting game from API response');
                 setSelectedGame(currentGameDetails);
                 setIsDataLoaded(true);
                 setIsInitialLoading(false); // Stop initial loading
                 initializeSession(currentGameDetails);
+            } else {
+                console.log('⚠️ Not setting game from API:', {
+                    loadedFromLocalStorage,
+                    hasSelectedGame: !!selectedGame,
+                    isCorrectGame,
+                    gameId
+                });
             }
         } else if (gameDetailsStatus === 'failed') {
             console.error('❌ Game details API failed:', {
@@ -172,11 +217,61 @@ function GameDetailsContent() {
             setIsInitialLoading(false); // Stop loading on error
         } else if (gameDetailsStatus === 'loading') {
             console.log('⏳ Game details API is loading...', { gameId });
+        } else if (gameDetailsStatus === 'succeeded' && !currentGameDetails) {
+            // API succeeded but no game data - this shouldn't happen, but clear loading anyway
+            console.warn('⚠️ API succeeded but no game data received');
+            setIsInitialLoading(false);
         }
     }, [currentGameDetails, gameDetailsStatus, gameId, loadedFromLocalStorage, selectedGame]);
 
     // Use fresh API data (Redux state cleared before navigation)
-    const displayGame = selectedGame || currentGameDetails;
+    // Normalize game data by merging gameDetails into root level for easier access
+    const rawGame = selectedGame || currentGameDetails;
+
+    const displayGame = useMemo(() => {
+        if (!rawGame) return null;
+
+        // If game has nested gameDetails, merge it with root properties
+        if (rawGame.gameDetails) {
+            const normalized = {
+                ...rawGame,
+                ...rawGame.gameDetails,
+                // Keep root-level properties that might be important
+                _id: rawGame._id,
+                gameId: rawGame.gameId || rawGame.gameDetails.id,
+                title: rawGame.title || rawGame.gameDetails.name || rawGame.gameDetails.title,
+                // Merge goals and points from gameDetails
+                goals: rawGame.gameDetails.goals || rawGame.goals,
+                points: rawGame.gameDetails.points || rawGame.points,
+                // Merge images (prioritize gameDetails images)
+                image: rawGame.gameDetails.image || rawGame.image,
+                square_image: rawGame.gameDetails.square_image || rawGame.square_image,
+                large_image: rawGame.gameDetails.large_image || rawGame.large_image,
+                // Merge amount and cpi from gameDetails
+                amount: rawGame.gameDetails.amount || rawGame.amount,
+                cpi: rawGame.gameDetails.cpi || rawGame.cpi,
+                // Merge category
+                category: rawGame.gameDetails.category || rawGame.category || rawGame.metadata?.genre,
+                // Keep rewards from root level (they're already there)
+                rewards: rawGame.rewards || rawGame.gameDetails.rewards,
+                // Keep gameDetails for backward compatibility
+                gameDetails: rawGame.gameDetails
+            };
+
+            console.log('🔄 Normalized game data:', {
+                hasGoals: !!normalized.goals,
+                goalsLength: normalized.goals?.length || 0,
+                hasImage: !!normalized.square_image,
+                imageUrl: normalized.square_image,
+                hasAmount: !!normalized.amount,
+                amount: normalized.amount
+            });
+
+            return normalized;
+        }
+
+        return rawGame;
+    }, [rawGame]);
 
     // Preload game image to prevent delay
     useEffect(() => {
@@ -418,6 +513,13 @@ function GameDetailsContent() {
     if (isLoading) {
         return (
             <div className="flex flex-col  overflow-x-hidden w-full h-full items-center justify-center px-4 pb-3 pt-1 bg-black max-w-[390px] mx-auto loading-container android-optimized">
+                {/* App Version */}
+                <div className="w-full max-w-[375px] px-3  mb-3 ml-2 pt-2">
+                    <div className="[font-family:'Poppins',Helvetica] font-normal text-[#A4A4A4] text-[10px] tracking-[0] leading-3">
+                        App Version: {process.env.NEXT_PUBLIC_APP_VERSION || "V0.1.0"}
+                    </div>
+                </div>
+
                 {/* Header Skeleton */}
                 <div className="flex w-[375px] items-center gap-6 px-4 py-4 relative">
                     <div
@@ -586,6 +688,13 @@ function GameDetailsContent() {
             <div
                 className="flex flex-col overflow-x-hidden w-full h-full items-center justify-center px-4 pb-3 pt-1 bg-black max-w-[390px] mx-auto transition-all duration-300 ease-in-out animate-fade-in android-optimized"
             >
+                {/* App Version */}
+                <div className="w-full max-w-[375px] px-3 ml-2 mb-3 pt-2">
+                    <div className="[font-family:'Poppins',Helvetica] font-normal text-[#A4A4A4] text-[10px] tracking-[0] leading-3">
+                        App Version: {process.env.NEXT_PUBLIC_APP_VERSION || "V0.1.0"}
+                    </div>
+                </div>
+
                 {/* Header */}
                 <div className="flex w-[375px] items-center gap-6  px-2 py-4 relative ">
                     <button
@@ -659,33 +768,34 @@ function GameDetailsContent() {
                     <span className="[font-family:'Poppins',Helvetica] font-regular text-[#f4f3fc] mt-1 text-[13px]">
                         {selectedGame?.category || selectedGame?.details?.category || 'Casual'}
                     </span>
+                    <div className="flex w-[266px] items-center justify-start  mt-3 relative ">
+                        <div className="flex flex-row items-center justify-center gap-2 bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] rounded-[10px] py-2 w-full">
+                            <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[16px] flex items-center justify-center gap-2 flex-wrap">
+                                <span className="whitespace-nowrap text-[16px] font-medium">Earn up to</span>
+                                <span className="flex items-center gap-1">
+                                    <span className="font-semibold text-[16px]">{displayGame?.amount || displayGame?.rewards?.coins || 0}</span>
+                                    <img
+                                        className="w-[23px] h-[22px] object-contain"
+                                        alt="Coin icon"
+                                        src="https://c.animaapp.com/ltgoa7L3/img/image-3937-7@2x.png"
+                                    />
+                                </span>
+                                <span className="whitespace-nowrap">and</span>
+                                <span className="flex items-center gap-1">
+                                    <span className="font-semibold">{displayGame?.cpi || displayGame?.rewards?.xp || 0}</span>
+                                    <img
+                                        className="w-[22px] h-[23px] object-contain"
+                                        alt="XP icon"
+                                        src="https://c.animaapp.com/ltgoa7L3/img/pic-7.svg"
+                                    />
+                                </span>
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Reward Summary */}
-                <div className="flex w-[266px] items-center justify-center relative mr-2">
-                    <div className="flex flex-row items-center justify-center gap-2 bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] rounded-[10px] py-2 w-full">
-                        <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[16px] flex items-center justify-center gap-2 flex-wrap">
-                            <span className="whitespace-nowrap text-[16px] font-medium">Earn up to</span>
-                            <span className="flex items-center gap-1">
-                                <span className="font-semibold text-[16px]">{displayGame?.amount || displayGame?.rewards?.coins || 0}</span>
-                                <img
-                                    className="w-[23px] h-[22px] object-contain"
-                                    alt="Coin icon"
-                                    src="https://c.animaapp.com/ltgoa7L3/img/image-3937-7@2x.png"
-                                />
-                            </span>
-                            <span className="whitespace-nowrap">and</span>
-                            <span className="flex items-center gap-1">
-                                <span className="font-semibold">{displayGame?.cpi || displayGame?.rewards?.xp || 0}</span>
-                                <img
-                                    className="w-[22px] h-[23px] object-contain"
-                                    alt="XP icon"
-                                    src="https://c.animaapp.com/ltgoa7L3/img/pic-7.svg"
-                                />
-                            </span>
-                        </span>
-                    </div>
-                </div>
+
                 {/* Main Content Sections */}
                 <div className="animate-fade-in">
                     <InstructionsTextSection game={displayGame} />

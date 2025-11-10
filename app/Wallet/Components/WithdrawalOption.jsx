@@ -47,7 +47,7 @@ const SERVICE_CARDS = [
     {
         id: 5,
         innerBgColor: "bg-gradient-to-br from-[#2666a796] to-[#581fd424]",
-        image: "/Moeny5.png",
+        image: "/moeny5.png",
         title: "Gift Card",
         description: null,
         hasDescription: false,
@@ -358,12 +358,15 @@ export const WithdrawalOption = () => {
                 )}
 
                 {isInsufficientBalanceModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                        <div className="bg-[#1F1F1F] border border-[#3C3C3C] rounded-[12px] p-6 mx-4 max-w-sm w-full">
+                    <div
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-md transition-all duration-300"
+                        style={{ backdropFilter: 'blur(12px)' }}
+                    >
+                        <div className="bg-black border border-[#4A4A4A] rounded-[16px] p-6 mx-4 max-w-sm w-full shadow-2xl shadow-purple-500/20 transition-all duration-300">
                             <div className="flex flex-col items-center ">
                                 {/* Image at the top, 3x original size */}
                                 <img
-                                    src="/bodydollor.png"
+                                    src="/bodtdollor.png"
                                     alt=""
                                     width={240}
                                     height={240}
@@ -377,7 +380,7 @@ export const WithdrawalOption = () => {
                                 <div className="flex w-full">
                                     <button
                                         onClick={handlePlayToEarnMore}
-                                        className="w-full px-4 py-2 bg-gradient-to-r from-[#8B5CF6] to-[#A855F7] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+                                        className="w-full px-4 py-2 bg-gradient-to-r from-[#8B5CF6] to-[#A855F7] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity shadow-lg hover:shadow-xl hover:shadow-purple-500/30"
                                     >
                                         Okay Got it
                                     </button>

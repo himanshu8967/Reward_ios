@@ -91,7 +91,7 @@ const ConvertNowModal = ({ onClose }) => {
 export const Conversion = () => {
     // State Management
     const [conversionAmount, setConversionAmount] = useState("?");
-    const [coinAmount, setCoinAmount] = useState("1"); // Editable coin input
+    const [coinAmount, setCoinAmount] = useState("0"); // Editable coin input
     const [currentScaleClass, setCurrentScaleClass] = useState("scale-100");
     const [flowState, setFlowState] = useState("idle"); // 'idle', 'timerRunning', 'convertNow'
     const [timeLeft, setTimeLeft] = useState(5 * 60); // 5 minutes in seconds
@@ -111,7 +111,7 @@ export const Conversion = () => {
                 if (prevTime <= 1) {
                     clearInterval(timerRef.current);
                     // Show conversion result after timer completes
-                    const userAmount = parseFloat(coinAmount) || 1;
+                    const userAmount = parseFloat(coinAmount) || 0;
                     const conversionRate = 0.10; // 1 dollar = 10 coins, so 1 coin = 0.10 dollars
                     setConversionAmount((userAmount * conversionRate).toFixed(2));
                     setFlowState("idle"); // Reset if time runs out
@@ -130,7 +130,7 @@ export const Conversion = () => {
 
     // Handle Convert Now modal close - Show conversion result
     const handleConvertNowClose = () => {
-        const userAmount = parseFloat(coinAmount) || 1;
+        const userAmount = parseFloat(coinAmount) || 0;
         const conversionRate = 0.10; // 1 dollar = 10 coins, so 1 coin = 0.10 dollars
         setConversionAmount((userAmount * conversionRate).toFixed(2));
         setFlowState("idle");
@@ -216,13 +216,13 @@ export const Conversion = () => {
                             value={coinAmount}
                             onChange={(e) => {
                                 const value = e.target.value;
-                                // Allow only numbers and limit to 5 digits
+                                // Allow only numbers and limit to 5 digits, allow empty string
                                 if (/^\d*$/.test(value) && value.length <= 5) {
-                                    setCoinAmount(value || "1");
+                                    setCoinAmount(value);
                                 }
                             }}
                             className="bg-transparent text-white text-[13px] outline-none text-center font-medium [appearance:none] [-webkit-appearance:none] [-moz-appearance:textfield]"
-                            placeholder="1"
+                            placeholder="0"
                             disabled={flowState !== 'idle'}
                             style={{
                                 width: `${Math.max(coinAmount.length * 14, 30)}px`,

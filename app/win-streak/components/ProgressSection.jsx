@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { getDailyActivityStats } from "@/lib/api";
 
 /**
@@ -27,6 +27,7 @@ export const ProgressSection = ({
     const scrollContainerRef = useRef(null);
     const [activityStats, setActivityStats] = useState(null);
     const [activityLoading, setActivityLoading] = useState(false);
+    const hasScrolledRef = useRef(false); // Track if we've already scrolled
 
     // Extract data from API response - prioritize activity stats if available
     const currentStreak = activityStats?.currentStreak !== undefined ? activityStats.currentStreak : (streakData?.currentStreak || 0);
@@ -68,6 +69,8 @@ export const ProgressSection = ({
     };
 
     // Check if day should show chest box (special milestone days)
+    // Days are now 1-indexed (1-30)
+    // Milestone days: 7, 14, 21, 28
     const shouldShowChestBox = (day) => {
         return [7, 14, 21, 28].includes(day);
     };
@@ -89,16 +92,80 @@ export const ProgressSection = ({
         }
     };
 
-    // Generate all 30 days with proper spacing (50px between each day)
-    const generateDays = () => {
-        const days = [];
-        const startTop = 50; // Start position from top - moved up
-        const spacing = 50; // Space between days
+    // Calculate vertical offset for each day to align circles with green parts on branch
+    const getCircleOffset = (day) => {
+        // Green parts are positioned on the branch image itself
+        // Days are now 1-indexed (1-30)
+        // Day 1 should start from the bottom green part on the branch
+        // Adjust offsets to align circles with green parts on branch
+        if (day === 1) {
+            return 245; // Day 1 starts from bottom green part
+        } else if (day === 2) {
+            return 235; // Day 2 starts from bottom green part - reduced by 10px more
+        } else if (day === 3) {
+            return 230; // Day 3 - reduced by 10px more
+        } else if (day === 4) {
+            return 210; // Day 4 - moved upward by 10px
+        } else if (day === 5) {
+            return 200; // Day 5 - moved upward a little more (5px)
+        } else if (day === 6) {
+            return 188; // Day 6 - moved upward by 5px
+        } else if (day === 7) {
+            return 174; // Day 7 - reduced by 10px more
+        } else if (day <= 9) {
+            return 148; // Days 8-9 - reduced by 10px more
+        } else if (day <= 11) {
+            return 120; // Days 10-11
+        } else if (day === 12) {
+            return 112; // Day 12 - reduced by 10px more
+        } else if (day === 13) {
+            return 96; // Day 13
+        } else if (day === 14) {
+            return 80; // Day 14 - moved upward by 50px to fix overlap with day 13
+        } else if (day === 15) {
+            return 70; // Day 15 - moved upward by 30px
+        } else if (day === 16) {
+            return 60; // Day 16 - moved upward by 30px
+        } else if (day === 17) {
+            return 40; // Day 17 - moved upward by 30px
+        } else if (day <= 19) {
+            return 20; // Days 18-19
+        } else if (day === 20) {
+            return 6; // Day 20 - reduced by 10px more
+        } else if (day === 21) {
+            return -22; // Day 21 - moved down a little
+        } else if (day === 22) {
+            return -24; // Day 22 - moved upward by 10px
+        } else if (day <= 24) {
+            return -50; // Days 23-24 - reduced by 10px more
+        } else if (day === 25) {
+            return -60; // Day 25 - moved upward a little
+        } else if (day === 26) {
+            return -80; // Day 26 - reduced by 10px more
+        } else if (day === 27) {
+            return -90; // Day 27 - moved upward a little
+        } else if (day === 28) {
+            return -100; // Day 28 - reduced by 10px more
+        } else if (day === 29) {
+            return -120; // Day 29 - reduced by 10px more
+        } else if (day === 30) {
+            return -114; // Day 30 - reduced by 10px more
+        }
+    };
 
-        for (let i = 0; i < 30; i++) {
-            const day = i + 1;
-            // Reverse the order: Day 1 at bottom, Day 30 at top
-            const top = startTop + ((29 - i) * spacing);
+    // Generate all 30 days (Day 1 to Day 30) with proper spacing to match tree branch
+    // Days are now 1-indexed: Day 1 at bottom, Day 30 at top
+    // Memoized for performance - only recalculate when streakTree changes
+    const allDays = useMemo(() => {
+        const days = [];
+        const startTop = 2637; // Start position for Day 1 at bottom
+        const spacing = 87; // Space between days to fit tree branch
+
+        // Generate Days 1-30 (Day 1 at bottom, Day 30 at top)
+        for (let day = 1; day <= 30; day++) {
+            // Day 1 at bottom (highest top value), Day 30 at top (lowest top value)
+            // This ensures numbering starts from bottom: Day 1 is at the bottom, Day 30 at the top
+            const top = startTop - ((day - 1) * spacing);
 
             days.push({
                 day: day,
@@ -111,18 +178,77 @@ export const ProgressSection = ({
             });
         }
         return days;
-    };
+    }, [streakTree]);
 
-    const allDays = generateDays();
+    // Preload images for faster display - optimized with link preload and early loading
+    useEffect(() => {
+        // Add preconnect for external image domains to establish early connections
+        const preconnectDomains = [
+            'https://c.animaapp.com'
+        ];
 
-    // Fetch daily activity stats on component mount
+        preconnectDomains.forEach(domain => {
+            const link = document.createElement('link');
+            link.rel = 'preconnect';
+            link.href = domain;
+            link.crossOrigin = 'anonymous';
+            document.head.appendChild(link);
+        });
+
+        // Add link preload tags for critical images (browser-level preloading)
+        const imageUrls = [
+            { url: "/tree.png", as: "image" },
+            { url: "https://c.animaapp.com/1RFP1hGC/img/image-4016@2x.png", as: "image" },
+            { url: "https://c.animaapp.com/b23YVSTi/img/2211-w030-n003-510b-p1-510--converted--02-2@2x.png", as: "image" }
+        ];
+
+        imageUrls.forEach(({ url, as }) => {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = as;
+            link.href = url;
+            link.fetchPriority = 'high';
+            if (url.startsWith('http')) {
+                link.crossOrigin = 'anonymous';
+            }
+            document.head.appendChild(link);
+        });
+
+        // Also preload using Image objects for immediate caching
+        const treeImage = new Image();
+        treeImage.src = "/tree.png";
+        treeImage.fetchPriority = 'high';
+
+        const leafImage = new Image();
+        leafImage.src = "https://c.animaapp.com/1RFP1hGC/img/image-4016@2x.png";
+        leafImage.crossOrigin = 'anonymous';
+        leafImage.fetchPriority = 'high';
+
+        const chestImage = new Image();
+        chestImage.src = "https://c.animaapp.com/b23YVSTi/img/2211-w030-n003-510b-p1-510--converted--02-2@2x.png";
+        chestImage.crossOrigin = 'anonymous';
+        chestImage.fetchPriority = 'high';
+
+        // Cleanup function to remove link tags when component unmounts
+        return () => {
+            document.querySelectorAll('link[rel="preload"][href*="tree.png"], link[rel="preload"][href*="animaapp.com"]').forEach(link => link.remove());
+            document.querySelectorAll('link[rel="preconnect"][href*="animaapp.com"]').forEach(link => link.remove());
+        };
+    }, []);
+
+    // Fetch daily activity stats on component mount - optimized for fast loading
     useEffect(() => {
         const fetchActivityStats = async () => {
             try {
+                // Don't block rendering - fetch in background
                 setActivityLoading(true);
                 const token = localStorage.getItem('authToken');
-                if (!token) return;
+                if (!token) {
+                    setActivityLoading(false);
+                    return;
+                }
 
+                // Fetch data without blocking UI
                 const response = await getDailyActivityStats(token);
                 if (response && response.success) {
                     setActivityStats(response.data);
@@ -134,54 +260,69 @@ export const ProgressSection = ({
             }
         };
 
+        // Start fetching immediately without blocking
         fetchActivityStats();
     }, []);
 
-    // Auto-scroll to current day when data loads
+    // Auto-scroll to bottom of screen once when navigating to /win-streak
     useEffect(() => {
-        if (scrollContainerRef.current) {
-            if (currentStreak > 0) {
-                // Scroll to show current day in the middle of the viewport
-                const scrollTo = Math.max(0, (currentStreak - 1) * 50 - 200);
-                scrollContainerRef.current.scrollTo({
-                    top: scrollTo,
-                    behavior: 'smooth'
-                });
-            } else {
-                // When currentStreak is 0, scroll to day 1 (start)
-                scrollContainerRef.current.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            }
+        if (scrollContainerRef.current && !hasScrolledRef.current) {
+            // Small delay to ensure DOM is fully rendered
+            const timer = setTimeout(() => {
+                if (scrollContainerRef.current && !hasScrolledRef.current) {
+                    // Scroll to the bottom of the screen smoothly
+                    const scrollHeight = scrollContainerRef.current.scrollHeight;
+                    const clientHeight = scrollContainerRef.current.clientHeight;
+                    const scrollTo = scrollHeight - clientHeight;
+
+                    scrollContainerRef.current.scrollTo({
+                        top: scrollTo,
+                        behavior: 'smooth'
+                    });
+
+                    // Mark as scrolled to prevent multiple scrolls
+                    hasScrolledRef.current = true;
+                }
+            }, 100); // Small delay to ensure DOM is ready
+
+            return () => clearTimeout(timer);
         }
-    }, [currentStreak]);
+    }, []); // Run once on mount only
 
     // Decorative images removed - only small icons next to each day number will be shown
 
-    // Path images (vines) - positioned for seamless 30 days ladder
-    const pathImages = [
-        { src: "https://c.animaapp.com/1RFP1hGC/img/image-3995@2x.png", top: 49, left: 68, width: 118, height: 350 },
-        { src: "https://c.animaapp.com/1RFP1hGC/img/image-4010@2x.png", top: 349, left: 73, width: 110, height: 300 },
-        { src: "https://c.animaapp.com/1RFP1hGC/img/image-4010@2x.png", top: 599, left: 73, width: 110, height: 300 },
-        { src: "https://c.animaapp.com/1RFP1hGC/img/image-4014@2x.png", top: 849, left: 73, width: 110, height: 250 },
-        { src: "https://c.animaapp.com/1RFP1hGC/img/image-4010@2x.png", top: 1049, left: 73, width: 110, height: 300 },
-        { src: "https://c.animaapp.com/1RFP1hGC/img/image-4014@2x.png", top: 1299, left: 74, width: 110, height: 250 },
-        { src: "https://c.animaapp.com/1RFP1hGC/img/image-4018@2x.png", top: 1499, left: 73, width: 110, height: 200 },
-        // Added more path images for seamless connection
-    ];
+    // Path images (vines) - connected seamlessly to make one long vertical image
+    // Each image is scaled to width 85px, with height auto
+    // Overlapping significantly (100px spacing) to ensure seamless connection and hide seams
+    // Added extra images at the top to accommodate circle 30
+    // Memoized for performance - static data doesn't need recalculation
+    const pathImages = useMemo(() => {
+        const images = [];
+        const imageSpacing = 100; // Reduced spacing for better overlap
+        const totalImages = 30; // Increased to cover full height including circle 30
+        const startOffset = -200; // Start from negative to accommodate circle 30 at top
+
+        for (let i = 0; i < totalImages; i++) {
+            images.push({
+                src: "/tree.png",
+                top: startOffset + (i * imageSpacing),
+                left: 55
+            });
+        }
+        return images;
+    }, []);
 
     return (
         <section
             ref={scrollContainerRef}
-            className="w-full max-w-[375px] scrollbar-hide"
+            className="w-full max-w-[375px] scrollbar-hide overflow-y-auto h-screen"
             aria-label="Progress tracker"
         >
-            <div className="w-full min-h-[1300px] flex justify-center relative px-4 pt-0 ladder-3d">
-                {/* Loading State */}
-                {(!streakData || activityLoading) && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+            <div className="w-full flex justify-center relative px-4 pt-0 ladder-3d" style={{ height: '2900px' }}>
+                {/* Loading State - Non-blocking, show UI while loading */}
+                {activityLoading && !activityStats && (
+                    <div className="absolute top-4 right-4 z-50">
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
                     </div>
                 )}
 
@@ -206,36 +347,60 @@ export const ProgressSection = ({
                 {pathImages.map((image, index) => (
                     <img
                         key={`path-${index}`}
-                        className="absolute pointer-events-none"
+                        className="absolute pointer-events-none block"
                         style={{
                             top: `${image.top}px`,
-                            left: `${image.left}px`,
-                            width: `${image.width}px`,
-                            height: `${image.height}px`,
+                            left: image.left !== undefined ? `${image.left}px` : '0',
+                            width: '85px',
+                            height: 'auto',
+                            display: 'block',
+                            margin: 0,
+                            padding: 0,
+                            lineHeight: 0,
+                            verticalAlign: 'top',
+                            imageRendering: 'auto',
+                            objectFit: 'cover',
+                            objectPosition: 'center',
+                            mixBlendMode: 'normal',
                         }}
                         alt=""
                         src={image.src}
+                        loading={index < 10 ? "eager" : "lazy"}
+                        decoding="async"
+                        fetchPriority={index < 5 ? "high" : index < 10 ? "auto" : "low"}
                     />
                 ))}
 
                 {/* Connecting Lines - Fill gaps between path segments */}
-                <div className="absolute left-[140px] top-[100px] w-1 h-[1500px] bg-gradient-to-b from-green-600 via-green-500 to-green-400 opacity-60 z-5"></div>
+                {/* <div className="absolute left-[140px] top-[100px] w-1 h-[1500px] bg-gradient-to-b from-green-600 via-green-500 to-green-400 opacity-60 z-5"></div> */}
+
+                {/* Background Overlay to Hide Unused Tree/Stream Elements Below Day 1 */}
+                {/* Day 1 position: top = 2600px, circle at 2600 + 100 = 2700px */}
+                {/* <div
+                    className="absolute w-full bg-black z-40"
+                    style={{
+                        top: `${2600 + 100 + 45 + 10}px`, // Below Day 1 circle with 10px margin
+                        left: 0,
+                        height: '80px', // Decreased height
+                    }}
+                ></div> */}
 
                 {/* Decorative Images Removed - Only small icons next to day numbers are shown */}
 
-                {/* All 30 Days - Generated from API data */}
+                {/* All 30 Circles (Day 1-30) - Generated from API data */}
                 {allDays.map((dayData) => (
                     <div key={dayData.day}>
                         {/* Day Circle - Dynamic Yellow Background with Green Border */}
+
                         <div
-                            className={`absolute w-[36px] h-[36px] rounded-full z-20 flex items-center justify-center transform transition-all duration-300 ease-out hover:scale-110 day-circle-3d cursor-pointer bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 shadow-[0_8px_16px_rgba(251,191,36,0.4),0_4px_8px_rgba(245,158,11,0.3),inset_0_2px_4px_rgba(255,255,255,0.3)] border-2 border-green-500 hover:shadow-[0_12px_24px_rgba(251,191,36,0.6),0_6px_12px_rgba(245,158,11,0.4),inset_0_2px_4px_rgba(255,255,255,0.4)]`}
+                            className={`absolute w-[45px] h-[45px] rounded-full z-40 flex items-center justify-center transform transition-all duration-300 ease-out hover:scale-110 day-circle-3d cursor-pointer bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 shadow-[0_8px_16px_rgba(251,191,36,0.4),0_4px_8px_rgba(245,158,11,0.3),inset_0_2px_4px_rgba(255,255,255,0.3)] border-2 border-green-500 hover:shadow-[0_12px_24px_rgba(251,191,36,0.6),0_6px_12px_rgba(245,158,11,0.4),inset_0_2px_4px_rgba(255,255,255,0.4)]`}
                             style={{
-                                top: `${dayData.top - 10}px`, // Shifted 5px up
-                                left: `${dayData.left - 20}px`, // Shifted 18px to the left
-                                animation: dayData.isCurrent ? 'float 3s ease-in-out infinite' : dayData.isCompleted ? 'float 4s ease-in-out infinite' : 'none'
+                                top: `${dayData.top + getCircleOffset(dayData.day)}px`,
+                                left: `80px`,
+                                animation: dayData.isCurrent ? 'circleMotion 2.5s ease-in-out infinite' : dayData.isCompleted ? 'circleMotion 3s ease-in-out infinite' : 'circleMotion 4s ease-in-out infinite'
                             }}
                         >
-                            <div className="w-7 h-7 flex items-center justify-center [-webkit-text-stroke:1px_#1a1a1a] [font-family:'Passion_One',Helvetica] text-xl tracking-[0] leading-none font-bold text-black z-30 drop-shadow-lg">
+                            <div className="w-7 h-7 flex items-center justify-center [-webkit-text-stroke:1px_#1a1a1a] [font-family:'Passion_One',Helvetica] text-2xl tracking-[0] leading-none font-bold text-black z-30 drop-shadow-lg">
                                 {dayData.day}
                             </div>
                         </div>
@@ -246,7 +411,7 @@ export const ProgressSection = ({
                             <div
                                 className="absolute flex items-center gap-2 bg-gradient-to-br from-amber-300 via-yellow-400 to-orange-500 rounded-full px-5 py-3 shadow-[0_8px_16px_rgba(251,191,36,0.5),0_4px_8px_rgba(245,158,11,0.4),inset_0_2px_4px_rgba(255,255,255,0.4)] z-10 border-2 border-amber-200 transform hover:scale-105 transition-all duration-300 cursor-pointer"
                                 style={{
-                                    top: `${dayData.top - 28}px`,
+                                    top: `${dayData.top - 28 - (dayData.day === 28 || dayData.day === 29 ? 15 : 0)}px`,
                                     left: `${dayData.left + 110}px`,
                                     animation: 'glow 3s ease-in-out infinite'
                                 }}
@@ -261,45 +426,55 @@ export const ProgressSection = ({
                         {/* Uses activity stats to track user activity streak */}
                         {(dayData.day <= currentStreak) && (
                             <div
-                                className="absolute flex items-center z-30"
+                                className="absolute flex items-center z-30 transform transition-all duration-300 hover:scale-110"
                                 style={{
-                                    top: `${dayData.top - 40}px`,
-                                    left: `${dayData.left + 20}px`
+                                    top: `${dayData.top + getCircleOffset(dayData.day) - 38 - (dayData.day === 28 || dayData.day === 29 ? 15 : 0)}px`, // Aligned with circle position, moved up more
+                                    left: `130px` // Aligned with circle position (circles at 80px, leaves at 130px for proper spacing)
                                 }}
                             >
                                 {/* Show leaf with treasure box for milestone days (7, 14, 21, 28) */}
                                 {shouldShowChestBox(dayData.day) && dayData.day <= currentStreak ? (
-                                    <div className="relative">
-                                        {/* Leaf background */}
+                                    <div className="relative group">
+                                        {/* Leaf background - natural proportions - increased size */}
                                         <img
-                                            className="w-30 h-16 drop-shadow-lg"
+                                            className="w-[140px] h-[100px] object-contain drop-shadow-lg transition-transform duration-300 group-hover:scale-105"
                                             src="https://c.animaapp.com/1RFP1hGC/img/image-4016@2x.png"
                                             alt="Leaf with Treasure Box"
+                                            style={{ aspectRatio: 'auto' }}
+                                            loading="eager"
+                                            decoding="async"
+                                            fetchPriority="high"
                                         />
-                                        {/* Treasure box overlay on the leaf */}
+                                        {/* Treasure box overlay on the leaf - better proportioned - increased size */}
                                         <img
-                                            className="absolute top-[2px] right-1 w-24 h-12 "
-                                            src="https://c.animaapp.com/b23YVSTi/img/2211-w030-n003-510b-p1-510--converted--02-2@2x.png"
+                                            className="absolute -top-6 left-1  w-[138px] h-[120px] object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-md z-10"
+                                            src="/treasure.png"
                                             alt="Treasure Chest"
+                                            style={{ imageRendering: 'crisp-edges', willChange: 'transform' }}
+                                            loading="eager"
+                                            decoding="async"
+                                            fetchPriority="high"
                                         />
                                         {/* Show reward amount for milestone days */}
-                                        <div className="absolute -top-2 -right-2 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full px-2 py-1 shadow-lg">
+                                        <div className="absolute -top-1 -right-1 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full px-2 py-1 shadow-lg border-2 border-yellow-600 transform transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl z-20">
                                             <span className="text-xs font-bold text-black">
-                                                {dayData.day === 7 ? '50' : dayData.day === 14 ? '100' : dayData.day === 21 ? '150' : '250'}
+                                                {dayData.day === 6 ? '50' : dayData.day === 13 ? '100' : dayData.day === 20 ? '150' : '250'}
                                             </span>
                                         </div>
                                     </div>
                                 ) : (
-                                    /* Regular leaf for other days within streak range */
-                                    <div className="relative">
+                                    /* Regular leaf for other days within streak range - increased size */
+                                    <div className="relative group">
                                         <img
-                                            className="w-30 h-16 drop-shadow-lg"
+                                            className="w-[150px] h-[80px] drop-shadow-lg transition-transform duration-300 group-hover:scale-105"
                                             src="https://c.animaapp.com/1RFP1hGC/img/image-4016@2x.png"
                                             alt="Leaf with Tick"
+                                            loading="eager"
+                                            decoding="async"
                                         />
                                         {/* Show tick mark for completed days */}
                                         {dayData.isCompleted && (
-                                            <div className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center text-white font-bold text-sm bg-gradient-to-br from-emerald-400 via-emerald-500 to-green-700 rounded-full shadow-[0_6px_12px_rgba(16,185,129,0.5),0_3px_6px_rgba(5,150,105,0.4),inset_0_2px_4px_rgba(255,255,255,0.4)]">
+                                            <div className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center text-white font-bold text-base bg-gradient-to-br from-emerald-400 via-emerald-500 to-green-700 rounded-full shadow-[0_6px_12px_rgba(16,185,129,0.5),0_3px_6px_rgba(5,150,105,0.4),inset_0_2px_4px_rgba(255,255,255,0.4)] border-2 border-emerald-300 transform transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl">
                                                 ✓
                                             </div>
                                         )}
@@ -311,22 +486,6 @@ export const ProgressSection = ({
                                         )} */}
                                     </div>
                                 )}
-                            </div>
-                        )}
-
-                        {/* Current Day Indicator - Dynamic Positioning */}
-                        {(dayData.isCurrent || (currentStreak === 0 && dayData.day === 1)) && (
-                            <div
-                                className="absolute flex items-center gap-2 bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 rounded-full px-6 py-4 shadow-[0_8px_16px_rgba(59,130,246,0.6),0_4px_8px_rgba(37,99,235,0.5),inset_0_2px_4px_rgba(255,255,255,0.4)] z-10 border-2 border-cyan-200 transform hover:scale-105 transition-all duration-300 cursor-pointer"
-                                style={{
-                                    top: `${dayData.top + 50}px`,
-                                    left: `${dayData.left - 60}px`,
-                                    animation: 'float 3s ease-in-out infinite, bounce 2s ease-in-out infinite'
-                                }}
-                            >
-                                <span className="text-base font-bold text-white drop-shadow-sm">
-                                    {dayData.isCompleted ? 'COMPLETED' : 'START'}
-                                </span>
                             </div>
                         )}
                     </div>
@@ -382,6 +541,29 @@ export const ProgressSection = ({
           }
           100% {
             background-position: 200% 0;
+          }
+        }
+        
+        @keyframes circleMotion {
+          0%, 100% {
+            transform: translateY(0px) scale(1);
+            box-shadow: 0 8px 16px rgba(251, 191, 36, 0.4), 0 4px 8px rgba(245, 158, 11, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            border-color: rgb(34, 197, 94);
+          }
+          25% {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(251, 191, 36, 0.5), 0 5px 10px rgba(245, 158, 11, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.35);
+            border-color: rgb(74, 222, 128);
+          }
+          50% {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 24px rgba(251, 191, 36, 0.6), 0 6px 12px rgba(245, 158, 11, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            border-color: rgb(96, 230, 153);
+          }
+          75% {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(251, 191, 36, 0.5), 0 5px 10px rgba(245, 158, 11, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.35);
+            border-color: rgb(74, 222, 128);
           }
         }
         

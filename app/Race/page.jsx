@@ -15,7 +15,7 @@ const RacePage = () => {
         >
             {/* Header */}
             <div className="absolute w-full h-[49px] top-0 left-0 z-10 px-5">
-                <div className="absolute top-[1px] left-5 [font-family:'Poppins',Helvetica] font-light text-white text-[10px] tracking-[0] leading-3 whitespace-nowrap">
+                <div className="absolute top-[1px] left-5 [font-family:'Poppins',Helvetica] font-light text-[#A4A4A4] text-[10px] tracking-[0] leading-3 whitespace-nowrap">
                     App Version: V0.0.1
                 </div>
             </div>

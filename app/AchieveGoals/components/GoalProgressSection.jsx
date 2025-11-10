@@ -33,10 +33,10 @@ const bottomSteps = [
 export const GoalProgressSection = () => {
     return (
         <div
-            className="relative  mb-1 w-[334px] h-[390px] rounded-[20px] overflow-hidden bg-[linear-gradient(103deg,rgba(121,32,207,1)_0%,rgba(205,73,153,1)_80%)]"
+            className="relative mb-1 w-full max-w-[334px] h-[390px] rounded-[20px] overflow-hidden bg-[linear-gradient(103deg,rgba(121,32,207,1)_0%,rgba(205,73,153,1)_80%)]"
         >
             <div className="relative h-[366px]">
-                <div className="w-[334px] h-[354px] left-0 absolute top-0">
+                <div className="w-full max-w-[334px] h-[354px] left-0 absolute top-0">
                     <h1 className="absolute top-[23px] left-6 [font-family:'Poppins',Helvetica] font-bold text-white text-[18px] tracking-[0] leading-6 whitespace-nowrap">
                         Follow the steps
                     </h1>
@@ -97,7 +97,7 @@ export const GoalProgressSection = () => {
                     alt="Connection line"
                     src="/dot5.svg"
                 />
-                <div className="absolute w-[300px] h-[184px] top-[129px] left-2">
+                <div className="absolute w-[300px] max-w-[calc(100%-16px)] h-[184px] top-[129px] left-2">
                     {goalSteps.map((step, index) => (
                         <div
                             key={step.id}

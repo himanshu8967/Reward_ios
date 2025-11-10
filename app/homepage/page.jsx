@@ -28,7 +28,7 @@ const Homepage = () => {
       className="relative w-full min-h-screen bg-black pb-[150px] animate-fade-in"
     >
       <div className="absolute w-full h-[49px] z-10 px-8">
-        <div className="absolute top-[10px] left-6 [font-family:'Poppins',Helvetica] font-normal text-white text-[10px] tracking-[0] leading-3 whitespace-nowrap">
+        <div className="absolute top-[10px] left-6 [font-family:'Poppins',Helvetica] font-normal text-[#A4A4A4] text-[10px] tracking-[0] leading-3 whitespace-nowrap">
           App Version: V0.0.1
         </div>
       </div>

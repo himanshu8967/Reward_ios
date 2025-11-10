@@ -111,7 +111,7 @@ export const PrivacyPolicy = ({
 
             {/* App Version */}
             {showHeader && (
-                <div className="absolute top-[38px] left-5 [font-family:'Poppins',Helvetica] font-normal text-neutral-400 text-[10px] tracking-[0] leading-3 whitespace-nowrap">
+                <div className="absolute top-[38px] left-5 [font-family:'Poppins',Helvetica] font-normal text-[#A4A4A4] text-[10px] tracking-[0] leading-3 whitespace-nowrap">
                     App Version: {process.env.NEXT_PUBLIC_APP_VERSION || "V0.0.1"}
                 </div>
             )}

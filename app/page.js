@@ -14,10 +14,17 @@ export default function AppLoader() {
       localStorage.getItem("permissionsAccepted") === "true";
     const locationCompleted =
       localStorage.getItem("locationCompleted") === "true";
+    const faceVerificationCompleted =
+      localStorage.getItem("faceVerificationCompleted") === "true";
+    const faceVerificationSkipped =
+      localStorage.getItem("faceVerificationSkipped") === "true";
 
     if (storedUserString) {
       try {
         const user = JSON.parse(storedUserString);
+
+        // Check if this is a new signup (onboarding not complete) or existing user login
+        const isNewSignup = !hasCompletedOnboarding;
 
         if (!permissionsAccepted) {
           router.replace("/permissions");
@@ -29,6 +36,18 @@ export default function AppLoader() {
           router.replace("/location");
           return; // Stop further execution
         }
+
+        // Condition 3: Only show face verification for NEW SIGNUPS, not for login
+        // Existing users who log in should skip face verification and go directly to homepage
+        if (
+          isNewSignup &&
+          !faceVerificationCompleted &&
+          !faceVerificationSkipped
+        ) {
+          router.replace("/face-verification");
+          return; // Stop further execution
+        }
+
         router.replace("/homepage");
         return;
       } catch (e) {

@@ -36,7 +36,7 @@ export default function WalletPage() {
 
   const handleVipUpgrade = () => {
     router.prefetch("/BuySubscription");
-    router.push("/BuySubscription", { scroll: false });
+    router.push("/BuySubscription");
   };
 
   const isLoading = detailsStatus === 'loading' || statsStatus === 'loading' || vipLoadingStatus === 'loading';
@@ -61,7 +61,7 @@ export default function WalletPage() {
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-black flex justify-center">
-      <div className="w-full max-w-md min-h-screen flex flex-col items-center bg-black  pb-8">
+      <div className="w-full max-w-md min-h-screen flex flex-col items-center bg-black pb-6">
         <WalletHeader balance={balance} appVersion="V0.1.1" token={token} />
         <MyEarningCard token={token} />
         <TransactionHistory />

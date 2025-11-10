@@ -12,7 +12,7 @@ export const RulesModal = ({ isVisible, onClose }) => {
     return (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
             <div
-                className="flex flex-col w-[335px] h-[315px] items-start pt-5 pb-0 px-0 relative bg-black rounded-[20px] border-t [border-top-style:solid] border-r [border-right-style:solid] border-l [border-left-style:solid] border-[#595959]"
+                className="flex flex-col w-[335px] mb-60 h-[315px] items-start pt-5 pb-0 px-0 relative bg-black rounded-[20px] border-t [border-top-style:solid] border-r [border-right-style:solid] border-l [border-left-style:solid] border-[#595959] -mt-16"
                 data-model-id="2549:6803"
                 role="dialog"
                 aria-labelledby="modal-title"

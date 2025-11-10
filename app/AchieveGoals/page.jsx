@@ -12,12 +12,11 @@ export default function AchieveGoalsPage() {
     const router = useRouter();
 
     return (
-        <div className="flex flex-col w-full h-full  items-center gap-3 px-4 pt-1 bg-black text-white">
+        <div className="flex flex-col overflow-x-hidden w-full h-full gap-4 items-center justify-center px-4 pb-3 pt-1 bg-black max-w-[390px] mx-auto relative">
             <Header />
             <GoalProgressSection />
             <TaskListSection />
             <BannerSection />
-
         </div>
     );
 }

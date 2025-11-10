@@ -229,7 +229,7 @@ export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) =
             </div>
 
             {/* Extra spacing to ensure content isn't hidden behind navigation */}
-            <div className="h-[6px]"></div>
+
         </div>
     );
 };

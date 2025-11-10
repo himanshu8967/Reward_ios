@@ -17,32 +17,45 @@ export const useRealTimeCountdown = ({
   const getOrCreateEndTime = useCallback(() => {
     try {
       let targetTime = null;
+      let serverEndTime = null;
+      const now = Date.now();
 
-      // If endTime is provided, use it
+      // If endTime is provided from server, parse it
       if (endTime) {
         if (typeof endTime === "string") {
-          targetTime = new Date(endTime).getTime();
+          serverEndTime = new Date(endTime).getTime();
         } else if (endTime instanceof Date) {
-          targetTime = endTime.getTime();
+          serverEndTime = endTime.getTime();
         } else if (typeof endTime === "number") {
-          targetTime = endTime;
+          serverEndTime = endTime;
+        }
+
+        // Persist server endTime if persistence is enabled (even if expired)
+        if (serverEndTime && persist) {
+          localStorage.setItem(storageKey, serverEndTime.toString());
+        }
+
+        // Use server time if it's valid (not in the past)
+        if (serverEndTime && serverEndTime > now) {
+          targetTime = serverEndTime;
         }
       }
 
-      // If no endTime or invalid, check storage
+      // If no valid server time, check storage for persisted time
       if (!targetTime && persist) {
         const stored = localStorage.getItem(storageKey);
         if (stored) {
           const storedTime = parseInt(stored, 10);
-          if (storedTime > Date.now()) {
+          // Only use stored time if it's valid (not in the past)
+          if (storedTime > now) {
             targetTime = storedTime;
           }
         }
       }
 
       // If still no valid time, create new one
-      if (!targetTime) {
-        targetTime = Date.now() + defaultDuration * 1000;
+      if (!targetTime || targetTime <= now) {
+        targetTime = now + defaultDuration * 1000;
         if (persist) {
           localStorage.setItem(storageKey, targetTime.toString());
         }

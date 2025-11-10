@@ -70,16 +70,50 @@ export const DebitTransfer = ({ isOpen, onClose, methods, fundingSources, token 
         }));
     };
 
-    // ✅ FIX: Scroll to button when keyboard opens (mobile)
+    // ✅ FIX: Better keyboard handling - ensure button stays visible with 3x more scroll
     const handleInputFocus = () => {
+        // Use multiple timeouts to handle different keyboard animation speeds
         setTimeout(() => {
-            if (submitButtonRef.current) {
+            if (submitButtonRef.current && formContainerRef.current) {
+                // Scroll the button into view with proper padding - 3x more aggressive
                 submitButtonRef.current.scrollIntoView({
                     behavior: 'smooth',
-                    block: 'nearest'
+                    block: 'end',
+                    inline: 'nearest'
                 });
+                // Also ensure the form container scrolls to show button - 3x more scroll
+                if (formContainerRef.current) {
+                    const buttonRect = submitButtonRef.current.getBoundingClientRect();
+                    const containerRect = formContainerRef.current.getBoundingClientRect();
+                    const viewportHeight = window.innerHeight;
+                    const keyboardHeight = viewportHeight - containerRect.bottom;
+
+                    // If button is below visible area, scroll container - 3x more scroll
+                    const scrollAmount = (buttonRect.bottom - viewportHeight + 150) * 3;
+                    if (buttonRect.bottom > viewportHeight - 100) {
+                        formContainerRef.current.scrollTop += scrollAmount;
+                    }
+                }
             }
-        }, 300); // Wait for keyboard to appear
+        }, 100);
+        setTimeout(() => {
+            if (submitButtonRef.current && formContainerRef.current) {
+                // Second scroll attempt - 3x more aggressive
+                submitButtonRef.current.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'end',
+                    inline: 'nearest'
+                });
+                if (formContainerRef.current) {
+                    const buttonRect = submitButtonRef.current.getBoundingClientRect();
+                    const viewportHeight = window.innerHeight;
+                    if (buttonRect.bottom > viewportHeight - 100) {
+                        const scrollAmount = (buttonRect.bottom - viewportHeight + 200) * 3;
+                        formContainerRef.current.scrollTop += scrollAmount;
+                    }
+                }
+            }
+        }, 500);
     };
 
 
@@ -213,8 +247,10 @@ export const DebitTransfer = ({ isOpen, onClose, methods, fundingSources, token 
                 // Stop showing processing state immediately when success is set
                 setIsSubmitting(false);
 
-                // Close modal after 2 seconds (don't wait for refetch)
-                setTimeout(() => onClose(), 2000);
+                // Close modal faster - 1 second is enough to see success message
+                setTimeout(() => {
+                    onClose();
+                }, 1000);
 
                 // Refetch wallet data in background (don't await - let it run in parallel)
                 refetchWalletData().catch(err => {
@@ -276,8 +312,7 @@ export const DebitTransfer = ({ isOpen, onClose, methods, fundingSources, token 
             />
 
             <section
-                className={` flex flex-col w-full max-h-[90vh] ${!showCardForm ? 'h-[350px]' : 'h-[min(88vh,700px)]'} items-start gap-2.5 pt-5 pb-8 px-2 relative bg-black border border-[#333] shadow-2xl shadow-blue-500/20 rounded-[20px_20px_0px_0px] overflow-y-auto
-                    }`}
+                className={` flex flex-col w-full max-h-[90vh] ${!showCardForm ? 'h-[350px]' : 'h-[min(88vh,640px)]'} items-start gap-2.5 pt-5 pb-8 px-2 relative bg-black border border-[#333] shadow-2xl shadow-blue-500/20 rounded-[20px_20px_0px_0px] overflow-y-auto`}
                 data-model-id="3212:8488"
                 role="region"
                 aria-label="Virtual Debit Card Options"
@@ -285,6 +320,10 @@ export const DebitTransfer = ({ isOpen, onClose, methods, fundingSources, token 
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
+                style={{
+                    paddingBottom: 'env(safe-area-inset-bottom, 1rem)',
+                    maxHeight: 'calc(100vh - env(keyboard-height, 0px))'
+                }}
             >
 
                 <div className="relative w-full h-[11px] flex justify-center">
@@ -446,7 +485,7 @@ export const DebitTransfer = ({ isOpen, onClose, methods, fundingSources, token 
                                 </div>
                             )}
 
-                            <div ref={submitButtonRef} className="pb-4">
+                            <div ref={submitButtonRef} className="pb-6 pt-2">
                                 <button
                                     onClick={handleSubmitDebitCard}
                                     disabled={isSubmitting || !!success}

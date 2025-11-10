@@ -212,7 +212,7 @@ export const Charity = ({ isOpen, onClose, methods, fundingSources, token }) => 
                 setSuccess(`Donation to ${selectedCharity.name} submitted successfully!`);
                 // Stop showing processing state immediately when success is set
                 setIsSubmitting(false);
-                
+
                 // Close modal after 2 seconds (don't wait for refetch)
                 setTimeout(() => onClose(), 2000);
 
@@ -268,7 +268,7 @@ export const Charity = ({ isOpen, onClose, methods, fundingSources, token }) => 
             <div className="absolute " onClick={onClose} />
 
             <section
-                className={` flex flex-col w-full max-h-[90vh] ${!showDonationForm ? 'h-[516px]' : 'h-[min(88vh,700px)]'} items-start gap-2.5 pt-5 pb-8 px-2 relative bg-black border border-[#333] shadow-2xl shadow-green-500/20 rounded-[20px_20px_0px_0px] overflow-y-auto`}
+                className={` flex flex-col w-full max-h-[90vh] ${!showDonationForm ? 'h-[516px]' : 'h-[min(88vh,640px)]'} items-start gap-2.5 pt-5 pb-8 px-2 relative bg-black border border-[#333] shadow-2xl shadow-green-500/20 rounded-[20px_20px_0px_0px] overflow-y-auto`}
                 data-model-id="3212:8488"
                 role="region"
                 aria-label="Donation & Charity Options"

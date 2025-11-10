@@ -72,6 +72,11 @@ export default function BuySubscription() {
 
     // VIP status will be refreshed directly via Redux dispatch after successful payment
 
+    // Scroll to top on page load
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     useEffect(() => {
         if (status === "idle" && tiers.length === 0) {
             // Only fetch if we somehow don't have data yet
@@ -218,7 +223,9 @@ export default function BuySubscription() {
                 token
             })).unwrap();
 
-            // Refresh VIP status to update the banner immediately
+            // Refresh VIP status to update membership status across the app
+            // This updates: homepage banner, profile page, and wallet page
+            // All components use state.profile.vipStatus to display membership status
             dispatch(fetchVipStatus(token));
 
             // Show success message

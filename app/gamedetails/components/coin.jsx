@@ -309,7 +309,10 @@ export const Coin = ({
                 {/* --- End of Modified Progress Bar --- */}
 
                 <button
-                    onClick={() => setShowOptInModal(true)}
+                    onClick={() => {
+                        console.log('Toolkit button clicked, opening modal...');
+                        setShowOptInModal(true);
+                    }}
                     className="absolute top-[165px] left-[286px] w-9 h-9 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-black rounded-full"
                     aria-label="Information"
                 >
@@ -459,7 +462,10 @@ export const Coin = ({
             {/* Opt-In/Opt-Out Information Modal */}
             <OptInModal
                 isVisible={showOptInModal}
-                onClose={() => setShowOptInModal(false)}
+                onClose={() => {
+                    console.log('Closing modal...');
+                    setShowOptInModal(false);
+                }}
                 sessionData={{ sessionCoins, sessionXP }}
                 game={game}
             />

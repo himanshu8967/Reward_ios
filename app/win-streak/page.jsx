@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchStreakStatus } from "@/lib/redux/slice/streakSlice";
@@ -41,6 +41,9 @@ export default function WinStreakPage() {
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [rewardData, setRewardData] = useState(null);
 
+    // Ref for scrollable container
+    const scrollContainerRef = useRef(null);
+
     // Check if data is fresh (less than 5 minutes old)
     const isDataFresh = lastFetched && (Date.now() - lastFetched) < 5 * 60 * 1000;
 
@@ -58,6 +61,35 @@ export default function WinStreakPage() {
         }
     }, [status, currentStreak]);
 
+    // Scroll to bottom when page loads/navigates
+    useEffect(() => {
+        // Wait for content to render, then scroll to bottom
+        const scrollToBottom = () => {
+            if (scrollContainerRef.current) {
+                // Use setTimeout to ensure content is rendered
+                setTimeout(() => {
+                    if (scrollContainerRef.current) {
+                        // Scroll to absolute bottom - use maximum scrollable position
+                        const scrollHeight = scrollContainerRef.current.scrollHeight;
+                        // Scroll to the absolute maximum position
+                        scrollContainerRef.current.scrollTo({
+                            top: scrollHeight, // Scroll to absolute bottom
+                            behavior: 'smooth'
+                        });
+                    }
+                }, 500); // Increased timeout to ensure all content is fully rendered
+            }
+        };
+
+        // Scroll when component mounts
+        scrollToBottom();
+
+        // Also scroll when data is loaded
+        if (status === 'succeeded') {
+            scrollToBottom();
+        }
+    }, [status]);
+
     // Load additional data (history and leaderboard)
     const loadAdditionalData = async () => {
         try {
@@ -72,6 +104,19 @@ export default function WinStreakPage() {
             if (leaderboardResponse && leaderboardResponse.data) {
                 setLeaderboard(leaderboardResponse.data.leaderboard || []);
             }
+
+            // Scroll to bottom after additional data is loaded
+            setTimeout(() => {
+                if (scrollContainerRef.current) {
+                    // Scroll to absolute bottom - use maximum scrollable position
+                    const scrollHeight = scrollContainerRef.current.scrollHeight;
+                    // Scroll to the absolute maximum position
+                    scrollContainerRef.current.scrollTo({
+                        top: scrollHeight, // Scroll to absolute bottom
+                        behavior: 'smooth'
+                    });
+                }
+            }, 600); // Increased timeout to ensure all content is fully rendered
         } catch (error) {
             console.error("Failed to load additional data:", error);
         }
@@ -204,7 +249,7 @@ export default function WinStreakPage() {
             {/* Main Content */}
             <div className="relative w-full max-w-[375px] mx-auto h-full flex flex-col">
                 {/* Scrollable Content - everything scrolls together */}
-                <div className="flex-1 relative overflow-y-auto">
+                <div ref={scrollContainerRef} className="flex-1 relative overflow-y-auto">
                     {/* Header - scrolls with ladder */}
                     <div className="bg-gradient-to-b from-gray-900 to-transparent">
                         <TitleSection
@@ -227,7 +272,7 @@ export default function WinStreakPage() {
                         onRefresh={handleRefresh}
                     />
 
-                    {/* Bottom Spacing */}
+                    {/* Bottom Spacing - Increased for more scroll space */}
                     <div className="h-20">
                         <HomeIndicator />
                     </div>

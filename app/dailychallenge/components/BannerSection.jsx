@@ -143,7 +143,7 @@ export const BannerSection = ({ calendar, today, onDayClick, onPreviousMonth, on
     };
 
     return (
-        <section className={`flex flex-col w-[375px] h-[343px] items-center gap-2.5 px-4 py-0 absolute top-[200px] left-0 overflow-x-scroll mb-4 ${isDisabled ? 'pointer-events-none opacity-90' : ''}`}>
+        <section className={`flex flex-col w-[375px] h-[343px] items-center gap-2.5 px-4 py-0 absolute top-[220px] left-0 overflow-x-scroll mb-4 ${isDisabled ? 'pointer-events-none opacity-90' : ''}`}>
             <article
                 className="relative w-[335px] h-[343.08px] mb-[-0.08px] rounded-[17.96px] border-[none] shadow-[inset_4.49px_4.49px_10.78px_#ffffff66,inset_-4.49px_-4.49px_13.47px_#00000075] backdrop-blur-[38.17px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(38.17px)_brightness(100%)]"
                 style={{

@@ -68,6 +68,18 @@ const config: CapacitorConfig = {
       setReturnUrlSchemeOnIOS: true,
       returnUrlScheme: "jacksonrewards", // Use payment success scheme
     },
+    BiometricAuth: {
+      // iOS Face ID usage description
+      ios: {
+        NSFaceIDUsageDescription: "Jackson app uses Face ID to securely verify your identity and protect your account."
+      },
+      // Android biometric configuration
+      android: {
+        biometricPromptTitle: "Face Verification",
+        biometricPromptSubtitle: "Complete face verification to secure your account",
+        biometricPromptNegativeButtonText: "Cancel"
+      }
+    },
   },
 };
 

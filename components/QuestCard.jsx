@@ -129,15 +129,15 @@ export const QuestCard = ({ game }) => {
                             className={`relative w-[304px] h-[75px] px-2 ${quest.hasBorder ? "border-b [border-bottom-style:solid] border-[#cacaca80]" : ""}`}
                         >
                             <div className="flex w-[14.14%] mt-[1px] h-[57.33%] items-center justify-around gap-[12.59px] px-[12.59px] py-[10.49px] absolute top-[14.00%] left-0 bg-[#4a347a] rounded-[50px] shadow-[0px_4px_4px_#00000040]">
-                                {quest.status === "Pending" ? (
-                                    <div className="flex w-[43px] h-[43px] items-center justify-around gap-[12.59px] px-[12.59px] py-[10.49px] absolute top-0 left-0.5 bg-[#2f344a] rounded-[104.88px]">
-                                        <div className="absolute top-px -left-0.5 w-[43px] h-[43px]">
+                                {quest.isLocked ? (
+                                    <div className="flex w-[48px] h-[43px] items-center justify-around gap-[12.59px] px-[12.59px] py-[10.49px] absolute top-[2px] left-0.5 rounded-[104.88px]">
+                                        <div className="absolute top-px bottom-1 -left-0.5 w-[43px] h-[43px]">
                                             <img
                                                 className="absolute top-0.5 left-1 w-[35px] h-[35px] aspect-[1] object-cover"
                                                 alt="Lock"
                                                 src="https://c.animaapp.com/FYtIEbRF/img/image-3943@2x.png"
                                             />
-                                            <div className="absolute top-0 left-[1px] w-[44px] h-[44px] bg-[#d6d6d680] rounded-[21.5px]" />
+                                            <div className="absolute top-[-3px] left-[px] w-[45px] h-[44px] bg-[#d6d6d680] rounded-[21.5px]" />
                                         </div>
                                     </div>
                                 ) : (

@@ -4,14 +4,14 @@ import NextImage from "next/image";
 export const Header = () => {
     return (
         <>
-            <div className="absolute top-[10px] left-6 w-full h-[49px] z-10">
-                <div className="absolute top-[0px] left-0 [font-family:'Poppins',Helvetica] font-light text-[#A4A4A4] text-[10px] tracking-[0] leading-3 whitespace-nowrap">
+            <div className="absolute top-[10px] left-6 right-6 h-[49px] z-10">
+                <div className="absolute top-[8px] left-0 [font-family:'Poppins',Helvetica] font-light text-[#A4A4A4] text-[10px] tracking-[0] leading-3 whitespace-nowrap">
                     App Version: V0.0.1
                 </div>
             </div>
 
-            <header className="flex flex-col w-full items-start gap-2 pr-4 py-3 mt-[32px] mb-1">
-                <div className="flex items-center gap-4 w-full">
+            <header className="flex flex-col w-full min-w-0 max-w-full items-start gap-2 pr-4 py-3 mt-[36px] mb-1">
+                <div className="flex items-center gap-4 w-full min-w-0 max-w-full">
                     <Link
                         className="relative w-6 h-6 mt-[1px] flex-shrink-0"
                         aria-label="Go back"

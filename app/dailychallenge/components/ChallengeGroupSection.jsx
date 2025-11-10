@@ -19,7 +19,7 @@ export const ChallengeGroupSection = ({ streak }) => {
 
     return (
         <section
-            className="absolute w-[336px] h-[30px] top-[140px] left-[19px] flex"
+            className="absolute w-[336px] h-[30px] top-[150px] left-[19px] flex"
             role="region"
             aria-label="Challenge progress milestones"
         >

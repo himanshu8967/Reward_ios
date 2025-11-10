@@ -50,48 +50,56 @@ const TicketCard = React.memo(({ ticket, onClick }) => {
         onClick(ticket.id);
     }, [onClick, ticket.id]);
 
+    // Format ticket ID to show full ID
+    const formatTicketId = (id) => {
+        if (!id) return 'N/A';
+        return String(id);
+    };
+
     return (
         <article
-            className="flex w-full items-center justify-between pt-0 pb-4 px-0 border-b border-[#4d4d4d] cursor-pointer hover:bg-gray-800/20 transition-all"
+            className="flex w-full items-start justify-between pt-3 pb-4 px-0 border-b border-[#4d4d4d] cursor-pointer hover:bg-gray-800/20 transition-all"
             onClick={handleClick}
             style={{
                 // Hardware acceleration for smooth interactions
                 transform: 'translateZ(0)',
                 willChange: 'background-color',
                 // Touch-friendly sizing
-                minHeight: '60px',
+                minHeight: '80px',
             }}
         >
-            <div className="flex flex-1 items-center gap-2 relative">
-                <div className="flex flex-col items-start relative flex-1 grow">
+            <div className="flex flex-1 items-start gap-3 relative min-w-0 pr-3">
+                <div className="flex flex-col items-start relative flex-1 grow min-w-0">
                     {/* Ticket ID */}
-                    <p className="relative w-full h-[23px] [font-family:'Poppins',Helvetica] font-normal text-white text-base tracking-[0.02px] leading-[normal]">
-                        <span className="tracking-[0]">Ticket ID: </span>
-                        <span className="font-bold tracking-[0]">
-                            {typeof ticket.ticketId === 'string' ? ticket.ticketId :
-                                typeof ticket.id === 'string' ? ticket.id :
-                                    String(ticket.ticketId || ticket.id || 'N/A')}
-                        </span>
-                    </p>
+                    <div className="relative w-full mb-2">
+                        <p className="[font-family:'Poppins',Helvetica] font-normal text-white text-sm tracking-[0.02px] leading-[20px] break-words">
+                            <span className="tracking-[0] text-gray-400">Ticket ID: </span>
+                            <span className="font-semibold tracking-[0] text-white break-all">
+                                {formatTicketId(ticket.ticketId || ticket.id || 'N/A')}
+                            </span>
+                        </p>
+                    </div>
 
                     {/* Description Preview */}
-                    <p className="relative self-stretch [font-family:'Poppins',Helvetica] font-normal text-[#bdbdbd] text-[13px] tracking-[0] leading-[normal] line-clamp-2 overflow-hidden mt-1 break-words">
-                        {(() => {
-                            const desc = ticket.descriptionPreview || ticket.fullDescription || ticket.description || 'No description available';
-                            // Truncate very long descriptions for preview
-                            return desc.length > 100 ? desc.substring(0, 100) + '...' : desc;
-                        })()}
-                    </p>
+                    <div className="relative w-full mt-1">
+                        <p className="[font-family:'Poppins',Helvetica] font-normal text-[#bdbdbd] text-[13px] tracking-[0] leading-[18px] line-clamp-2 overflow-hidden break-words">
+                            {(() => {
+                                const desc = ticket.descriptionPreview || ticket.fullDescription || ticket.description || 'No description available';
+                                // Truncate very long descriptions for preview
+                                return desc.length > 120 ? desc.substring(0, 120) + '...' : desc;
+                            })()}
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <div className="inline-flex items-center gap-1 relative flex-[0_0_auto]">
+            <div className="inline-flex items-center gap-1.5 relative flex-[0_0_auto] ml-2 mt-1">
                 <div
-                    className="relative w-2 h-2 rounded"
+                    className="relative w-2 h-2 rounded-full flex-shrink-0"
                     style={{ backgroundColor: statusColor }}
                 />
 
-                <div className="relative w-fit mt-[-1.00px] [font-family:'Poppins',Helvetica] font-medium text-white text-base text-right tracking-[0] leading-5 whitespace-nowrap">
+                <div className="relative w-fit [font-family:'Poppins',Helvetica] font-medium text-white text-sm text-right tracking-[0] leading-5 whitespace-nowrap">
                     {statusLabel}
                 </div>
             </div>
@@ -117,6 +125,7 @@ export const TicketList = () => {
     // LOCAL STATE
     // ============================================================================
     const [retryCount, setRetryCount] = useState(0);
+    const [hasLoadedData, setHasLoadedData] = useState(false);
 
     // ============================================================================
     // ROUTER
@@ -126,16 +135,17 @@ export const TicketList = () => {
     // ============================================================================
     // EFFECTS
     // ============================================================================
+    // Load tickets and stats only once on component mount
     useEffect(() => {
         const token = localStorage.getItem('authToken');
-        if (!token) return;
+        if (!token || hasLoadedData) return;
 
-        // Only load tickets once on component mount, not on every filter change
-        if (paginatedData.totalCount === 0) {
-            dispatch(fetchUserTickets({ filters: { page: 1, limit: 100 }, token }));
-        }
+        // Fetch tickets and stats in parallel for better performance
+        // Only load once - use hasLoadedData flag to prevent multiple calls
+        dispatch(fetchUserTickets({ filters: { page: 1, limit: 100 }, token }));
         dispatch(fetchTicketStats({ token }));
-    }, [dispatch, paginatedData.totalCount]);
+        setHasLoadedData(true);
+    }, [dispatch]); // Only run once on mount - eslint-disable-line react-hooks/exhaustive-deps
 
     // Clear errors on component mount
     useEffect(() => {
@@ -171,18 +181,23 @@ export const TicketList = () => {
 
     const handleTicketClick = useCallback((ticketId) => {
         // Ticket details page removed - no action needed
-        console.log('Ticket clicked:', ticketId);
+        // Only log in development
+        if (process.env.NODE_ENV === 'development') {
+            console.log('Ticket clicked:', ticketId);
+        }
     }, []);
 
     const handleRetry = useCallback(() => {
         setRetryCount(prev => prev + 1);
+        setHasLoadedData(false); // Reset flag to allow retry
         const token = localStorage.getItem('authToken');
         if (token) {
-            // Retry loading tickets
+            // Retry loading tickets and stats
             dispatch(fetchUserTickets({
                 filters: { page: 1, limit: 100 },
                 token
             }));
+            dispatch(fetchTicketStats({ token }));
         }
     }, [dispatch]);
 
@@ -196,12 +211,12 @@ export const TicketList = () => {
     return (
         <div className="flex flex-col w-full h-screen bg-black overflow-x-hidden">
             {/* App Version */}
-            <div className="px-5 ml-2 [font-family:'Poppins',Helvetica] font-normal text-neutral-400 text-[10px] tracking-[0] leading-3">
+            <div className="px-5 ml-2 [font-family:'Poppins',Helvetica] font-normal mt-[8px]     text-[#A4A4A4] text-[10px] tracking-[0] leading-3">
                 App Version: V0.0.1
             </div>
 
             {/* Header */}
-            <header className="flex flex-col w-full items-start gap-2 px-5 py-3 pt-4">
+            <header className="flex flex-col w-full items-start gap-2  mt-[34px] px-5 pb-3 ">
                 <div className="flex items-center gap-4 relative self-stretch w-full flex-[0_0_auto] rounded-[32px]">
                     <button
                         type="button"
@@ -258,7 +273,7 @@ export const TicketList = () => {
                 />
 
                 {!isInitialLoading && !error && (
-                    <div className="flex flex-col gap-3 transition-all duration-300">
+                    <div className="flex flex-col gap-4 transition-all duration-300">
                         {paginatedData.tickets.length > 0 ? (
                             paginatedData.tickets.map((ticket, index) => (
                                 <TicketCard

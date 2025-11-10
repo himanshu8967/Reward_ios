@@ -301,13 +301,13 @@ export const DailyChallenge = () => {
             className="relative w-[375px] h-[640px] bg-black"
             data-model-id="3291:8378"
         >
-            <div className="absolute top-[1px] left-5 [font-family:'Poppins',Helvetica] font-light text-neutral-400 text-[10px] tracking-[0] leading-3 whitespace-nowrap">
+            <div className="absolute top-[8px] left-7 [font-family:'Poppins',Helvetica] font-light text-[#A4A4A4] text-[10px] tracking-[0] leading-3 whitespace-nowrap">
                 App Version: V0.0.1
             </div>
 
             {/* Removed status bar */}
 
-            <header className="flex flex-col w-[375px] items-start gap-2 px-5 py-3 absolute top-[20px] ">
+            <header className="flex flex-col w-[375px] items-start gap-2 px-5 py-3 absolute top-[36px]">
                 <nav className="items-center gap-4 self-stretch w-full rounded-[32px] flex relative flex-[0_0_auto]">
                     <button aria-label="Go back">
                         <img
@@ -337,7 +337,7 @@ export const DailyChallenge = () => {
                         isDisabled
                     />
                 ) : (
-                    <section className="flex flex-col w-[375px] h-[343px] items-center gap-2.5 px-4 py-0 absolute top-[200px] left-0">
+                    <section className="flex flex-col w-[375px] h-[343px] items-center gap-2.5 px-4 py-0 absolute top-[220px] left-0">
                         <article className="relative w-[335px] h-[343.08px] rounded-[17.96px] border border-gray-700/40 bg-gray-900 animate-pulse" />
                     </section>
                 )
@@ -413,7 +413,7 @@ export const DailyChallenge = () => {
 
             {/* Treasure chests moved to progress bar alignment */}
 
-            <div className="absolute top-[calc(50.00%_-_260px)] left-[289px] w-[73px] h-[69px] flex">
+            <div className="absolute top-[calc(50.00%_-_250px)] left-[289px] w-[73px] h-[69px] flex">
                 <img
                     className="-mt-6 w-[104.15px] h-[109.51px] ml-[-18.2px] object-cover"
                     alt="Buried treasure"
@@ -421,7 +421,7 @@ export const DailyChallenge = () => {
                 />
             </div>
 
-            <div className="absolute top-[580px] left-0 w-[375px] px-4 pb-2">
+            <div className="absolute top-[590px] left-0 w-[375px] px-4 pb-2">
                 <button
                     className={`relative w-full h-12 rounded-[12.97px] overflow-hidden transition-transform duration-150 scale-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 shadow-lg border-2 border-white/20 ${isLoading ? 'opacity-60 cursor-not-allowed' : 'hover:scale-105'} bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)]`}
                     style={{

@@ -202,7 +202,7 @@ const WatchAdCard = ({
      * Render the component
      */
     return (
-        <div className="relative w-full max-w-[335px] mx-auto mb-6">
+        <div className="relative w-full max-w-[335px] mx-auto ">
             <div
                 className={`relative w-full h-[100px] bg-[#360875] rounded-[10px] overflow-hidden ${isAdAvailable && !isWatchingAd ? 'cursor-pointer hover:shadow-lg hover:shadow-purple-500/50' : 'cursor-not-allowed opacity-75'
                     } transition-all duration-200 ${className}`}

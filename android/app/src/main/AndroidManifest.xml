@@ -9,6 +9,10 @@
 <uses-permission android:name="android.permission.NFC" />
 <uses-permission android:name="android.permission.VIBRATE" />
 
+<!-- Biometric Authentication Permissions -->
+<uses-permission android:name="android.permission.USE_BIOMETRIC" />
+<uses-permission android:name="android.permission.USE_FINGERPRINT" />
+
  <uses-feature android:name="android.hardware.location.gps" android:required="true" />
     <application
         android:allowBackup="true"
@@ -34,12 +38,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- Custom URL Scheme (for fallback) -->
             <intent-filter>
                <action android:name="android.intent.action.VIEW" />
                <category android:name="android.intent.category.DEFAULT" />
                <category android:name="android.intent.category.BROWSABLE" />
                <data android:scheme="@string/custom_url_scheme" />
-               
+           </intent-filter>
+
+            <!-- Android App Links (HTTPS) - Configured for Vercel deployment -->
+            <intent-filter android:autoVerify="true">
+               <action android:name="android.intent.action.VIEW" />
+               <category android:name="android.intent.category.DEFAULT" />
+               <category android:name="android.intent.category.BROWSABLE" />
+               <!-- Vercel domain: https://jacksonrewardsapp.vercel.app -->
+               <data android:scheme="https" android:host="jacksonrewardsapp.vercel.app" />
+               <data android:scheme="https" android:host="jacksonrewardsapp.vercel.app" android:pathPrefix="/reset-password" />
            </intent-filter>
 
         </activity>
