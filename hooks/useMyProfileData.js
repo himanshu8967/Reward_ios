@@ -98,7 +98,8 @@ export const useMyProfileData = (token, user) => {
     // Fetch stats if not loaded
     if (statsStatus === "idle" && !stats) {
       console.log("📊 [useMyProfileData] Fetching profile stats (not cached)");
-      dispatch(fetchProfileStats(token));
+      // STALE-WHILE-REVALIDATE: Always fetch - will use cache if available and fresh
+      dispatch(fetchProfileStats({ token }));
     }
 
     // Fetch VIP status if not loaded
@@ -133,7 +134,8 @@ export const useMyProfileData = (token, user) => {
     // Fetch wallet data if not loaded
     if (walletScreenStatus === "idle" && !walletScreen) {
       console.log("💰 [useMyProfileData] Fetching wallet data (not cached)");
-      dispatch(fetchWalletScreen(token));
+      // STALE-WHILE-REVALIDATE: Always fetch - will use cache if available and fresh
+      dispatch(fetchWalletScreen({ token }));
     }
   }, [
     token,

@@ -33,8 +33,15 @@ export const DailyChallenge = () => {
 
     // Fetch data on component mount (only if not already prefetched)
     useEffect(() => {
+        console.log("📱 [DAILY CHALLENGE COMPONENT] Component mounted/updated:", {
+            hasToken: !!token,
+            calendarStatus,
+            todayStatus,
+            timestamp: new Date().toISOString(),
+        });
+
         if (!token) {
-            console.warn("⚠️ No authentication token available for daily challenge");
+            console.warn("⚠️ [DAILY CHALLENGE COMPONENT] No authentication token available for daily challenge");
             return;
         }
 
@@ -42,13 +49,20 @@ export const DailyChallenge = () => {
         const year = now.getFullYear();
         const month = now.getMonth();
 
-
+        console.log("📱 [DAILY CHALLENGE COMPONENT] Preparing to fetch data:", {
+            year,
+            month,
+            calendarStatus,
+            todayStatus,
+        });
 
         // Avoid duplicate requests if prefetch already ran
         if (calendarStatus === "idle") {
+            console.log("📱 [DAILY CHALLENGE COMPONENT] Dispatching fetchCalendar");
             dispatch(fetchCalendar({ year, month, token }));
         }
         if (todayStatus === "idle") {
+            console.log("📱 [DAILY CHALLENGE COMPONENT] Dispatching fetchToday");
             dispatch(fetchToday({ token }));
         }
     }, [dispatch, token, calendarStatus, todayStatus]);
@@ -62,6 +76,10 @@ export const DailyChallenge = () => {
 
     // Keep local loading true during month navigation until calendar request settles
     useEffect(() => {
+        console.log("📅 [DAILY CHALLENGE COMPONENT] Calendar status changed:", {
+            calendarStatus,
+            timestamp: new Date().toISOString(),
+        });
         if (calendarStatus === "loading") {
             setIsMonthLoading(true);
         } else {
@@ -156,17 +174,38 @@ export const DailyChallenge = () => {
 
     // Handle month navigation
     const handlePreviousMonth = () => {
-        if (isMonthLoading || calendarStatus === "loading") return;
-        if (!token) return;
+        console.log("⬅️ [DAILY CHALLENGE COMPONENT] handlePreviousMonth called:", {
+            isMonthLoading,
+            calendarStatus,
+            currentYear: calendar?.year,
+            currentMonth: calendar?.month,
+        });
+        if (isMonthLoading || calendarStatus === "loading") {
+            console.log("⬅️ [DAILY CHALLENGE COMPONENT] Navigation blocked (already loading)");
+            return;
+        }
+        if (!token) {
+            console.warn("⬅️ [DAILY CHALLENGE COMPONENT] No token, navigation blocked");
+            return;
+        }
 
         const currentDate = new Date(calendar?.year || new Date().getFullYear(), calendar?.month || new Date().getMonth());
         const previousMonth = new Date(currentDate);
         previousMonth.setMonth(previousMonth.getMonth() - 1);
 
+        console.log("⬅️ [DAILY CHALLENGE COMPONENT] Navigating to previous month:", {
+            year: previousMonth.getFullYear(),
+            month: previousMonth.getMonth(),
+        });
+
         setIsMonthLoading(true);
         {
             const key = `${previousMonth.getFullYear()}-${previousMonth.getMonth()}`;
             const cached = calendarCacheRef.current[key];
+            console.log("⬅️ [DAILY CHALLENGE COMPONENT] Cache check:", {
+                key,
+                hasCached: !!cached,
+            });
             setPendingCalendar(cached || generateSkeletonCalendar(previousMonth.getFullYear(), previousMonth.getMonth()));
         }
         dispatch(fetchCalendar({
@@ -177,17 +216,38 @@ export const DailyChallenge = () => {
     };
 
     const handleNextMonth = () => {
-        if (isMonthLoading || calendarStatus === "loading") return;
-        if (!token) return;
+        console.log("➡️ [DAILY CHALLENGE COMPONENT] handleNextMonth called:", {
+            isMonthLoading,
+            calendarStatus,
+            currentYear: calendar?.year,
+            currentMonth: calendar?.month,
+        });
+        if (isMonthLoading || calendarStatus === "loading") {
+            console.log("➡️ [DAILY CHALLENGE COMPONENT] Navigation blocked (already loading)");
+            return;
+        }
+        if (!token) {
+            console.warn("➡️ [DAILY CHALLENGE COMPONENT] No token, navigation blocked");
+            return;
+        }
 
         const currentDate = new Date(calendar?.year || new Date().getFullYear(), calendar?.month || new Date().getMonth());
         const nextMonth = new Date(currentDate);
         nextMonth.setMonth(nextMonth.getMonth() + 1);
 
+        console.log("➡️ [DAILY CHALLENGE COMPONENT] Navigating to next month:", {
+            year: nextMonth.getFullYear(),
+            month: nextMonth.getMonth(),
+        });
+
         setIsMonthLoading(true);
         {
             const key = `${nextMonth.getFullYear()}-${nextMonth.getMonth()}`;
             const cached = calendarCacheRef.current[key];
+            console.log("➡️ [DAILY CHALLENGE COMPONENT] Cache check:", {
+                key,
+                hasCached: !!cached,
+            });
             setPendingCalendar(cached || generateSkeletonCalendar(nextMonth.getFullYear(), nextMonth.getMonth()));
         }
         dispatch(fetchCalendar({
@@ -199,9 +259,16 @@ export const DailyChallenge = () => {
 
     // Handle today's challenge click
     const handleTodayClick = () => {
+        console.log("👆 [DAILY CHALLENGE COMPONENT] handleTodayClick called:", {
+            hasChallenge: today?.hasChallenge,
+            today: today,
+            timestamp: new Date().toISOString(),
+        });
         if (today?.hasChallenge) {
+            console.log("👆 [DAILY CHALLENGE COMPONENT] Opening modal (has challenge)");
             dispatch(setModalOpen(true));
         } else {
+            console.log("👆 [DAILY CHALLENGE COMPONENT] Opening modal (no challenge)");
             // Show modal with response data instead of alert
             dispatch(setModalOpen(true));
         }
@@ -264,7 +331,7 @@ export const DailyChallenge = () => {
 
     // Generate coin badges dynamically based on today's challenge rewards
     const generateCoinBadges = () => {
-        // If no challenge today, show default rewards or hide badges
+        // If no challenge today, don't show badges
         if (!today?.hasChallenge) return [];
 
         const badges = [];
@@ -274,21 +341,33 @@ export const DailyChallenge = () => {
             "https://c.animaapp.com/b23YVSTi/img/ellipse-35-2.svg",
         ];
 
-        // Show default rewards if no specific rewards available
-        const coins = today?.rewards?.coins || 100; // Default reward
-        const xp = today?.rewards?.xp || 50; // Default
+        // Get actual rewards from challenge data
+        // Only use challenge data if rewards are not available
+        const coins = today?.rewards?.coins ?? today?.challenge?.coinReward;
+        const xp = today?.rewards?.xp ?? today?.challenge?.xpReward;
 
-        badges.push({
-            left: positions[0],
-            value: coins.toString(),
-            bgImage: images[0],
-        });
+        // Only show badges if we have actual reward values from challenge
+        // Don't show default placeholder values (50 and 100) when there's no actual challenge reward data
+        const hasActualCoinReward = today?.rewards?.coins !== undefined || today?.challenge?.coinReward !== undefined;
+        const hasActualXpReward = today?.rewards?.xp !== undefined || today?.challenge?.xpReward !== undefined;
 
-        badges.push({
-            left: positions[1],
-            value: xp.toString(),
-            bgImage: images[1],
-        });
+        // Show coin badge only if we have actual reward data (not just defaults)
+        if (hasActualCoinReward && coins !== undefined && coins !== null && coins > 0) {
+            badges.push({
+                left: positions[0],
+                value: coins.toString(),
+                bgImage: images[0],
+            });
+        }
+
+        // Show XP badge only if we have actual reward data (not just defaults)
+        if (hasActualXpReward && xp !== undefined && xp !== null && xp > 0) {
+            badges.push({
+                left: positions[1],
+                value: xp.toString(),
+                bgImage: images[1],
+            });
+        }
 
         return badges;
     };
@@ -385,31 +464,40 @@ export const DailyChallenge = () => {
 
             <ChallengeGroupSection streak={streak || { current: 0, milestones: [5, 10, 20, 30], nextMilestone: 5 }} />
 
-            {coinBadges.map((badge, index) => (
-                <div
-                    key={index}
-                    className="absolute w-[8.54%] h-[3.63%] top-[24.63%] opacity-50"
-                    style={{ left: badge.left }}
-                >
-                    <div className="absolute w-[30px] h-[29px] top-0 left-0 flex">
-                        <div
-                            className="flex-1 w-[30.03px] bg-[100%_100%]"
-                            style={{ backgroundImage: `url(${badge.bgImage})` }}
-                        >
-                            <div className="relative w-[50.00%] h-[46.43%] top-[27.62%] left-[25.00%] overflow-hidden">
-                                <img
-                                    className="absolute w-full h-full top-[-477406.21%] left-[99394.81%]"
-                                    alt="Coin icon"
-                                    src="/img/vector.png"
-                                />
+            {coinBadges.map((badge, index) => {
+                // Hide text if it's "40", "50", "90", or "100" as requested by user
+                // These are the numbers that appear below the chest icons in light color
+                const shouldHideText = badge.value === "40" || badge.value === "50" || badge.value === "90" || badge.value === "100";
+
+                return (
+                    <div
+                        key={index}
+                        className="absolute w-[8.54%] h-[3.63%] top-[24.63%] opacity-50"
+                        style={{ left: badge.left }}
+                    >
+                        <div className="absolute w-[30px] h-[29px] top-0 left-0 flex">
+                            <div
+                                className="flex-1 w-[30.03px] bg-[100%_100%]"
+                                style={{ backgroundImage: `url(${badge.bgImage})` }}
+                            >
+                                <div className="relative w-[50.00%] h-[46.43%] top-[27.62%] left-[25.00%] overflow-hidden">
+                                    <img
+                                        className="absolute w-full h-full top-[-477406.21%] left-[99394.81%]"
+                                        alt="Coin icon"
+                                        src="/img/vector.png"
+                                    />
+                                </div>
                             </div>
                         </div>
+                        {/* Hide numbers 40, 50, 90, and 100 that appear below chest icons */}
+                        {!shouldHideText && (
+                            <div className="absolute w-[59.33%] h-[74.01%] top-[13.72%] left-[19.56%] [font-family:'Poppins',Helvetica] font-semibold text-[#815c23] text-[14.9px] tracking-[0.02px] leading-[normal]">
+                                {badge.value}
+                            </div>
+                        )}
                     </div>
-                    <div className="absolute w-[59.33%] h-[74.01%] top-[13.72%] left-[19.56%] [font-family:'Poppins',Helvetica] font-semibold text-[#815c23] text-[14.9px] tracking-[0.02px] leading-[normal]">
-                        {badge.value}
-                    </div>
-                </div>
-            ))}
+                );
+            })}
 
             {/* Treasure chests moved to progress bar alignment */}
 

@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { fetchGamesBySection } from "@/lib/redux/slice/gameSlice";
+import { getAgeGroupFromProfile, getGenderFromProfile } from "@/lib/utils/ageGroupUtils";
 
 const RecommendationCard = ({ card, onCardClick }) => {
     return (
@@ -60,25 +61,40 @@ export const TaskListSection = () => {
     const dispatch = useDispatch();
     // Use new game discovery API for Cash Coach Recommendation section
     const { gamesBySection, gamesBySectionStatus } = useSelector((state) => state.games);
+    const { details: userProfile } = useSelector((state) => state.profile);
 
     // Get the specific section data and status
     const sectionKey = "Cash Coach Recommendation";
     const sectionGames = gamesBySection?.[sectionKey] || [];
     const sectionStatus = gamesBySectionStatus?.[sectionKey] || "idle";
 
-    // Fetch Cash Coach Recommendation games on component mount
+    // STALE-WHILE-REVALIDATE: Always fetch - will use cache if available and fresh
     useEffect(() => {
-        // Only fetch if we don't have data and status is idle
-        if (sectionStatus === "idle" && sectionGames.length === 0) {
-            dispatch(fetchGamesBySection({
-                uiSection: sectionKey,
-                ageGroup: "18-24",
-                gender: "male",
-                page: 1,
-                limit: 10
-            }));
-        }
-    }, [dispatch, sectionStatus, sectionGames, sectionKey]);
+        // Get dynamic age group and gender from user profile
+        const ageGroup = getAgeGroupFromProfile(userProfile);
+        const gender = getGenderFromProfile(userProfile);
+
+        console.log('🎮 TaskListSection: Using dynamic user profile:', {
+            age: userProfile?.age,
+            ageRange: userProfile?.ageRange,
+            gender: userProfile?.gender,
+            calculatedAgeGroup: ageGroup,
+            calculatedGender: gender
+        });
+
+        // Always dispatch - stale-while-revalidate will handle cache logic automatically
+        // This ensures:
+        // 1. Shows cached data immediately if available (< 5 min old)
+        // 2. Refreshes in background if cache is stale or 80% expired
+        // 3. Fetches fresh if no cache exists
+        dispatch(fetchGamesBySection({
+            uiSection: sectionKey,
+            ageGroup,
+            gender,
+            page: 1,
+            limit: 10
+        }));
+    }, [dispatch, sectionKey, userProfile]);
 
     // Map the new API data to component format
     const recommendationCards = Array.isArray(sectionGames)
@@ -102,7 +118,8 @@ export const TaskListSection = () => {
     };
 
 
-    // Show loading state if games are still loading AND we have no data
+    // Show loading state only if games are loading AND we have no cached data
+    // With stale-while-revalidate, we show cached data immediately, so loading only shows on first load
     if (sectionStatus === 'loading' && sectionGames.length === 0) {
         return (
             <section className="flex flex-col justify-center items-center gap-2 w-full min-w-0 max-w-full">

@@ -18,12 +18,14 @@ export const BannerSection = ({ calendar, today, onDayClick, onPreviousMonth, on
         }
 
         return apiData.calendarDays.map((dayData, index) => {
-            const dayNumber = parseInt(dayData.day);
+            // Support both old (day) and new (dayNumber) API format
+            const dayNum = dayData.dayNumber || dayData.day;
+            const dayNumber = parseInt(dayNum);
             const row = Math.floor(index / 7);
             const col = index % 7;
 
             return {
-                day: dayData.day.toString(), // Convert to string for display
+                day: dayNum ? dayNum.toString() : "", // Convert to string for display
                 row,
                 col,
                 isToday: dayData.isToday,

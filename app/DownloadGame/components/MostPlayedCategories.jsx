@@ -7,6 +7,7 @@ import { fetchMostPlayedScreenGames, fetchGameById } from "@/lib/redux/slice/gam
 import { useAuth } from "@/contexts/AuthContext";
 import GameItemCard from "./GameItemCard";
 import WatchAdCard from "./WatchAdCard";
+import { getAgeGroupFromProfile, getGenderFromProfile } from "@/lib/utils/ageGroupUtils";
 
 export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) => {
     // Redux state management
@@ -16,19 +17,30 @@ export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) =
 
     // Get data from Redux store - using dedicated Most Played Screen state
     const { mostPlayedScreenGames, mostPlayedScreenStatus, mostPlayedScreenError } = useSelector((state) => state.games);
+    const { details: userProfile } = useSelector((state) => state.profile);
 
     // Fetch games from API for "Most Played Screen" section
     React.useEffect(() => {
+        // Get dynamic age group and gender from user profile
+        const ageGroup = getAgeGroupFromProfile(userProfile);
+        const gender = getGenderFromProfile(userProfile);
+
+        console.log('🎮 MostPlayedCategories: Using dynamic user profile:', {
+            age: userProfile?.age,
+            calculatedAgeGroup: ageGroup,
+            calculatedGender: gender
+        });
+
         // Only fetch if we don't have data and status is idle
         if (mostPlayedScreenStatus === "idle" && (!mostPlayedScreenGames || mostPlayedScreenGames.length === 0)) {
             dispatch(fetchMostPlayedScreenGames({
-                ageGroup: "18-24",
-                gender: "male",
+                ageGroup,
+                gender,
                 page: 1,
                 limit: 50
             }));
         }
-    }, [dispatch, mostPlayedScreenStatus, mostPlayedScreenGames]);
+    }, [dispatch, mostPlayedScreenStatus, mostPlayedScreenGames, userProfile]);
 
     console.log("mostPlayedScreenGames", mostPlayedScreenGames)
 
@@ -153,9 +165,11 @@ export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) =
                             <p>Failed to load games</p>
                             <button
                                 onClick={() => {
+                                    const ageGroup = getAgeGroupFromProfile(userProfile);
+                                    const gender = getGenderFromProfile(userProfile);
                                     dispatch(fetchMostPlayedScreenGames({
-                                        ageGroup: "18-24",
-                                        gender: "male",
+                                        ageGroup,
+                                        gender,
                                         page: 1,
                                         limit: 50
                                     }));
@@ -201,9 +215,11 @@ export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) =
                             <p>Failed to load games</p>
                             <button
                                 onClick={() => {
+                                    const ageGroup = getAgeGroupFromProfile(userProfile);
+                                    const gender = getGenderFromProfile(userProfile);
                                     dispatch(fetchMostPlayedScreenGames({
-                                        ageGroup: "18-24",
-                                        gender: "male",
+                                        ageGroup,
+                                        gender,
                                         page: 1,
                                         limit: 50
                                     }));

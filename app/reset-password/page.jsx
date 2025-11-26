@@ -19,6 +19,10 @@ const ResetPasswordComponent = () => {
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
 
+  // ✅ Success Modal State
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // ✅ Read token
   useEffect(() => {
     const tokenFromUrl = searchParams.get("token");
     if (tokenFromUrl) {
@@ -29,52 +33,59 @@ const ResetPasswordComponent = () => {
     }
   }, [searchParams]);
 
-  // ✅ Validation function
-  const validatePasswords = () => {
+  // ✅ Validation logic
+  const validatePasswords = (pw = newPassword, cpw = confirmPassword) => {
     const errs = {};
 
-    if (!newPassword) errs.newPassword = "New password is required";
-    if (!confirmPassword) errs.confirmPassword = "Confirm password is required";
+    if (!pw) errs.newPassword = "New password is required";
+    if (!cpw) errs.confirmPassword = "Confirm password is required";
 
-    if (newPassword && newPassword.length < 8)
+    if (pw && pw.length < 8)
       errs.newPassword = "Password must be at least 8 characters";
-
-    if (newPassword && !/[A-Z]/.test(newPassword))
+    if (pw && !/[A-Z]/.test(pw))
       errs.newPassword = "Must include at least 1 uppercase letter";
-
-    if (newPassword && !/[a-z]/.test(newPassword))
+    if (pw && !/[a-z]/.test(pw))
       errs.newPassword = "Must include at least 1 lowercase letter";
-
-    if (newPassword && !/[0-9]/.test(newPassword))
+    if (pw && !/[0-9]/.test(pw))
       errs.newPassword = "Must include at least 1 number";
-
-    if (newPassword && !/[!@#$%^&*(),.?\":{}|<>]/.test(newPassword))
+    if (pw && !/[!@#$%^&*(),.?\":{}|<>]/.test(pw))
       errs.newPassword = "Must include at least 1 special character";
 
-    if (newPassword && confirmPassword && newPassword !== confirmPassword)
+    if (pw && cpw && pw !== cpw)
       errs.confirmPassword = "Passwords do not match";
 
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+    return errs;
   };
 
-  const isFormValid =
-    newPassword && confirmPassword && Object.keys(errors).length === 0 && token;
+  useEffect(() => {
+    const errs = validatePasswords(newPassword, confirmPassword);
+    setErrors(errs);
+  }, [newPassword, confirmPassword]);
 
+  const isFormValid =
+    token &&
+    newPassword &&
+    confirmPassword &&
+    Object.keys(errors).length === 0;
+
+  // ✅ Submit handler
   const handleResetPassword = async (e) => {
     e.preventDefault();
 
-    if (!validatePasswords()) return;
+    const errs = validatePasswords();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
 
     setIsLoading(true);
     setMessage("");
     setIsError(false);
 
     try {
-      const data = await resetPassword(token, newPassword);
-      setMessage(data.message || "Password reset successful!");
-      setIsError(false);
-      router.replace("/login");
+      await resetPassword(token, newPassword);
+
+      // ✅ Show success modal (NO auto redirect)
+      setShowSuccessModal(true);
+
     } catch (error) {
       setMessage(error.message || "Failed to reset password.");
       setIsError(true);
@@ -90,6 +101,7 @@ const ResetPasswordComponent = () => {
         <div className="absolute inset-0 bg-[#20202033] backdrop-blur-[5px]" />
 
         <div className="absolute w-[280px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[15px] p-4 [background:radial-gradient(50%_50%_at_50%_50%,rgba(134,47,148,1)_0%,rgba(6,9,78,1)_100%)]">
+
           <div className="text-white text-[64px] flex justify-center mt-3">🔑</div>
 
           <h1 className="text-center text-[#efefef] text-2xl font-extrabold mt-3">
@@ -101,7 +113,7 @@ const ResetPasswordComponent = () => {
               Enter your new password below to finish resetting.
             </p>
 
-            {/* ✅ New Password */}
+            {/* ✅ NEW PASSWORD */}
             <div className="mb-3">
               <label className="text-neutral-400 text-[14px]">New Password</label>
 
@@ -109,19 +121,30 @@ const ResetPasswordComponent = () => {
                 <input
                   type={showPassword1 ? "text" : "password"}
                   value={newPassword}
-                  onChange={(e) => {
-                    setNewPassword(e.target.value);
-                    validatePasswords();
-                  }}
+                  onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full h-full px-4 bg-transparent text-white outline-none"
                   placeholder="Enter new password"
                 />
 
+                {/* ✅ SVG ICONS */}
                 <span
-                  className="absolute right-4 text-white cursor-pointer"
+                  className="absolute right-4 w-5 h-5 cursor-pointer flex items-center justify-center"
                   onClick={() => setShowPassword1(!showPassword1)}
                 >
-                  {showPassword1 ? "🙈" : "👁️"}
+                  {showPassword1 ? (
+                    // 👁️ SHOW PASSWORD
+                    <svg width="17" height="17" viewBox="0 0 20 20" fill="none">
+                      <path d="M10 12c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" stroke="#d3d3d3" strokeWidth="1.2" />
+                      <path d="M10 4C5.5 4 1.73 7.11 1 10c.73 2.89 4.5 6 9 6s8.27-3.11 9-6c -.73-2.89-4.5-6-9-6z" stroke="#d3d3d3" strokeWidth="1.2" />
+                    </svg>
+                  ) : (
+                    // 👁️‍🗨️ HIDE PASSWORD
+                    <svg width="17" height="17" viewBox="0 0 20 20" fill="none">
+                      <path d="M10 12c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" stroke="#d3d3d3" strokeWidth="1.2" />
+                      <path d="M10 4C5.5 4 1.73 7.11 1 10c .73 2.89 4.5 6 9 6s8.27-3.11 9-6c-.73 -2.89-4.5-6-9-6z" stroke="#d3d3d3" strokeWidth="1.2" />
+                      <line x1="3" y1="3" x2="17" y2="17" stroke="#d3d3d3" strokeWidth="1.2" strokeLinecap="round" />
+                    </svg>
+                  )}
                 </span>
               </div>
 
@@ -130,29 +153,36 @@ const ResetPasswordComponent = () => {
               )}
             </div>
 
-            {/* ✅ Confirm Password */}
+            {/* ✅ CONFIRM PASSWORD */}
             <div className="mb-3">
-              <label className="text-neutral-400 text-[14px]">
-                Confirm Password
-              </label>
+              <label className="text-neutral-400 text-[14px]">Confirm Password</label>
 
               <div className="relative w-full h-[45px] bg-white/10 rounded-lg border border-white/20 flex items-center">
                 <input
                   type={showPassword2 ? "text" : "password"}
                   value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    validatePasswords();
-                  }}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full h-full px-4 bg-transparent text-white outline-none"
                   placeholder="Confirm password"
                 />
 
+                {/* ✅ SVG ICONS */}
                 <span
-                  className="absolute right-4 text-white cursor-pointer"
+                  className="absolute right-4 w-5 h-5 cursor-pointer flex items-center justify-center"
                   onClick={() => setShowPassword2(!showPassword2)}
                 >
-                  {showPassword2 ? "🙈" : "👁️"}
+                  {showPassword2 ? (
+                    <svg width="17" height="17" viewBox="0 0 20 20" fill="none">
+                      <path d="M10 12c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" stroke="#d3d3d3" strokeWidth="1.2" />
+                      <path d="M10 4C5.5 4 1.73 7.11 1 10c .73 2.89 4.5 6 9 6s8.27-3.11 9-6c -.73-2.89-4.5-6-9-6z" stroke="#d3d3d3" strokeWidth="1.2" />
+                    </svg>
+                  ) : (
+                    <svg width="17" height="17" viewBox="0 0 20 20" fill="none">
+                      <path d="M10 12c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" stroke="#d3d3d3" strokeWidth="1.2" />
+                      <path d="M10 4C5.5 4 1.73 7.11 1 10c .73 2.89 4.5 6 9 6s8.27-3.11 9-6c -.73-2.89-4.5-6-9-6z" stroke="#d3d3d3" strokeWidth="1.2" />
+                      <line x1="3" y1="3" x2="17" y2="17" stroke="#d3d3d3" strokeWidth="1.2" strokeLinecap="round" />
+                    </svg>
+                  )}
                 </span>
               </div>
 
@@ -161,14 +191,16 @@ const ResetPasswordComponent = () => {
               )}
             </div>
 
-            {/* ✅ Message */}
             {message && (
-              <p className={`text-center text-xs mt-2 ${isError ? "text-red-400" : "text-green-400"}`}>
+              <p
+                className={`text-center text-xs mt-2 ${
+                  isError ? "text-red-400" : "text-green-400"
+                }`}
+              >
                 {message}
               </p>
             )}
 
-            {/* ✅ Submit */}
             <button
               type="submit"
               disabled={!isFormValid || isLoading}
@@ -190,6 +222,30 @@ const ResetPasswordComponent = () => {
           </button>
         </div>
       </div>
+
+      {/* ✅ SUCCESS MODAL */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm">
+          <div className="w-[280px] rounded-[15px] p-4 [background:radial-gradient(50%_50%_at_50%_50%,rgba(140,227,140,1)_0%,rgba(6,9,78,1)_100%)]">
+            <div className="text-white text-[64px] flex justify-center">✅</div>
+
+            <h2 className="text-center text-white text-xl font-bold mt-2">
+              Password Reset Successful!
+            </h2>
+
+            <p className="text-center text-white/80 text-sm mt-2">
+              Your password has been updated. Please log in to continue.
+            </p>
+
+            <button
+              onClick={() => router.push("/login")}
+              className="w-full h-[40px] bg-gradient-to-b from-[#9eadf7] to-[#716ae7] text-white rounded-lg mt-4 font-semibold"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

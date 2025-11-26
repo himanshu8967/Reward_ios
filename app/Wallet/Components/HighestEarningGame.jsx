@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { handleGameDownload } from "@/lib/gameDownloadUtils";
 import { fetchGamesBySection } from "@/lib/redux/slice/gameSlice";
+import { getAgeGroupFromProfile, getGenderFromProfile } from "@/lib/utils/ageGroupUtils";
 const SCALE_CONFIG = [
     { minWidth: 0, scaleClass: "scale-90" },
     { minWidth: 320, scaleClass: "scale-90" },
@@ -23,24 +24,40 @@ export const HighestEarningGame = () => {
 
     // Use new game discovery API for Highest Earning section
     const { gamesBySection, gamesBySectionStatus } = useSelector((state) => state.games);
+    const { details: userProfile } = useSelector((state) => state.profile);
 
     // Get data for "Highest Earning" section specifically
     const sectionName = "Highest Earning";
     const highestEarningGames = gamesBySection[sectionName] || [];
     const highestEarningStatus = gamesBySectionStatus[sectionName] || "idle";
 
-    // Fetch highest earning games on component mount - only if no data exists
+    // STALE-WHILE-REVALIDATE: Always fetch - will use cache if available and fresh
     useEffect(() => {
-        if (highestEarningStatus === "idle" && highestEarningGames.length === 0) {
-            dispatch(fetchGamesBySection({
-                uiSection: sectionName,
-                ageGroup: "18-24",
-                gender: "male",
-                page: 1,
-                limit: 10
-            }));
-        }
-    }, [dispatch, highestEarningStatus, highestEarningGames, sectionName]);
+        // Get dynamic age group and gender from user profile
+        const ageGroup = getAgeGroupFromProfile(userProfile);
+        const gender = getGenderFromProfile(userProfile);
+
+        console.log('🎮 HighestEarningGame: Using dynamic user profile:', {
+            age: userProfile?.age,
+            ageRange: userProfile?.ageRange,
+            gender: userProfile?.gender,
+            calculatedAgeGroup: ageGroup,
+            calculatedGender: gender
+        });
+
+        // Always dispatch - stale-while-revalidate will handle cache logic automatically
+        // This ensures:
+        // 1. Shows cached data immediately if available (< 5 min old)
+        // 2. Refreshes in background if cache is stale or 80% expired
+        // 3. Fetches fresh if no cache exists
+        dispatch(fetchGamesBySection({
+            uiSection: sectionName,
+            ageGroup,
+            gender,
+            page: 1,
+            limit: 10
+        }));
+    }, [dispatch, sectionName, userProfile]);
 
     // Map the new API data to component format
     const processedGames = highestEarningGames?.slice(0, 2).map((game) => ({

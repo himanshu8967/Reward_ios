@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { fetchGamesBySection } from "@/lib/redux/slice/gameSlice";
+import { getAgeGroupFromProfile, getGenderFromProfile } from "@/lib/utils/ageGroupUtils";
 
 const RecommendationCard = React.memo(({ card, onCardClick }) => {
     const [imageError, setImageError] = useState(false);
@@ -85,6 +86,7 @@ export const ListGame = () => {
 
     // Use both API games and downloaded games
     const { gamesBySection, gamesBySectionStatus, inProgressGames } = useSelector((state) => state.games);
+    const { details: userProfile } = useSelector((state) => state.profile);
 
     // Extract games from the "Swipe" section (since that's what we're fetching)
     const swipeGames = gamesBySection?.["Swipe"] || [];
@@ -178,16 +180,25 @@ export const ListGame = () => {
     useEffect(() => {
         // Only fetch as fallback if no games are available and not currently loading
         if (swipeStatus === 'idle' && (!swipeGames || swipeGames.length === 0)) {
-            console.log('[ListGame] Fallback: Fetching games data (homepage may not have loaded yet)...');
+            // Get dynamic age group and gender from user profile
+            const ageGroup = getAgeGroupFromProfile(userProfile);
+            const gender = getGenderFromProfile(userProfile);
+
+            console.log('[ListGame] Fallback: Fetching games data (homepage may not have loaded yet)...', {
+                age: userProfile?.age,
+                calculatedAgeGroup: ageGroup,
+                calculatedGender: gender
+            });
+
             dispatch(fetchGamesBySection({
                 uiSection: "Swipe",
-                ageGroup: "18-24",
-                gender: "male",
+                ageGroup,
+                gender,
                 page: 1,
                 limit: 50  // Increased limit to get more games
             }));
         }
-    }, [dispatch, swipeStatus, swipeGames]);
+    }, [dispatch, swipeStatus, swipeGames, userProfile]);
 
     // Loading timeout handling
     useEffect(() => {

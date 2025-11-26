@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { fetchGamesBySection } from "@/lib/redux/slice/gameSlice";
+import { getAgeGroupFromProfile, getGenderFromProfile } from "@/lib/utils/ageGroupUtils";
 
 const MostPlayedGames = () => {
     const router = useRouter();
@@ -64,28 +65,33 @@ const MostPlayedGames = () => {
         router.push(`/gamedetails?gameId=${gameId}&source=mostPlayed`);
     }, [router, dispatch]);
 
-    // OPTIMIZED: Smart fetch - only fetch if no data exists for this specific section
+    // STALE-WHILE-REVALIDATE: Always fetch - will use cache if available and fresh
     useEffect(() => {
-        const ageGroup = userProfile?.ageRange || "18-24";
-        const gender = userProfile?.gender || "male";
+        // Get dynamic age group and gender from user profile
+        const ageGroup = getAgeGroupFromProfile(userProfile);
+        const gender = getGenderFromProfile(userProfile);
 
-        // Only fetch if we don't have data for "Most Played" section and not currently loading
-        if (mostPlayedStatus === "idle" && mostPlayedGames.length === 0) {
-            console.log("🎮 OPTIMIZED: Fetching Most Played games (no cached data for this section)");
+        console.log('🎮 MostPlayedGames: Using dynamic user profile:', {
+            age: userProfile?.age,
+            ageRange: userProfile?.ageRange,
+            gender: userProfile?.gender,
+            calculatedAgeGroup: ageGroup,
+            calculatedGender: gender
+        });
 
-            const apiParams = {
-                uiSection: sectionName,
-                ageGroup,
-                gender,
-                page: 1,
-                limit: 10 // Reduced limit for faster loading
-            };
-
-            dispatch(fetchGamesBySection(apiParams));
-        } else {
-            console.log("🎮 OPTIMIZED: Using cached Most Played games:", mostPlayedGames.length);
-        }
-    }, [dispatch, mostPlayedStatus, mostPlayedGames, sectionName]); // Smart dependencies
+        // Always dispatch - stale-while-revalidate will handle cache logic automatically
+        // This ensures:
+        // 1. Shows cached data immediately if available (< 5 min old)
+        // 2. Refreshes in background if cache is stale or 80% expired
+        // 3. Fetches fresh if no cache exists
+        dispatch(fetchGamesBySection({
+            uiSection: sectionName,
+            ageGroup,
+            gender,
+            page: 1,
+            limit: 10
+        }));
+    }, [dispatch, sectionName, userProfile]);
 
     // OPTIMIZED: Memoize localStorage operations to prevent unnecessary writes
     const handleStoreGamesData = useCallback((games) => {

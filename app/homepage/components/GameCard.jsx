@@ -4,11 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchGamesBySection } from "@/lib/redux/slice/gameSlice";
 import { useRouter } from "next/navigation";
 import { handleGameDownload } from "@/lib/gameDownloadUtils";
+import { getAgeGroupFromProfile, getGenderFromProfile } from "@/lib/utils/ageGroupUtils";
 
 const GameCard = ({ onClose: onCloseProp }) => {
     const dispatch = useDispatch();
     const router = useRouter();
     const { gamesBySection, gamesBySectionStatus, error, inProgressGames } = useSelector((state) => state.games);
+    const { details: userProfile } = useSelector((state) => state.profile);
 
     // Get data for "Swipe" section specifically
     const sectionName = "Swipe";
@@ -367,18 +369,33 @@ const GameCard = ({ onClose: onCloseProp }) => {
         }
     };
 
+    // STALE-WHILE-REVALIDATE: Always fetch - will use cache if available and fresh
     useEffect(() => {
-        // Only fetch if we don't have data for "Swipe" section and status is idle
-        if (swipeStatus === "idle" && swipeGames.length === 0) {
-            dispatch(fetchGamesBySection({
-                uiSection: sectionName,
-                ageGroup: "18-24",
-                gender: "male",
-                page: 1,
-                limit: 10
-            }));
-        }
-    }, [dispatch, swipeStatus, swipeGames, sectionName]);
+        // Get dynamic age group and gender from user profile
+        const ageGroup = getAgeGroupFromProfile(userProfile);
+        const gender = getGenderFromProfile(userProfile);
+
+        console.log('🎮 GameCard: Using dynamic user profile:', {
+            age: userProfile?.age,
+            ageRange: userProfile?.ageRange,
+            gender: userProfile?.gender,
+            calculatedAgeGroup: ageGroup,
+            calculatedGender: gender
+        });
+
+        // Always dispatch - stale-while-revalidate will handle cache logic
+        // This ensures:
+        // 1. Shows cached data immediately if available (< 5 min old)
+        // 2. Refreshes in background if cache is stale or 80% expired
+        // 3. Fetches fresh if no cache exists
+        dispatch(fetchGamesBySection({
+            uiSection: sectionName,
+            ageGroup,
+            gender,
+            page: 1,
+            limit: 10
+        }));
+    }, [dispatch, sectionName, userProfile]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {

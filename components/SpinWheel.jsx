@@ -95,11 +95,11 @@ export default function SpinWheel() {
             return;
         }
 
-        // Check if already spinning - COMMENTED OUT: Allow multiple clicks to see loading state
-        // if (isSpinning) {
-        //     console.log("⚠️ [SPIN] Already spinning...");
-        //     return;
-        // }
+        // Check if already spinning - prevent multiple clicks
+        if (isSpinning) {
+            console.log("⚠️ [SPIN] Already spinning...");
+            return;
+        }
 
         try {
             console.log("🎰 [SPIN] Starting spin...");
@@ -134,14 +134,14 @@ export default function SpinWheel() {
                         // Store pending reward and spin ID for redemption
                         setPendingReward(finalReward);
                         setPendingSpinId(spinData.spinId);
-
-                        setResult(`🎉 Congratulations! You won ${finalReward} coins!\n\n${spinData.message || "Watch ad to redeem your reward."}`);
-                        setShowResult(true);
                     } else {
                         setPendingReward(0);
-                        setResult(`😔 Better Luck Next Time!\n\nNo reward this time.\nTry spinning again!`);
-                        setShowResult(true);
                     }
+
+                    // ONLY display the message from backend API
+                    const backendMessage = spinData.message || spinResponse.message || "Spin completed";
+                    setResult(backendMessage);
+                    setShowResult(true);
 
                     // Reload status to update remaining spins
                     loadSpinData();
@@ -152,28 +152,15 @@ export default function SpinWheel() {
                     }, 5000);
                 }, 3000);
             } else {
-                // Handle backend error response
-                const errorMessage = spinResponse.error || "Spin failed";
+                // Handle backend error response - ONLY show backend message
+                const backendMessage = spinResponse.message || spinResponse.error || "Spin failed";
                 const errorData = spinResponse.data || {};
 
-                console.error("❌ [SPIN] Backend error:", errorMessage, errorData);
+                console.error("❌ [SPIN] Backend error:", backendMessage, errorData);
                 setIsSpinning(false);
 
-                // Show backend error message in modal
-                let displayMessage = errorMessage;
-
-                // Add "Daily spin limit reached" if it's a limit error
-                if (errorMessage.toLowerCase().includes("limit") || errorMessage.toLowerCase().includes("daily")) {
-                    if (!displayMessage.toLowerCase().includes("daily spin limit reached")) {
-                        displayMessage = `Daily spin limit reached\n\n${displayMessage}`;
-                    }
-                }
-
-                if (errorData.remainingSpins !== undefined && errorData.dailyLimit !== undefined) {
-                    displayMessage = `${displayMessage}\n\nRemaining Spins: ${errorData.remainingSpins}/${errorData.dailyLimit}`;
-                }
-
-                setResult(`🚫 ${displayMessage}`);
+                // ONLY display the message from backend API (no hardcoded text)
+                setResult(backendMessage);
                 setShowResult(true);
 
                 // Reload status to update remaining spins
@@ -188,25 +175,19 @@ export default function SpinWheel() {
             console.error("❌ [SPIN] Spin error:", err);
             setIsSpinning(false);
 
-            // Extract error message from API error
-            let errorMessage = "Failed to spin. Please try again.";
-            if (err.message) {
-                errorMessage = err.message;
-            } else if (err.body?.error) {
-                errorMessage = err.body.error;
-            } else if (err.body?.message) {
-                errorMessage = err.body.message;
-            }
+            // Extract error message from API error - ONLY use backend message from api.js:33
+            // The ApiError is thrown at api.js:33 with the backend message
+            // ApiError structure: { message: "Not eligible for this spin wheel", status: 403, body: {...} }
+            let errorMessage = err.message || "Failed to spin. Please try again.";
+            
+            // The error message from api.js:33 is already in err.message
+            // This is the message that should be displayed: "Not eligible for this spin wheel"
+            console.log("📝 [SPIN] Error object:", err);
+            console.log("📝 [SPIN] Error message (from api.js:33):", err.message);
+            console.log("📝 [SPIN] Error body:", err.body);
 
-            // Add "Daily spin limit reached" if it's a limit error
-            if (errorMessage.toLowerCase().includes("limit") || errorMessage.toLowerCase().includes("daily")) {
-                if (!errorMessage.toLowerCase().includes("daily spin limit reached")) {
-                    errorMessage = `Daily spin limit reached\n\n${errorMessage}`;
-                }
-            }
-
-            // Show error in modal
-            setResult(`🚫 ${errorMessage}`);
+            // ONLY display the message from backend API (no hardcoded additions)
+            setResult(errorMessage);
             setShowResult(true);
 
             // Reload status
@@ -730,19 +711,18 @@ export default function SpinWheel() {
                 <div className="absolute top-[67%] left-1/2  mr-2 transform -translate-x-1/2 -translate-y-1/2 z-20">
                     <motion.button
                         onClick={handleSpin}
-                        // disabled={isSpinning || isLoading} // COMMENTED OUT: Allow button to remain visible during spinning/loading
+                        disabled={isSpinning && !showResult}
                         className={`w-[200px] h-12 text-white text-lg font-bold px-8 rounded-lg border-2 ${
-                            // (isSpinning || isLoading) // COMMENTED OUT: Don't change styling during spinning/loading
-                            //     ? 'bg-gray-600 border-gray-700 cursor-not-allowed opacity-50'
-                            //     : 
-                            'bg-gradient-to-b from-red-600 to-red-800 border-red-900 shadow-[0_8px_0px_#8f1a1a,inset_0_2px_4px_rgba(255,255,255,0.4)]'
+                            (isSpinning && !showResult)
+                                ? 'bg-gradient-to-b from-red-600 to-red-800 border-red-900 shadow-[0_8px_0px_#8f1a1a,inset_0_2px_4px_rgba(255,255,255,0.4)] cursor-not-allowed pointer-events-none'
+                                : 'bg-gradient-to-b from-red-600 to-red-800 border-red-900 shadow-[0_8px_0px_#8f1a1a,inset_0_2px_4px_rgba(255,255,255,0.4)]'
                             }`}
-                        whileHover={{ scale: 1.02 }} // COMMENTED OUT: Always allow hover effect
-                        whileTap={{
+                        whileHover={isSpinning && !showResult ? {} : { scale: 1.02 }}
+                        whileTap={isSpinning && !showResult ? {} : {
                             scale: 0.98,
                             y: 4,
                             boxShadow: '0 4px 0px #8f1a1a, inset 0 2px 4px rgba(255,255,255,0.4)'
-                        }} // COMMENTED OUT: Always allow tap effect
+                        }}
                     >
                         {isSpinning ? "SPINNING..." : isLoading ? "LOADING..." : "PUSH TO SPIN"}
                     </motion.button>
@@ -885,88 +865,15 @@ export default function SpinWheel() {
                                 )}
                             </motion.div>
 
-                            {/* Title with improved styling */}
-                            <motion.h2
-                                className="text-xl font-bold mb-3 text-white leading-tight"
+                            {/* Display ONLY the backend message - no hardcoded status info */}
+                            <motion.div
+                                className="text-base text-gray-300 mb-3 leading-snug whitespace-pre-line text-center px-4"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2, duration: 0.4 }}
                             >
-                                {result.includes("🎉") ? "Congratulations!" :
-                                    result.includes("🚫") ? "Daily Limit Reached" :
-                                        "Better Luck Next Time"}
-                            </motion.h2>
-
-                            {/* Description with coin icons for rewards */}
-                            <motion.div
-                                className="text-base text-gray-300 mb-3 leading-snug"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3, duration: 0.4 }}
-                            >
-                                {result.includes("🎉") ? (
-                                    <div className="flex items-center justify-center gap-2">
-                                        <span>You won</span>
-                                        <motion.div
-                                            animate={{
-                                                scale: [1, 1.2, 1],
-                                                rotate: [0, 10, -10, 0]
-                                            }}
-                                            transition={{
-                                                duration: 0.8,
-                                                repeat: 2,
-                                                ease: "easeInOut"
-                                            }}
-                                        >
-                                            <img
-                                                src="/dollor.png"
-                                                alt="Coin"
-                                                className="w-5 h-5"
-                                            />
-                                        </motion.div>
-                                        <span className="font-bold text-yellow-400">{pendingReward}</span>
-                                        <span>coins!</span>
-                                    </div>
-                                ) : result.includes("🚫") ? (
-                                    <div>
-                                        <p className="text-sm">You've used all {maxDailySpins} spins today.</p>
-                                        <p className="text-xs text-gray-400 mt-1">Come back tomorrow!</p>
-                                    </div>
-                                ) : (
-                                    <p className="text-sm">No reward this time. Try spinning again!</p>
-                                )}
+                                {result}
                             </motion.div>
-
-                            {/* Status information */}
-                            {!result.includes("🚫") && (
-                                <motion.div
-                                    className="bg-[#2a2a2a] rounded-xl p-3 mb-2"
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ scale: [1, 1.02, 1] }}
-                                    transition={{ delay: 0.4, duration: 0.3 }}
-                                >
-                                    <p className="text-gray-400 text-xs">
-                                        Daily Spins: <span className="text-yellow-400 font-semibold">{dailySpinsUsed}/{maxDailySpins}</span>
-                                    </p>
-                                </motion.div>
-                            )}
-
-                            {/* Limit reached info */}
-                            {result.includes("🚫") && (
-                                <motion.div
-                                    className="bg-gradient-to-r from-red-900/30 to-red-800/20 rounded-xl p-3 mb-2 border border-red-700/50"
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: 0.4, duration: 0.3 }}
-                                >
-                                    <p className="text-red-300 text-xs font-medium">
-                                        Daily Spins Used: {dailySpinsUsed}/{maxDailySpins}
-                                    </p>
-                                    <p className="text-gray-400 text-[10px] mt-0.5">
-                                        Resets at midnight
-                                    </p>
-                                </motion.div>
-                            )}
 
                             {/* Pending reward indicator */}
                             {pendingReward > 0 && (

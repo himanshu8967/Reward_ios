@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchUserData } from "@/lib/redux/slice/gameSlice";
 import { fetchWalletScreen } from "@/lib/redux/slice/walletTransactionsSlice";
+import { fetchProfileStats } from "@/lib/redux/slice/profileSlice";
 
 /**
  * Custom hook to manage homepage data efficiently
@@ -64,11 +65,22 @@ export const useHomepageData = (token, user) => {
     dashboardStatus,
   ]);
 
-  // Only fetch data if it's not already available
+  // STALE-WHILE-REVALIDATE: Always fetch stats and wallet screen - will use cache if available and fresh
   useEffect(() => {
     if (!token || !user?._id) return;
 
-    // Only fetch if data is not already loaded
+    // Always dispatch - stale-while-revalidate will handle cache logic automatically
+    // This ensures:
+    // 1. Shows cached data immediately if available (< 5 min old)
+    // 2. Refreshes in background if cache is stale or 80% expired
+    // 3. Fetches fresh if no cache exists
+    console.log(
+      "💰 [useHomepageData] Fetching stats and wallet screen (stale-while-revalidate)"
+    );
+    dispatch(fetchProfileStats({ token }));
+    dispatch(fetchWalletScreen({ token }));
+
+    // Only fetch user data if not already loaded
     if (userDataStatus === "idle" && !userData) {
       console.log("🎮 [useHomepageData] Fetching user data (not cached)");
       dispatch(
@@ -78,20 +90,28 @@ export const useHomepageData = (token, user) => {
         })
       );
     }
+  }, [token, user, userDataStatus, userData, dispatch]);
 
-    if (walletScreenStatus === "idle" && !walletScreen) {
-      console.log("💰 [useHomepageData] Fetching wallet data (not cached)");
-      dispatch(fetchWalletScreen(token));
-    }
-  }, [
-    token,
-    user,
-    userDataStatus,
-    walletScreenStatus,
-    userData,
-    walletScreen,
-    dispatch,
-  ]);
+  // Refresh balance/XP when app comes to foreground (admin changes)
+  useEffect(() => {
+    if (!token) return;
+
+    const handleFocus = () => {
+      console.log(
+        "🔄 [useHomepageData] App focused - refreshing balance and XP"
+      );
+      // Force refresh to get latest admin changes
+      dispatch(fetchProfileStats({ token, force: true }));
+      dispatch(fetchWalletScreen({ token, force: true }));
+    };
+
+    // Listen for window focus (app comes to foreground)
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [token, dispatch]);
 
   return {
     // Data

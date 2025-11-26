@@ -7,6 +7,7 @@ import { fetchUserData, fetchGamesBySection } from "@/lib/redux/slice/gameSlice"
 import { useAuth } from "@/contexts/AuthContext";
 import GameItemCard from "./GameItemCard";
 import WatchAdCard from "./WatchAdCard";
+import { getAgeGroupFromProfile, getGenderFromProfile } from "@/lib/utils/ageGroupUtils";
 
 // Static data for non-gaming offers carousel
 const nonGamingOffers = [
@@ -45,6 +46,7 @@ export const GameListSection = ({ searchQuery = "", showSearch = false }) => {
 
   // Get data from Redux store
   const { inProgressGames, userDataStatus, error, gamesBySection, gamesBySectionStatus } = useSelector((state) => state.games);
+  const { details: userProfile } = useSelector((state) => state.profile);
 
   // Extract games from the "Most Played" section
   const mostPlayedGames = gamesBySection?.["Most Played"] || [];
@@ -91,19 +93,29 @@ export const GameListSection = ({ searchQuery = "", showSearch = false }) => {
     return null;
   };
 
-  // Fetch games from new API for "Most Played" sectio
+  // Fetch games from new API for "Most Played" section
   React.useEffect(() => {
+    // Get dynamic age group and gender from user profile
+    const ageGroup = getAgeGroupFromProfile(userProfile);
+    const gender = getGenderFromProfile(userProfile);
+
+    console.log('🎮 GameListSection: Using dynamic user profile:', {
+      age: userProfile?.age,
+      calculatedAgeGroup: ageGroup,
+      calculatedGender: gender
+    });
+
     // Only fetch if we don't have data and status is idle
     if (mostPlayedStatus === "idle" && (!mostPlayedGames || mostPlayedGames.length === 0)) {
       dispatch(fetchGamesBySection({
         uiSection: "Most Played",
-        ageGroup: "18-24",
-        gender: "male",
+        ageGroup,
+        gender,
         page: 1,
         limit: 50
       }));
     }
-  }, [dispatch, mostPlayedStatus, mostPlayedGames]);
+  }, [dispatch, mostPlayedStatus, mostPlayedGames, userProfile]);
 
   // Fetch user data from Redux when component mounts (lazy loading) - fallback
   React.useEffect(() => {
@@ -286,20 +298,22 @@ export const GameListSection = ({ searchQuery = "", showSearch = false }) => {
             mostPlayedStatus === "failed" ? (
               <div className="text-red-400 text-center py-4 w-full">
                 <p>Failed to load games</p>
-                <button
-                  onClick={() => {
-                    dispatch(fetchGamesBySection({
-                      uiSection: "Most Played",
-                      ageGroup: "18-24",
-                      gender: "male",
-                      page: 1,
-                      limit: 50
-                    }));
-                  }}
-                  className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
-                >
-                  Retry
-                </button>
+                  <button
+                    onClick={() => {
+                      const ageGroup = getAgeGroupFromProfile(userProfile);
+                      const gender = getGenderFromProfile(userProfile);
+                      dispatch(fetchGamesBySection({
+                        uiSection: "Most Played",
+                        ageGroup,
+                        gender,
+                        page: 1,
+                        limit: 50
+                      }));
+                    }}
+                    className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700"
+                  >
+                    Retry
+                  </button>
               </div>
             ) : filteredGames.length > 0 ? (
               filteredGames.map((game) => (

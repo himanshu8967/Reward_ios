@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useRouter } from 'next/navigation'
 import { handleGameDownload } from '@/lib/gameDownloadUtils'
 import { fetchGamesBySection } from '@/lib/redux/slice/gameSlice'
+import { getAgeGroupFromProfile, getGenderFromProfile } from '@/lib/utils/ageGroupUtils'
 
 const Leadership = () => {
     const router = useRouter();
@@ -11,17 +12,35 @@ const Leadership = () => {
     // Use new game discovery API for Leadership section
     const gamesBySection = useSelector((state) => state.games.gamesBySection)
     const gamesBySectionStatus = useSelector((state) => state.games.gamesBySectionStatus)
+    const { details: userProfile } = useSelector((state) => state.profile)
 
-    // Fetch leadership games on component mount
+    // STALE-WHILE-REVALIDATE: Always fetch - will use cache if available and fresh
     useEffect(() => {
+        // Get dynamic age group and gender from user profile
+        const ageGroup = getAgeGroupFromProfile(userProfile);
+        const gender = getGenderFromProfile(userProfile);
+
+        console.log('🎮 Leadership: Using dynamic user profile:', {
+            age: userProfile?.age,
+            ageRange: userProfile?.ageRange,
+            gender: userProfile?.gender,
+            calculatedAgeGroup: ageGroup,
+            calculatedGender: gender
+        });
+
+        // Always dispatch - stale-while-revalidate will handle cache logic automatically
+        // This ensures:
+        // 1. Shows cached data immediately if available (< 5 min old)
+        // 2. Refreshes in background if cache is stale or 80% expired
+        // 3. Fetches fresh if no cache exists
         dispatch(fetchGamesBySection({
             uiSection: "Leadership",
-            ageGroup: "18-24",
-            gender: "male",
+            ageGroup,
+            gender,
             page: 1,
             limit: 10
         }));
-    }, [dispatch]);
+    }, [dispatch, userProfile]);
 
     // Memoize the leadership games from the new API
     const leadershipGames = useMemo(() => {
