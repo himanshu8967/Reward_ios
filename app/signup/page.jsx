@@ -59,6 +59,8 @@ const SignUp = () => {
   const [isResending, setIsResending] = useState(false);
   const otpInputs = useRef([]);
   const [turnstileToken, setTurnstileToken] = useState(null);
+  const turnstileRef = useRef(null);
+  const turnstileWidgetId = useRef(null);
 
 
 
@@ -72,52 +74,120 @@ const SignUp = () => {
   }, [isOtpSent, countdown, isMobileVerified]);
 
   // ============================================================
-  // CLOUDFLARE TURNSTILE - AUTOMATIC VERIFICATION FLOW
+  // CLOUDFLARE TURNSTILE - MANUAL RENDERING FOR CLIENT-SIDE NAVIGATION
   // ============================================================
-  // Set up callbacks before script loads to ensure they're available
+  // Manually render Turnstile widget to ensure it works on client-side navigation
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // SUCCESS callback - Called automatically when Turnstile verifies user
-      window.onTurnstileSuccess = (token) => {
-        setTurnstileToken(token);
-        console.log('✅ Turnstile verified:', token);
-      };
+    const renderTurnstile = () => {
+      if (typeof window !== 'undefined' && window.turnstile && turnstileRef.current) {
+        // Check if widget is already rendered by checking for existing widget ID
+        if (turnstileWidgetId.current) {
+          return; // Widget already rendered
+        }
 
-      // ERROR callback - Called if verification fails
-      window.onTurnstileError = () => {
-        setTurnstileToken(null);
-        console.error('❌ Turnstile error');
-      };
+        // Check if element already has a widget rendered (from previous navigation)
+        const existingWidget = turnstileRef.current.querySelector('[data-widget-id]');
+        if (existingWidget) {
+          const existingId = existingWidget.getAttribute('data-widget-id');
+          if (existingId) {
+            try {
+              window.turnstile.remove(existingId);
+            } catch (e) {
+              // Ignore errors when removing
+            }
+          }
+        }
 
-      // EXPIRED callback - Called if token expires
-      window.onTurnstileExpired = () => {
-        setTurnstileToken(null);
-        console.warn('⏰ Turnstile token expired');
-      };
+        try {
+          // Clear the container first
+          turnstileRef.current.innerHTML = '';
+          
+          // Manually render the widget
+          const widgetId = window.turnstile.render(turnstileRef.current, {
+            sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA',
+            callback: (token) => {
+              setTurnstileToken(token);
+              console.log('✅ Turnstile verified:', token);
+            },
+            'error-callback': () => {
+              setTurnstileToken(null);
+              console.error('❌ Turnstile error');
+            },
+            'expired-callback': () => {
+              setTurnstileToken(null);
+              console.warn('⏰ Turnstile token expired');
+            },
+            theme: 'dark',
+            size: 'normal',
+          });
 
+          // Store widget ID for cleanup
+          turnstileWidgetId.current = widgetId;
+        } catch (err) {
+          console.error('Failed to render Turnstile widget:', err);
+        }
+      }
+    };
+
+    // Function to check and render when both script and DOM are ready
+    const checkAndRender = () => {
+      if (typeof window !== 'undefined' && window.turnstile && turnstileRef.current) {
+        renderTurnstile();
+        return true;
+      }
+      return false;
+    };
+
+    // Try immediate render if script is already loaded
+    if (checkAndRender()) {
       return () => {
-        delete window.onTurnstileSuccess;
-        delete window.onTurnstileError;
-        delete window.onTurnstileExpired;
+        if (turnstileWidgetId.current && typeof window !== 'undefined' && window.turnstile) {
+          try {
+            window.turnstile.remove(turnstileWidgetId.current);
+            turnstileWidgetId.current = null;
+          } catch (e) {
+            console.warn('Failed to remove Turnstile widget:', e);
+          }
+        }
       };
     }
+
+    // Wait for script to load and DOM to be ready
+    let checkInterval = null;
+    let timeoutId = null;
+
+    checkInterval = setInterval(() => {
+      if (checkAndRender()) {
+        if (checkInterval) clearInterval(checkInterval);
+        if (timeoutId) clearTimeout(timeoutId);
+      }
+    }, 100);
+
+    // Cleanup interval after 10 seconds
+    timeoutId = setTimeout(() => {
+      if (checkInterval) clearInterval(checkInterval);
+    }, 10000);
+
+    // Cleanup function
+    return () => {
+      if (checkInterval) clearInterval(checkInterval);
+      if (timeoutId) clearTimeout(timeoutId);
+      if (turnstileWidgetId.current && typeof window !== 'undefined' && window.turnstile) {
+        try {
+          window.turnstile.remove(turnstileWidgetId.current);
+          turnstileWidgetId.current = null;
+        } catch (e) {
+          console.warn('Failed to remove Turnstile widget:', e);
+        }
+      }
+    };
   }, []);
 
   // Helper function to reset Turnstile widget
   const resetTurnstileWidget = () => {
-    if (typeof window !== 'undefined' && window.turnstile) {
+    if (typeof window !== 'undefined' && window.turnstile && turnstileWidgetId.current) {
       try {
-        // Find the widget element and reset it
-        const widget = document.querySelector('.cf-turnstile');
-        if (widget) {
-          const widgetId = widget.getAttribute('data-widget-id');
-          if (widgetId) {
-            window.turnstile.reset(widgetId);
-          } else {
-            // Fallback: reset all widgets
-            window.turnstile.reset();
-          }
-        }
+        window.turnstile.reset(turnstileWidgetId.current);
         setTurnstileToken(null);
       } catch (err) {
         console.warn('Failed to reset Turnstile widget:', err);
@@ -333,14 +403,46 @@ const SignUp = () => {
           This script:
           1. Loads Turnstile JavaScript library
           2. Makes window.turnstile available globally
-          3. Automatically scans page for .cf-turnstile elements
-          4. Renders widgets and starts automatic verification
+          3. Widget is manually rendered via useEffect to work with client-side navigation
           
-          Strategy: "lazyOnload" = Load after page is interactive
+          Strategy: "afterInteractive" = Load after page is interactive
           ============================================================ */}
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js"
         strategy="afterInteractive"
+        onLoad={() => {
+          // Trigger widget rendering when script loads
+          // Use a small delay to ensure DOM is ready
+          setTimeout(() => {
+            if (turnstileRef.current && typeof window !== 'undefined' && window.turnstile && !turnstileWidgetId.current) {
+              try {
+                // Clear any existing content
+                turnstileRef.current.innerHTML = '';
+                
+                const widgetId = window.turnstile.render(turnstileRef.current, {
+                  sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA',
+                  callback: (token) => {
+                    setTurnstileToken(token);
+                    console.log('✅ Turnstile verified:', token);
+                  },
+                  'error-callback': () => {
+                    setTurnstileToken(null);
+                    console.error('❌ Turnstile error');
+                  },
+                  'expired-callback': () => {
+                    setTurnstileToken(null);
+                    console.warn('⏰ Turnstile token expired');
+                  },
+                  theme: 'dark',
+                  size: 'normal',
+                });
+                turnstileWidgetId.current = widgetId;
+              } catch (err) {
+                console.error('Failed to render Turnstile widget on script load:', err);
+              }
+            }
+          }, 200);
+        }}
       />
       <div className="min-h-screen w-full bg-[#272052] overflow-x-hidden ">
         <div
@@ -704,15 +806,16 @@ const SignUp = () => {
                   </div>
                 )}
                 {/* ============================================================
-                  CLOUDFLARE TURNSTILE WIDGET - AUTOMATIC VERIFICATION
+                  CLOUDFLARE TURNSTILE WIDGET - MANUAL RENDERING
                   ============================================================
                   
                   HOW IT WORKS:
-                  1. Widget is rendered once via useEffect to prevent duplicates
-                  2. Widget starts analyzing user behavior in the background
-                  3. No user interaction needed - verification happens automatically
-                  4. When verified → onTurnstileSuccess() callback fires automatically
-                  5. Token is stored in state and sent to backend with form
+                  1. Widget container is rendered with a ref
+                  2. Widget is manually rendered via useEffect when script loads
+                  3. This ensures it works on both page refresh and client-side navigation
+                  4. Widget starts analyzing user behavior in the background
+                  5. When verified → callback fires automatically
+                  6. Token is stored in state and sent to backend with form
                   
                   Widget Modes:
                   - "Managed" (default): Automatically decides if challenge needed
@@ -723,13 +826,8 @@ const SignUp = () => {
                   ============================================================ */}
                 <div className="w-full flex justify-center mt-2">
                   <div
+                    ref={turnstileRef}
                     className="cf-turnstile"
-                    data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
-                    data-callback="onTurnstileSuccess"
-                    data-error-callback="onTurnstileError"
-                    data-expired-callback="onTurnstileExpired"
-                    data-theme="dark"
-                    data-size="normal"
                   />
                 </div>
                 {!turnstileToken && (

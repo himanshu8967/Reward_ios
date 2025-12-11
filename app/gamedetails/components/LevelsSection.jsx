@@ -144,7 +144,22 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
                     const isPending = !isCompleted && !isFailed && !isExpired;
 
                     // Progressive unlocking based on taskProgression rules
+                    // PRIORITY: Use progression data from API if available (for downloaded games)
+                    // Otherwise, calculate based on taskProgression rules
                     const isLocked = (() => {
+                        // Check if goal has progression data from API (downloaded games)
+                        if (goal.progression && typeof goal.progression.isLocked === 'boolean') {
+                            console.log(`🎯 LevelsSection: Using API progression data for goal ${index + 1}:`, {
+                                goalId: goal.goal_id,
+                                isLocked: goal.progression.isLocked,
+                                isUnlocked: goal.progression.isUnlocked,
+                                unlockReason: goal.progression.unlockReason,
+                                batchNumber: goal.progression.batchNumber
+                            });
+                            return goal.progression.isLocked;
+                        }
+
+                        // Fallback: Calculate based on taskProgression rules (for games without progression data)
                         // If no progression rule, use old logic (groups of 3)
                         if (!hasProgressionRule || firstBatchSize === 0) {
                             // Determine which block of three this index belongs to
@@ -228,7 +243,33 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
 
                     // Calculate rewards (only if completed)
                     const coinReward = isCompleted ? goal.amount : 0;
-                    const xpReward = isCompleted ? Math.floor(goal.amount * 0.1) : 0;
+
+                    // Calculate XP based on xpRewardConfig with progressive multiplier
+                    // Task 1 (index 0): baseXP × multiplier^0 = baseXP
+                    // Task 2 (index 1): baseXP × multiplier^1 = baseXP × multiplier
+                    // Task 3 (index 2): baseXP × multiplier^2
+                    // Task 4 (index 3): baseXP × multiplier^3
+                    // Each subsequent task multiplies the previous task's XP by the multiplier
+                    const xpConfig = game?.xpRewardConfig || { baseXP: 1, multiplier: 1 };
+                    const baseXP = xpConfig.baseXP || 1;
+                    const multiplier = xpConfig.multiplier || 1;
+                    // Calculate: baseXP × (multiplier ^ taskIndex)
+                    // index is 0-based, so Task 1 = index 0, Task 2 = index 1, etc.
+                    // This ensures each task's XP is progressively multiplied
+                    const calculatedXP = Math.floor(baseXP * Math.pow(multiplier, index));
+                    // XP reward is only given if task is completed, but XP value is shown for all tasks
+                    const xpReward = isCompleted ? calculatedXP : 0;
+
+                    // Log XP calculation for debugging (only for first few tasks to avoid spam)
+                    if (index < 5) {
+                        console.log(`🎯 Task ${index + 1} XP Calculation:`, {
+                            taskNumber: index + 1,
+                            baseXP,
+                            multiplier,
+                            calculatedXP,
+                            formula: `baseXP(${baseXP}) × multiplier(${multiplier})^${index} = ${calculatedXP}`
+                        });
+                    }
 
                     // Format time limit
                     let timeLimit = 'No limit';
@@ -261,7 +302,7 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
                         title: goal.text,
                         timeLimit,
                         reward: goal.amount,
-                        points: `+${Math.floor(goal.amount * 0.1)}`,
+                        points: `+${calculatedXP}`,
                         gradient,
                         goalId: goal.goal_id,
                         section: goal.section,

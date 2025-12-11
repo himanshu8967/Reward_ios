@@ -541,6 +541,55 @@ const GameCard = ({ onClose: onCloseProp }) => {
         return swipeGames[currentGameIndex];
     }, [swipeGames, currentGameIndex]);
 
+    // Calculate coins and total XP for current game (same logic as TaskListSection and HighestEarningGame)
+    const currentGameRewards = useMemo(() => {
+        if (!currentGame) return { coins: 0, totalXP: 0 };
+
+        const rawData = currentGame.besitosRawData || {};
+
+        // Calculate coins - use rewards.coins first (from API), then fallback to amount
+        // Priority: rewards.coins > besitosRawData.amount > game.amount
+        const coinAmount = currentGame.rewards?.coins || rawData.amount || currentGame.amount || 0;
+        const coins = typeof coinAmount === 'number' ? coinAmount : (typeof coinAmount === 'string' ? parseFloat(coinAmount.replace('$', '')) || 0 : 0);
+
+        // Calculate total XP with progressive multiplier (same as game details page)
+        // Task 1: baseXP × multiplier^0
+        // Task 2: baseXP × multiplier^1
+        // Task 3: baseXP × multiplier^2
+        // ...
+        // Total = sum of all task XPs
+        let totalXP = 0;
+        if (currentGame.rewards?.xp) {
+            // Use rewards.xp if available
+            totalXP = currentGame.rewards.xp;
+        } else {
+            // Calculate from xpRewardConfig with progressive multiplier
+            const xpConfig = currentGame.xpRewardConfig || { baseXP: 1, multiplier: 1 };
+            const baseXP = xpConfig.baseXP || 1;
+            const multiplier = xpConfig.multiplier || 1;
+
+            // Get total number of tasks/goals
+            const goals = rawData.goals || currentGame.goals || [];
+            const totalTasks = goals.length || 0;
+
+            // Calculate total XP: sum of baseXP × multiplier^taskIndex for all tasks
+            // This is a geometric series: baseXP × (multiplier^totalTasks - 1) / (multiplier - 1) when multiplier ≠ 1
+            // When multiplier = 1, it's just baseXP × totalTasks
+            if (multiplier === 1) {
+                // Simple case: all tasks have same XP
+                totalXP = baseXP * totalTasks;
+            } else if (totalTasks > 0) {
+                // Geometric series: baseXP × (multiplier^totalTasks - 1) / (multiplier - 1)
+                totalXP = baseXP * (Math.pow(multiplier, totalTasks) - 1) / (multiplier - 1);
+            }
+        }
+
+        return {
+            coins: coins,
+            totalXP: Math.floor(totalXP)
+        };
+    }, [currentGame]);
+
     // OPTIMIZED: Memoize debug logging to prevent unnecessary console output
     const debugInfo = useMemo(() => {
         console.log('🎮 GameCard: Total games available:', swipeGames?.length);
@@ -674,16 +723,16 @@ const GameCard = ({ onClose: onCloseProp }) => {
                             })()}
                         </p>
                         <div className="flex items-center gap-x-1.5 text-sm font-semibold">
-                            <span>Earn up to {currentGame?.rewards?.coins || currentGame?.amount || 0}</span>
+                            <span>Earn up to {currentGameRewards.coins || 0}</span>
                             <img
                                 className="w-5 h-5"
-                                alt="Currency symbol"
+                                alt="Coin icon"
                                 src="/dollor.png"
                             />
-                            <span>& {currentGame?.rewards?.xp || currentGame?.cpi || 0}</span>
+                            <span>& {currentGameRewards.totalXP || 0}</span>
                             <img
                                 className="w-5 h-5"
-                                alt="Reward icon"
+                                alt="XP icon"
                                 src="/xp.svg"
                             />
                             <span className="font-semibold">points</span>
@@ -847,16 +896,16 @@ const GameCard = ({ onClose: onCloseProp }) => {
                             })()}
                         </p>
                         <div className="flex items-center gap-x-1.5 text-sm font-semibold">
-                            <span>Earn up to {currentGame?.rewards?.coins || currentGame?.amount || 0}</span>
+                            <span>Earn up to {currentGameRewards.coins || 0}</span>
                             <img
                                 className="w-5 h-5"
-                                alt="Currency symbol"
+                                alt="Coin icon"
                                 src="/dollor.png"
                             />
-                            <span>& {currentGame?.rewards?.xp || currentGame?.cpi || 0}</span>
+                            <span>& {currentGameRewards.totalXP || 0}</span>
                             <img
                                 className="w-5 h-5"
-                                alt="Reward icon"
+                                alt="XP icon"
                                 src="/xp.svg"
                             />
                             <span className="font-semibold">points</span>

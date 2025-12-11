@@ -230,7 +230,8 @@ export const useDailyRewards = () => {
         }
 
         if (data.success && data.data) {
-          // Update Redux store with new coins and XP
+          // Update Redux store with new coins and XP from reward response
+          // Use xp value from response (includes multipliers) for reward model
           dispatch(
             updateUserEarnings({
               coins: data.data.coins || 0,
@@ -279,16 +280,16 @@ export const useDailyRewards = () => {
           // Set success message immediately so user sees it right away
           // Use actual earned amounts from API response
           const earnedCoins = data.data.coins || data.data.rewardCoins || 0;
-          // Use baseXp instead of xp for display in modal
-          const baseXp =
-            data.data.baseXp ||
-            data.data.baseXP ||
+          // Use xp value from reward response (includes multipliers)
+          const earnedXp =
             data.data.xp ||
             data.data.rewardXp ||
+            data.data.baseXp ||
+            data.data.baseXP ||
             0;
 
           setSuccessMessage(
-            `Reward claimed! You earned ${earnedCoins} coins and ${baseXp} XP!`
+            `Reward claimed! You earned ${earnedCoins} coins and ${earnedXp} XP!`
           );
           setError(null);
 

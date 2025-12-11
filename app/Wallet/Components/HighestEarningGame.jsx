@@ -120,12 +120,50 @@ export const HighestEarningGame = () => {
         // Use besitosRawData if available
         const rawData = game.besitosRawData || {};
 
+        // Calculate coins - use rewards.coins first (from API), then fallback to amount
+        // Priority: rewards.coins > besitosRawData.amount > game.amount
+        const coinAmount = game.rewards?.coins || rawData.amount || game.amount || 0;
+        const earnings = typeof coinAmount === 'number' ? coinAmount.toString() : (typeof coinAmount === 'string' ? coinAmount.replace('$', '') : '0');
+
+        // Calculate total XP with progressive multiplier (same as game details page)
+        // Task 1: baseXP × multiplier^0
+        // Task 2: baseXP × multiplier^1
+        // Task 3: baseXP × multiplier^2
+        // ...
+        // Total = sum of all task XPs
+        let totalXP = 0;
+        if (game.rewards?.xp) {
+            // Use rewards.xp if available
+            totalXP = game.rewards.xp;
+        } else {
+            // Calculate from xpRewardConfig with progressive multiplier
+            const xpConfig = game.xpRewardConfig || { baseXP: 1, multiplier: 1 };
+            const baseXP = xpConfig.baseXP || 1;
+            const multiplier = xpConfig.multiplier || 1;
+
+            // Get total number of tasks/goals
+            const goals = rawData.goals || game.goals || [];
+            const totalTasks = goals.length || 0;
+
+            // Calculate total XP: sum of baseXP × multiplier^taskIndex for all tasks
+            // This is a geometric series: baseXP × (multiplier^totalTasks - 1) / (multiplier - 1) when multiplier ≠ 1
+            // When multiplier = 1, it's just baseXP × totalTasks
+            if (multiplier === 1) {
+                // Simple case: all tasks have same XP
+                totalXP = baseXP * totalTasks;
+            } else if (totalTasks > 0) {
+                // Geometric series: baseXP × (multiplier^totalTasks - 1) / (multiplier - 1)
+                totalXP = baseXP * (Math.pow(multiplier, totalTasks) - 1) / (multiplier - 1);
+            }
+        }
+
         return {
             id: game._id || game.id || game.gameId,
             title: rawData.title || game.details?.name || game.name || game.title || 'Game',
             category: rawData.categories?.[0]?.name || game.details?.category || (typeof game.categories?.[0] === 'string' ? game.categories[0] : 'Action'),
             image: rawData.square_image || rawData.image || game.images?.banner || game.images?.large_image || game.image || game.square_image,
-            earnings: rawData.amount ? `$${rawData.amount}` : (game.rewards?.coins ? `$${game.rewards.coins}` : (game.amount ? `$${game.amount}` : '$5')),
+            earnings: earnings, // Now shows coins without $ sign
+            totalXP: Math.floor(totalXP), // Total XP calculated with progressive multiplier
             fullGameData: game // Store full game including besitosRawData
         };
     }) || [];
@@ -207,17 +245,17 @@ export const HighestEarningGame = () => {
                                             aria-label="Earn rewards banner"
                                         >
                                             <div className="absolute top-1.5 left-[9px] [font-family:'Poppins',Helvetica] font-medium text-white text-base tracking-[0] leading-[normal]">
-                                                Earn upto {String(game.earnings || '$5')}
+                                                Earn upto {String(game.earnings || '0')}
                                             </div>
 
                                             <img
                                                 className="absolute w-[20px] h-[20px] top-[7px] left-[124px] aspect-[0.97]"
-                                                alt="Dollar coin icon"
+                                                alt="Coin icon"
                                                 src="/dollor.png"
                                             />
 
                                             <div className="absolute h-[13px] top-[34px] left-[9px] [font-family:'Poppins',Helvetica] font-medium text-white text-base tracking-[0] leading-[13px] whitespace-nowrap">
-                                                and 100
+                                                and {String(game.totalXP || 0)}
                                             </div>
 
                                             <img

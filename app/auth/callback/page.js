@@ -87,46 +87,69 @@ function AuthCallbackContent() {
           const message = authError || "Authentication token not found.";
           deepLink += `?message=${encodeURIComponent(message)}`;
         }
-        console.log("📱 [Auth Callback] Processing deep link redirect:", deepLink);
-        
+        console.log(
+          "📱 [Auth Callback] Processing deep link redirect:",
+          deepLink
+        );
+
         // For mobile apps, we need to:
         // 1. Close the Capacitor Browser
         // 2. Redirect to the deep link which will be caught by the app's deep link handler
-        
+
         try {
           // Close the browser FIRST
           await Browser.close();
           console.log("✅ [Auth Callback] Browser closed successfully");
-          
+
           // Wait a bit for browser to fully close, then redirect to deep link
           setTimeout(() => {
-            console.log("📱 [Auth Callback] Redirecting to deep link:", deepLink);
+            console.log(
+              "📱 [Auth Callback] Redirecting to deep link:",
+              deepLink
+            );
             try {
               // Try to redirect to deep link
               window.location.href = deepLink;
-              
+
               // Fallback: If deep link doesn't work, try using App plugin
               setTimeout(() => {
                 // If we're still here after 1 second, the deep link might not have worked
                 // Try alternative method using App.openUrl if available
-                if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
-                  window.Capacitor.Plugins.App.openUrl({ url: deepLink }).catch((err) => {
-                    console.error("❌ [Auth Callback] Failed to open deep link via App plugin:", err);
-                  });
+                if (
+                  typeof window !== "undefined" &&
+                  window.Capacitor &&
+                  window.Capacitor.Plugins &&
+                  window.Capacitor.Plugins.App
+                ) {
+                  window.Capacitor.Plugins.App.openUrl({ url: deepLink }).catch(
+                    (err) => {
+                      console.error(
+                        "❌ [Auth Callback] Failed to open deep link via App plugin:",
+                        err
+                      );
+                    }
+                  );
                 }
               }, 1000);
             } catch (redirectError) {
-              console.error("❌ [Auth Callback] Failed to redirect to deep link:", redirectError);
+              console.error(
+                "❌ [Auth Callback] Failed to redirect to deep link:",
+                redirectError
+              );
               setErrorMessage("Failed to redirect to app. Please try again.");
               setStatus("error");
             }
           }, 500); // Increased delay to ensure browser is fully closed
-          
         } catch (closeError) {
-          console.warn("⚠️ [Auth Callback] Browser close error (may already be closed):", closeError);
+          console.warn(
+            "⚠️ [Auth Callback] Browser close error (may already be closed):",
+            closeError
+          );
           // Even if closing fails, try to redirect to deep link
           setTimeout(() => {
-            console.log("📱 [Auth Callback] Attempting deep link redirect after close error");
+            console.log(
+              "📱 [Auth Callback] Attempting deep link redirect after close error"
+            );
             window.location.href = deepLink;
           }, 300);
         }

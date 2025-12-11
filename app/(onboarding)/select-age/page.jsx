@@ -51,76 +51,73 @@ export default function AgeSelection() {
 
 
   return (
-    <div className='relative w-full h-screen bg-[#272052] overflow-hidden'>
-      <div className='absolute w-[542px] h-[542px] top-0 left-0 bg-[#af7de6] rounded-[271px] blur-[250px]' />
+    <div className='relative w-full h-screen bg-[#272052] overflow-hidden flex flex-col'>
+      <div className='absolute w-[542px] h-[542px] top-0 left-0 bg-[#af7de6] rounded-full blur-[250px]' />
 
-      <div className='absolute top-[100px] left-0 px-4'>
-        <h1 className='text-white font-poppins font-normal text-4xl tracking-wide leading-tight'>
+      <div className='relative z-10 px-6 pt-20 font-poppins'>
+        <h1 className='text-white text-4xl font-light leading-tight mt-1 mb-4'>
           Select your age <br /> range
         </h1>
-        <p className='mt-4 text-white font-poppins font-light text-base'>
+        <p className='text-white/70 text-base font-light'>
           Helps with content filtering, COPPA <br /> compliance, and reward
           expectations
         </p>
       </div>
 
-      <div className='absolute inset-0 w-full flex items-center mt-50 justify-center'>
-        <div className='relative w-full mx-4'>
-          {onboardingStatus === 'loading' && (
-            <div className='text-white text-lg text-center p-4'>Loading...</div>
-          )}
-          {onboardingStatus === 'failed' && (
-            <div className='text-red-400 text-lg text-center p-4'>{error}</div>
-          )}
-          {onboardingStatus === 'succeeded' && (
-            <div className='relative h-[250px] rounded-xl bg-[rgba(255,255,255,0.1)] backdrop-blur-sm'>
-              {/* Wheel picker container */}
-              <div
-                ref={wheelRef}
-                className='h-full overflow-y-scroll scrollbar-hide'
-                onScroll={handleScroll}
-                style={{
-                  scrollSnapType: 'y mandatory',
-                  scrollBehavior: 'smooth'
-                }}
-              >
-                <div style={{ height: `${itemHeight * 2}px` }} />
+      <div className='relative z-10 flex-1 flex flex-col justify-center items-center px-6'>
+        {onboardingStatus === 'loading' && (
+          <p className="text-white text-center font-poppins">Loading options...</p>
+        )}
+        {onboardingStatus === 'failed' && (
+          <p className="text-red-400 text-center font-poppins">{error}</p>
+        )}
+        {onboardingStatus === 'succeeded' && (
+          <div className='relative h-[250px] sm:h-[280px] w-full max-w-[335px] rounded-xl bg-[rgba(255,255,255,0.1)] backdrop-blur-sm'>
+            {/* Wheel picker container */}
+            <div
+              ref={wheelRef}
+              className='h-full overflow-y-scroll scrollbar-hide'
+              onScroll={handleScroll}
+              style={{
+                scrollSnapType: 'y mandatory',
+                scrollBehavior: 'smooth'
+              }}
+            >
+              <div style={{ height: `${itemHeight * 2}px` }} />
 
-                {ageOptions.map((option, index) => (
+              {ageOptions.map((option, index) => (
+                <div
+                  key={option.id}
+                  onClick={() => handleWheelClick(index)}
+                  className={`flex items-center justify-center cursor-pointer transition-all duration-200 ${selectedIndex === index
+                    ? 'bg-white rounded-lg shadow-lg'
+                    : 'bg-transparent hover:bg-white/10'
+                    }`}
+                  style={{
+                    height: `${itemHeight}px`,
+                    scrollSnapAlign: 'center',
+                    margin: '0 4px',
+                    borderRadius: selectedIndex === index ? '8px' : '0'
+                  }}
+                >
                   <div
-                    key={option.id}
-                    onClick={() => handleWheelClick(index)}
-                    className={`flex items-center justify-center cursor-pointer transition-all duration-200 ${selectedIndex === index
-                      ? 'bg-white rounded-lg mx-1  shadow-lg transform scale-105'
-                      : 'bg-transparent hover:bg-white/10'
+                    className={`[font-family:'Poppins',Helvetica] text-lg text-center tracking-[0] leading-6 transition-all duration-200 ${selectedIndex === index
+                      ? 'text-[#6433aa] font-semibold'
+                      : 'text-white font-normal opacity-60'
                       }`}
-                    style={{
-                      height: `${itemHeight}px`,
-                      scrollSnapAlign: 'center'
-                    }}
                   >
-                    <div
-                      className={`[font-family:'Poppins',Helvetica] text-lg text-center tracking-[0] leading-6 transition-all duration-200 ${selectedIndex === index
-                        ? 'text-[#6433aa] font-semibold'
-                        : 'text-white font-normal opacity-60'
-                        }`}
-                    >
-                      {option.label}
-                    </div>
+                    {option.label}
                   </div>
-                ))}
+                </div>
+              ))}
 
-                <div style={{ height: `${itemHeight * 2}px` }} />
-              </div>
-
-              <div className='pointer-events-none absolute inset-0 flex items-center justify-center'>
-                <div className='w-full h-[50px] border-t-2 border-b-2 border-white/30 bg-white/5' />
-              </div>
-
-              <div className='pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-b from-[rgba(39,32,82,0.8)] via-transparent to-[rgba(39,32,82,0.8)]' />
+              <div style={{ height: `${itemHeight * 2}px` }} />
             </div>
-          )}
-        </div>
+
+            {/* Gradient overlay to fade items above and below selection */}
+            <div className='pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-b from-[rgba(39,32,82,0.8)] via-transparent to-[rgba(39,32,82,0.8)]' />
+          </div>
+        )}
       </div>
 
     </div>

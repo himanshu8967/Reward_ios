@@ -935,13 +935,18 @@ function GameDetailsContent() {
                                 <span className="flex items-center gap-1">
                                     <span className="font-semibold">
                                         {(() => {
-                                            // Calculate total XP: baseXP * multiplier * totalTasks
+                                            // Calculate total XP with progressive multiplier
                                             // Or use rewards.xp if available
                                             if (displayGame?.rewards?.xp) {
                                                 return displayGame.rewards.xp;
                                             }
 
-                                            // Calculate from xpRewardConfig
+                                            // Calculate from xpRewardConfig with progressive multiplier
+                                            // Task 1: baseXP × multiplier^0
+                                            // Task 2: baseXP × multiplier^1
+                                            // Task 3: baseXP × multiplier^2
+                                            // ...
+                                            // Total = sum of all task XPs
                                             const xpConfig = displayGame?.xpRewardConfig || { baseXP: 1, multiplier: 1 };
                                             const baseXP = xpConfig.baseXP || 1;
                                             const multiplier = xpConfig.multiplier || 1;
@@ -950,10 +955,19 @@ function GameDetailsContent() {
                                             const goals = displayGame?.besitosRawData?.goals || displayGame?.goals || [];
                                             const totalTasks = goals.length || 0;
 
-                                            // Calculate: baseXP * multiplier * totalTasks
-                                            const totalXP = baseXP * multiplier * totalTasks;
+                                            // Calculate total XP: sum of baseXP × multiplier^taskIndex for all tasks
+                                            // This is a geometric series: baseXP × (multiplier^totalTasks - 1) / (multiplier - 1) when multiplier ≠ 1
+                                            // When multiplier = 1, it's just baseXP × totalTasks
+                                            let totalXP = 0;
+                                            if (multiplier === 1) {
+                                                // Simple case: all tasks have same XP
+                                                totalXP = baseXP * totalTasks;
+                                            } else {
+                                                // Geometric series: baseXP × (multiplier^totalTasks - 1) / (multiplier - 1)
+                                                totalXP = baseXP * (Math.pow(multiplier, totalTasks) - 1) / (multiplier - 1);
+                                            }
 
-                                            return totalXP > 0 ? totalXP : 0;
+                                            return Math.floor(totalXP) > 0 ? Math.floor(totalXP) : 0;
                                         })()}
                                     </span>
                                     <img

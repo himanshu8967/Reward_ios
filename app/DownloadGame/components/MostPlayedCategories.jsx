@@ -3,8 +3,9 @@ import React from "react";
 import Image from "next/image";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-import { fetchMostPlayedScreenGames, fetchGameById } from "@/lib/redux/slice/gameSlice";
+import { fetchMostPlayedScreenGames } from "@/lib/redux/slice/gameSlice";
 import { useAuth } from "@/contexts/AuthContext";
+import { getAgeGroupFromProfile, getGenderFromProfile } from "@/lib/utils/ageGroupUtils";
 import GameItemCard from "./GameItemCard";
 import WatchAdCard from "./WatchAdCard";
 // Note: This file uses fetchMostPlayedScreenGames, not fetchGamesBySection
@@ -47,24 +48,71 @@ export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) =
 
 
 
-    // Process games from API into the same format
+    // Process games from API into the same format - using besitosRawData (same flow as other components)
     const processGames = (games) => {
         return games.map((game, index) => {
+            // Use besitosRawData if available, otherwise fallback to existing structure
+            const rawData = game.besitosRawData || {};
+
             // Clean game name - remove platform suffix after "-"
-            const cleanGameName = (game.details?.name || game.name || game.title || "Game").split(' - ')[0].trim();
+            const cleanGameName = (rawData.title || game.details?.name || game.name || game.title || "Game").split(' - ')[0].trim();
+
+            // Get category from besitosRawData first, then fallback
+            const category = rawData.categories?.[0]?.name || game.details?.category || "Game";
+
+            // Calculate coins - use rewards.coins first (from API), then fallback to amount
+            // Priority: rewards.coins > besitosRawData.amount > game.amount
+            const coinAmount = game.rewards?.coins || rawData.amount || game.amount || 0;
+            const amount = typeof coinAmount === 'number' ? coinAmount : (typeof coinAmount === 'string' ? parseFloat(coinAmount.replace('$', '')) || 0 : 0);
+
+            // Calculate total XP with progressive multiplier (same as game details page and other components)
+            // Task 1: baseXP × multiplier^0
+            // Task 2: baseXP × multiplier^1
+            // Task 3: baseXP × multiplier^2
+            // ...
+            // Total = sum of all task XPs
+            let totalXP = 0;
+            if (game.rewards?.xp) {
+                // Use rewards.xp if available
+                totalXP = game.rewards.xp;
+            } else {
+                // Calculate from xpRewardConfig with progressive multiplier
+                const xpConfig = game.xpRewardConfig || { baseXP: 1, multiplier: 1 };
+                const baseXP = xpConfig.baseXP || 1;
+                const multiplier = xpConfig.multiplier || 1;
+
+                // Get total number of tasks/goals
+                const goals = rawData.goals || game.goals || [];
+                const totalTasks = goals.length || 0;
+
+                // Calculate total XP: sum of baseXP × multiplier^taskIndex for all tasks
+                // This is a geometric series: baseXP × (multiplier^totalTasks - 1) / (multiplier - 1) when multiplier ≠ 1
+                // When multiplier = 1, it's just baseXP × totalTasks
+                if (multiplier === 1) {
+                    // Simple case: all tasks have same XP
+                    totalXP = baseXP * totalTasks;
+                } else if (totalTasks > 0) {
+                    // Geometric series: baseXP × (multiplier^totalTasks - 1) / (multiplier - 1)
+                    totalXP = baseXP * (Math.pow(multiplier, totalTasks) - 1) / (multiplier - 1);
+                }
+            }
 
             return {
-                id: game._id || game.id,
+                id: game._id || game.id || game.gameId,
                 name: cleanGameName,
-                genre: game.details?.category || "Game",
-                image: game.images?.banner || game.images?.large_image || game.details?.square_image || game.details?.image || "/placeholder-game.png",
-                overlayImage: game.details?.image || game.details?.square_image,
-                amount: game.rewards?.coins || game.amount || "50", // Use rewards from API
-                xp: game.rewards?.xp || "100", // Use XP from API
+                genre: category,
+                // Use besitosRawData images first (highest priority)
+                image: rawData.square_image || rawData.image || game.images?.banner || game.images?.large_image || game.details?.square_image || game.details?.image || "/placeholder-game.png",
+                overlayImage: rawData.image || rawData.square_image || game.details?.image || game.details?.square_image,
+                amount: amount, // Coins without $ sign
+                xp: Math.floor(totalXP), // Total XP calculated with progressive multiplier
                 coinIcon: "/dollor.png",
                 picIcon: "/xp.svg",
-                backgroundImage: game.images?.banner || game.details?.large_image || game.details?.image,
-                downloadUrl: game.details?.downloadUrl,
+                // Use besitosRawData large_image for background
+                backgroundImage: rawData.large_image || rawData.image || game.images?.banner || game.details?.large_image || game.details?.image,
+                // Use besitosRawData url for download
+                downloadUrl: rawData.url || game.details?.downloadUrl,
+                // Store full game data including besitosRawData
                 fullData: game,
             };
         });
@@ -96,33 +144,43 @@ export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) =
     };
 
     // Handle click on game - navigate to game details with full data
-    const handleGameClick = async (game) => {
-        if (game && game.fullData) {
-            console.log('🎮 MostPlayedCategories: Game clicked:', {
-                gameId: game.id,
-                gameName: game.name,
-                hasFullData: !!game.fullData
-            });
-
-            // Clear Redux state
-            dispatch({ type: 'games/clearCurrentGameDetails' });
-
-            try {
-                // Fetch detailed game data with goals/levels using getGameById
-                console.log('🎮 MostPlayedCategories: Fetching detailed game data for:', game.id);
-                await dispatch(fetchGameById({ gameId: game.id }));
-
-                // Navigate to game details page
-                router.push(`/gamedetails?id=${game.id}`);
-            } catch (error) {
-                console.error('❌ MostPlayedCategories: Failed to fetch game details:', error);
-
-                // Fallback: Store basic game data and navigate
-                localStorage.setItem('selectedGameData', JSON.stringify(game.fullData));
-                router.push(`/gamedetails?id=${game.id}`);
-            }
+    // Matches the pattern used in Swipe, Highest Earning, TaskListSection, and other sections
+    const handleGameClick = React.useCallback((game) => {
+        if (!game || !game.fullData) {
+            console.warn('🎮 MostPlayedCategories: Game or fullData is missing');
+            return;
         }
-    };
+
+        const fullGame = game.fullData;
+        console.log('🎮 MostPlayedCategories: Navigating to game details for:', {
+            title: fullGame.besitosRawData?.title || fullGame.details?.name || fullGame.title || fullGame.name,
+            _id: fullGame._id,
+            id: fullGame.id,
+            gameId: fullGame.gameId,
+            usingId: fullGame.id || fullGame._id || fullGame.gameId,
+            hasBesitosRawData: !!fullGame.besitosRawData
+        });
+
+        // Clear Redux state BEFORE navigation to prevent showing old data
+        dispatch({ type: 'games/clearCurrentGameDetails' });
+
+        // Store full game data including besitosRawData in localStorage for details page
+        // This matches the pattern used in Swipe, Highest Earning, TaskListSection, etc.
+        try {
+            localStorage.setItem('selectedGameData', JSON.stringify(fullGame));
+            console.log('💾 [MostPlayedCategories] Stored full game data with besitosRawData:', {
+                hasBesitosRawData: !!fullGame.besitosRawData,
+                gameId: fullGame.id || fullGame._id || fullGame.gameId
+            });
+        } catch (error) {
+            console.error('❌ Failed to store game data:', error);
+        }
+
+        // Use 'id' field first (as expected by API), fallback to '_id' or 'gameId'
+        // Use gameId query parameter (not id) to match other sections
+        const gameId = fullGame.id || fullGame._id || fullGame.gameId;
+        router.push(`/gamedetails?gameId=${gameId}&source=mostPlayedScreen`);
+    }, [router, dispatch]);
 
     const filterGamesBySearch = (games, query) => {
         if (!query || query.trim() === "") return games;
@@ -190,7 +248,11 @@ export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) =
                             />
                         ))
                     ) : (
-                        <GameItemCard isEmpty={true} />
+                        <div className="flex flex-col items-center justify-center w-full py-8 px-4">
+                            <p className="[font-family:'Poppins',Helvetica] font-normal text-gray-400 text-base text-center">
+                                No games available at the moment
+                            </p>
+                        </div>
                     )}
                 </div>
             </div>
@@ -240,7 +302,11 @@ export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) =
                             />
                         ))
                     ) : (
-                        <GameItemCard isEmpty={true} />
+                        <div className="flex flex-col items-center justify-center w-full py-8 px-4">
+                            <p className="[font-family:'Poppins',Helvetica] font-normal text-gray-400 text-base text-center">
+                                No games available at the moment
+                            </p>
+                        </div>
                     )}
                 </div>
             </div>
