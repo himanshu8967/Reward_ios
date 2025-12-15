@@ -40,6 +40,7 @@ export default function WinStreakPage() {
     const [showRewardModal, setShowRewardModal] = useState(false);
     const [showInfoModal, setShowInfoModal] = useState(false);
     const [rewardData, setRewardData] = useState(null);
+    const [milestones, setMilestones] = useState([]); // Store milestone rewards from API
 
     // Ref for scrollable container
     const scrollContainerRef = useRef(null);
@@ -105,6 +106,24 @@ export default function WinStreakPage() {
                 setLeaderboard(leaderboardResponse.data.leaderboard || []);
             }
 
+            // Store milestone rewards from API response
+            if (historyResponse && historyResponse.success && historyResponse.data && historyResponse.data.milestones) {
+                const apiMilestones = historyResponse.data.milestones || [];
+                setMilestones(apiMilestones);
+                console.log("📊 [WinStreak] Milestones loaded from API:", apiMilestones);
+                
+                // Log day 7 milestone specifically for debugging
+                const day7Milestone = apiMilestones.find(m => m.day === 7);
+                if (day7Milestone) {
+                    console.log("📊 [WinStreak] Day 7 milestone from API:", {
+                        day: day7Milestone.day,
+                        rewards: day7Milestone.rewards,
+                        coins: day7Milestone.rewards?.find(r => r.type === 'coins')?.value,
+                        xp: day7Milestone.rewards?.find(r => r.type === 'xp')?.value
+                    });
+                }
+            }
+
             // Scroll to bottom after additional data is loaded
             setTimeout(() => {
                 if (scrollContainerRef.current) {
@@ -122,22 +141,32 @@ export default function WinStreakPage() {
         }
     };
 
+    // Helper function to get reward from milestones API data
+    const getRewardFromMilestones = (day) => {
+        const milestone = milestones.find(m => m.day === day);
+        if (!milestone || !milestone.rewards) {
+            return null;
+        }
+        
+        const coins = milestone.rewards.find(r => r.type === 'coins')?.value || 0;
+        const xp = milestone.rewards.find(r => r.type === 'xp')?.value || 0;
+        
+        return { coins, xp };
+    };
+
     // Check for milestone rewards based on current streak
     useEffect(() => {
         if (currentStreak > 0) {
-            const milestones = [7, 14, 21, 30];
-            const reachedMilestone = milestones.find(m => m === currentStreak);
+            const milestoneDays = [7, 14, 21, 30];
+            const reachedMilestone = milestoneDays.find(m => m === currentStreak);
 
             if (reachedMilestone) {
-                // Calculate reward based on milestone
-                const rewardAmounts = {
-                    7: { coins: 50, xp: 25 },
-                    14: { coins: 100, xp: 50 },
-                    21: { coins: 150, xp: 75 },
-                    30: { coins: 250, xp: 125 }
+                // Get reward from API milestones data, fallback to defaults if not available
+                const reward = getRewardFromMilestones(reachedMilestone) || {
+                    coins: reachedMilestone === 7 ? 50 : reachedMilestone === 14 ? 100 : reachedMilestone === 21 ? 150 : 250,
+                    xp: reachedMilestone === 7 ? 25 : reachedMilestone === 14 ? 50 : reachedMilestone === 21 ? 75 : 125
                 };
-
-                const reward = rewardAmounts[reachedMilestone];
+                
                 if (reward) {
                     setRewardData({
                         milestone: reachedMilestone,
@@ -149,39 +178,61 @@ export default function WinStreakPage() {
                 }
             }
         }
-    }, [currentStreak]);
+    }, [currentStreak, milestones]);
 
-    // Generate streak tree data for ProgressSection
-    const generateStreakTree = () => {
+    // Generate streak tree data for ProgressSection - memoized to update when milestones change
+    const generateStreakTree = React.useMemo(() => {
         const tree = [];
         for (let day = 1; day <= 30; day++) {
+            const isMilestoneDay = [7, 14, 21, 30].includes(day);
+            // Get reward from API milestones, fallback to defaults if not available
+            const milestone = milestones.find(m => m.day === day);
+            let reward = null;
+            
+            if (isMilestoneDay) {
+                if (milestone && milestone.rewards) {
+                    const coins = milestone.rewards.find(r => r.type === 'coins')?.value || 0;
+                    const xp = milestone.rewards.find(r => r.type === 'xp')?.value || 0;
+                    reward = { coins, xp };
+                } else {
+                    // Fallback to defaults only if milestone data not loaded yet
+                    reward = {
+                        coins: day === 7 ? 50 : day === 14 ? 100 : day === 21 ? 150 : 250,
+                        xp: day === 7 ? 25 : day === 14 ? 50 : day === 21 ? 75 : 125
+                    };
+                }
+            }
+            
             tree.push({
                 day,
                 isCompleted: completedDays.includes(day),
                 isCurrent: day === currentStreak + 1,
-                isMilestone: [7, 14, 21, 30].includes(day),
-                reward: [7, 14, 21, 30].includes(day) ? {
-                    coins: day === 7 ? 50 : day === 14 ? 100 : day === 21 ? 150 : 250,
-                    xp: day === 7 ? 25 : day === 14 ? 50 : day === 21 ? 75 : 125
-                } : null
+                isMilestone: isMilestoneDay,
+                reward: reward
             });
         }
         return tree;
-    };
+    }, [completedDays, currentStreak, milestones]);
 
     // Generate rewards data
     const generateRewards = () => {
         const rewards = [];
-        const milestones = [7, 14, 21, 30];
+        const milestoneDays = [7, 14, 21, 30];
 
-        milestones.forEach(day => {
+        milestoneDays.forEach(day => {
             if (completedDays.includes(day)) {
+                // Get reward from API milestones, fallback to defaults if not available
+                const reward = getRewardFromMilestones(day) || {
+                    coins: day === 7 ? 50 : day === 14 ? 100 : day === 21 ? 150 : 250,
+                    xp: day === 7 ? 25 : day === 14 ? 50 : day === 21 ? 75 : 125
+                };
+                
                 rewards.push({
                     day,
                     isReached: true,
                     reward: {
-                        coins: day === 7 ? 50 : day === 14 ? 100 : day === 21 ? 150 : 250,
-                        xp: day === 7 ? 25 : day === 14 ? 50 : day === 21 ? 75 : 125,
+                        coins: reward.coins,
+                        xp: reward.xp,
                         badge: `Day ${day} Champion!`
                     }
                 });
@@ -264,7 +315,7 @@ export default function WinStreakPage() {
                         streakData={{
                             currentStreak,
                             completedDays,
-                            streakTree: generateStreakTree(),
+                            streakTree: generateStreakTree,
                             rewards: generateRewards()
                         }}
                         streakHistory={streakHistory}
@@ -295,6 +346,7 @@ export default function WinStreakPage() {
             <InfoModal
                 isVisible={showInfoModal}
                 onClose={() => setShowInfoModal(false)}
+                milestones={milestones}
             />
         </div>
     );

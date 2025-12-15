@@ -34,19 +34,18 @@ export default function Home() {
         blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
       />
 
-      {/* Navigation Button with improved touch handling */}
+      {/* Navigation Button with improved touch handling and responsive positioning */}
       <button
         onClick={handleClick}
         disabled={isNavigating}
         className="absolute z-20 touch-manipulation active:scale-95 transition-transform duration-100 hover:opacity-80 disabled:opacity-50"
         style={{
-          right: "4px",
-          bottom: "100px",
-          width: "100px", // Increased touch target
-          height: "300px", // Increased touch target
-          // background: "transparent",
+          right: "clamp(4px, 2vw, 8px)",
+          bottom: "clamp(80px, 15vh, 120px)",
+          width: "clamp(80px, 20vw, 120px)",
+          height: "clamp(200px, 40vh, 350px)",
           borderRadius: "50%",
-          WebkitTapHighlightColor: "transparent", // Remove tap highlight
+          WebkitTapHighlightColor: "transparent",
         }}
         aria-label="Navigate to Select Goal"
       />

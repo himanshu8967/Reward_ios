@@ -131,16 +131,22 @@ const Leadership = () => {
     // Show loading state if games are still loading
     if (gamesBySectionStatus?.["Leadership"] === 'loading') {
         return (
-            <section className="flex flex-col w-full max-w-[335px] items-start gap-2.5 mx-auto">
-                <h3 className="font-semibold text-white text-base">Featured Games</h3>
-                <div className="flex items-center gap-[15px] w-full">
+            <section className="flex flex-col w-full max-w-[335px] items-start gap-2.5 mx-auto px-2 sm:px-0">
+                <h3 className="font-semibold text-white text-base w-full mb-2">Leadership</h3>
+                <div
+                    className={`flex items-start sm:items-center gap-3 sm:gap-[15px] w-full overflow-x-auto pb-2 justify-center`}
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
                     {[1, 2].map((i) => (
-                        <div key={i} className="relative w-40 h-[281px] animate-pulse">
-                            <div className="w-40 h-[180px] bg-gray-700 rounded-[20px]"></div>
-                            <div className="mt-4 space-y-2">
+                        <div key={i} className="relative flex-shrink-0 w-[160px] sm:w-40 h-auto min-h-[281px] animate-pulse">
+                            <div className="w-full h-[185px] bg-gray-700 rounded-[16px]"></div>
+                            <div className="mt-3 space-y-2">
                                 <div className="w-24 h-4 bg-gray-700 rounded"></div>
-                                <div className="w-20 h-8 bg-gray-700 rounded-[10px]"></div>
-                                <div className="w-16 h-3 bg-gray-700 rounded"></div>
+                                <div className="w-full max-w-[140px] h-[37px] bg-gray-700 rounded-[10px]"></div>
+                                <div className="flex gap-2">
+                                    <div className="w-16 h-[29px] bg-gray-700 rounded-[10px]"></div>
+                                    <div className="w-16 h-[29px] bg-gray-700 rounded-[10px]"></div>
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -165,48 +171,70 @@ const Leadership = () => {
         );
     }
     return (
-        <section className="flex flex-col w-full max-w-[335px] items-start gap-2.5 mx-auto">
+        <section className="flex flex-col w-full max-w-[335px] items-start gap-2.5 mx-auto px-2 sm:px-0">
             {/* JACK_58: Ensure heading is present and styled */}
-            <h3 className="font-semibold text-white text-base">Leadership</h3>
+            <h3 className="font-semibold text-white text-base w-full">Leadership</h3>
 
-            <div className="flex items-center gap-[15px] w-full">
+            <div
+                className={`flex items-start sm:items-center gap-3 sm:gap-[15px] w-full overflow-x-auto pb-2 ${leadershipGames.length === 1 ? 'justify-center' : leadershipGames.length === 2 ? 'justify-start sm:justify-center' : 'justify-start'
+                    }`}
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
                 {leadershipGames.map((game, index) => {
                     // Use besitosRawData if available
                     const rawData = game.besitosRawData || {};
                     const displayImage = rawData.square_image || rawData.image || game.images?.icon || game.icon || game.square_image || game.image || '/placeholder-game.png';
                     const displayTitle = rawData.title || game.details?.name || game.title || game.name || 'Game';
 
+                    // Calculate coins and XP
+                    const coinAmount = game.rewards?.coins || rawData.amount || game.amount || 0;
+                    const coins = typeof coinAmount === 'number' ? coinAmount : (typeof coinAmount === 'string' ? parseFloat(coinAmount.replace('$', '').replace(/,/g, '')) || 0 : 0);
+
+                    // Calculate total XP
+                    let totalXP = 0;
+                    if (game.rewards?.xp) {
+                        totalXP = game.rewards.xp;
+                    } else {
+                        const xpConfig = game.xpRewardConfig || { baseXP: 1, multiplier: 1 };
+                        const baseXP = xpConfig.baseXP || 1;
+                        const multiplier = xpConfig.multiplier || 1;
+                        const goals = rawData.goals || game.goals || [];
+                        const totalTasks = goals.length || 0;
+
+                        if (multiplier === 1) {
+                            totalXP = baseXP * totalTasks;
+                        } else if (totalTasks > 0) {
+                            totalXP = baseXP * (Math.pow(multiplier, totalTasks) - 1) / (multiplier - 1);
+                        }
+                    }
+
+                    // Format numbers with commas
+                    const formatNumber = (num) => {
+                        if (num === null || num === undefined) return "0";
+                        const numValue = typeof num === 'string' ? parseFloat(num.replace(/,/g, '')) : num;
+                        if (isNaN(numValue)) return "0";
+                        return numValue.toLocaleString();
+                    };
+
                     return (
                         <article
                             key={game._id || game.id || game.gameId || `game-${index}`}
-                            className="relative w-40 h-[281px] cursor-pointer hover:scale-105 transition-all duration-200"
+                            className="relative flex-shrink-0 w-[160px] sm:w-40 h-auto min-h-[281px] cursor-pointer hover:scale-105 transition-all duration-200"
                             onClick={() => handleGameClick(game)}
                         >
                             <div
-                                className="absolute w-40 h-[185px] top-0 left-0 bg-cover bg-center rounded-[16px]"
+                                className="relative w-full h-[185px] bg-cover bg-center rounded-[16px] overflow-hidden"
                                 style={{
-                                    backgroundImage: ` url(${displayImage})`,
+                                    backgroundImage: `url(${displayImage})`,
                                 }}
                             >
-                                {/* <div className="relative w-[68px] h-[25px] top-3 left-[82px]">
-                                <div className="relative w-[66px] h-[25px] bg-[#ffffff4f] rounded-[5.32px] backdrop-blur-[2.66px]">
-                                    <Image
-                                        width={13}
-                                        height={10}
-                                        className="absolute top-2 left-[7px]"
-                                        alt="Views icon"
-                                        src="https://c.animaapp.com/V1uc3arn/img/vector-2.svg"
-                                    />
-                                    <div className="absolute top-[3px] left-[25px] font-bold text-white text-[13px]">
-                                        {game.amount && typeof game.amount === 'number' ? `$${game.amount}` : 'Free'}
-                                    </div>
-                                </div>
-                            </div> */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                             </div>
 
-                            <div className="flex flex-col w-[154px] gap-2 absolute top-[196px] left-0">
-                                <div className="flex flex-col gap-1">
-                                    <h4 className="font-semibold text-white text-base">
+                            <div className="flex flex-col w-full gap-2 mt-3">
+                                <div className="flex flex-col gap-1.5 w-full">
+                                    {/* Game Name - Match Highest Earning Games style */}
+                                    <h4 className="[font-family:'Poppins',Helvetica] font-bold text-white text-sm sm:text-base leading-tight break-words w-full">
                                         {(() => {
                                             const title = displayTitle;
                                             // Remove "Android" text from the title
@@ -217,19 +245,36 @@ const Leadership = () => {
                                         })()}
                                     </h4>
 
-                                    <div className="w-[120px] h-[37px] rounded-[10px]  mb-6 overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] flex items-center pl-2">
-                                        <div className="font-medium text-white text-base">
-                                            {rawData.categories?.[0]?.name || game.details?.category || (game.categories && game.categories.length > 0
-                                                ? (typeof game.categories[0] === 'object' ? game.categories[0].name || 'Game' : game.categories[0])
-                                                : 'Game')}
+                                    {/* Genre - Match Highest Earning Games style */}
+                                    <h4 className="[font-family:'Poppins',Helvetica] mb-2 mt-[2px] font-light text-white text-[11px] sm:text-[12px] leading-tight break-words">
+                                        ({rawData.categories?.[0]?.name || game.details?.category || (game.categories && game.categories.length > 0
+                                            ? (typeof game.categories[0] === 'object' ? game.categories[0].name || 'Game' : game.categories[0])
+                                            : 'Game')})
+                                    </h4>
+
+                                    {/* Stats - Match Highest Earning Games alignment and style */}
+                                    <div className="flex gap-2 flex-wrap" role="list" aria-label="Game statistics">
+                                        <div className="flex items-center justify-center min-w-fit h-[29px] px-2 rounded-[10px] bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] relative">
+                                            <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-xs sm:text-sm leading-5 whitespace-nowrap">
+                                                {formatNumber(coins)}
+                                            </span>
+                                            <img
+                                                className="w-4 h-4 ml-1 flex-shrink-0"
+                                                alt="Coin"
+                                                src="https://c.animaapp.com/3btkjiTJ/img/image-3937@2x.png"
+                                            />
+                                        </div>
+                                        <div className="flex items-center justify-center min-w-fit h-[29px] px-2 rounded-[10px] bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] relative">
+                                            <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-xs sm:text-sm leading-5 whitespace-nowrap">
+                                                {formatNumber(Math.floor(totalXP))}
+                                            </span>
+                                            <img
+                                                className="w-4 h-4 ml-1 flex-shrink-0"
+                                                alt="XP"
+                                                src="https://c.animaapp.com/3btkjiTJ/img/pic.svg"
+                                            />
                                         </div>
                                     </div>
-
-                                    {/* <div className="text-white text-[13px]">
-                                    {game.categories && game.categories.length > 0
-                                        ? (typeof game.categories[0] === 'object' ? game.categories[0].name || 'Entertainment' : game.categories[0])
-                                        : 'Entertainment'}
-                                </div> */}
                                 </div>
                             </div>
                         </article>

@@ -6,7 +6,7 @@ const Vip = ({ vipStatus, handleVipUpgrade }) => {
 
     return (
         !isVipActive ? (
-            <section className="relative w-full max-w-[335px] h-[127px] mx-auto">
+            <section className="relative w-full max-w-[335px] h-[127px] mx-auto mb-2">
                 <Image
                     width={334}
                     height={127}
@@ -37,7 +37,7 @@ const Vip = ({ vipStatus, handleVipUpgrade }) => {
                 </div>
             </section>
         ) : (
-            <section className="relative w-full max-w-[335px] h-[127px] mx-auto">
+            <section className="relative w-full max-w-[335px] h-[127px] mx-auto mb-2">
                 <Image
                     width={334}
                     height={127}

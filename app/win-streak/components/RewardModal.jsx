@@ -20,8 +20,8 @@ import React, { useEffect, useState } from "react";
 export const RewardModal = ({
     isVisible = false,
     milestone = 7,
-    coins = 50,
-    xp = 25,
+    coins = 0,
+    xp = 0,
     badge = "",
     onClose
 }) => {
@@ -110,35 +110,40 @@ export const RewardModal = ({
 
                     {/* Rewards */}
                     <div className="flex gap-4 justify-center">
-                        {/* Coins Reward */}
-                        <div className="flex flex-col items-center bg-gradient-to-b from-yellow-500 to-yellow-600 rounded-[15px] px-6 py-4 shadow-lg">
-                            <div className="flex items-center gap-2 mb-1">
-                                <img
-                                    className="w-8 h-8"
-                                    alt="Coins"
-                                    src="https://c.animaapp.com/hVj7UvM7/img/image-3938@2x.png"
-                                />
-                                <span className="text-3xl font-bold text-white [font-family:'Lilita_One',Helvetica]">
-                                    {coins}
-                                </span>
+                        {/* Coins Reward - Only show if coins > 0 */}
+                        {coins > 0 && (
+                            <div className="flex flex-col items-center bg-gradient-to-b from-yellow-500 to-yellow-600 rounded-[15px] px-6 py-4 shadow-lg">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <img
+                                        className="w-8 h-8"
+                                        alt="Coins"
+                                        src="/dollor.png"
+                                    />
+                                    <span className="text-3xl font-bold text-white [font-family:'Lilita_One',Helvetica]">
+                                        {coins}
+                                    </span>
+                                </div>
+                                <span className="text-xs font-medium text-yellow-900">Coins</span>
                             </div>
-                            <span className="text-xs font-medium text-yellow-900">Coins</span>
-                        </div>
+                        )}
 
-                        {/* XP Reward */}
-                        <div className="flex flex-col items-center bg-gradient-to-b from-purple-500 to-purple-600 rounded-[15px] px-6 py-4 shadow-lg">
-                            <div className="flex items-center gap-2 mb-1">
-                                <img
-                                    className="w-8 h-8"
-                                    alt="XP"
-                                    src="https://c.animaapp.com/hVj7UvM7/img/pic.svg"
-                                />
-                                <span className="text-3xl font-bold text-white [font-family:'Lilita_One',Helvetica]">
-                                    {xp}
-                                </span>
+                        {/* XP Reward - Only show if xp > 0 */}
+                        {xp > 0 && (
+                            <div className="flex flex-col items-center bg-gradient-to-b from-purple-500 to-purple-600 rounded-[15px] px-6 py-4 shadow-lg">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <img
+                                        className="w-8 h-8"
+                                        alt="XP"
+                                        src="/xp.svg"
+                                        onError={(e) => { e.target.src = "/xp.png"; }}
+                                    />
+                                    <span className="text-3xl font-bold text-white [font-family:'Lilita_One',Helvetica]">
+                                        {xp}
+                                    </span>
+                                </div>
+                                <span className="text-xs font-medium text-purple-900">XP Points</span>
                             </div>
-                            <span className="text-xs font-medium text-purple-900">XP Points</span>
-                        </div>
+                        )}
                     </div>
 
                     {/* Badge Display */}

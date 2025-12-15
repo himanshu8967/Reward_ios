@@ -204,11 +204,21 @@ const WatchAdCard = ({
     return (
         <div className="relative w-full max-w-[335px] mx-auto ">
             <div
-                className={`relative w-full h-[100px] bg-[#360875] rounded-[10px] overflow-hidden ${isAdAvailable && !isWatchingAd ? 'cursor-pointer hover:shadow-lg hover:shadow-purple-500/50' : 'cursor-not-allowed opacity-75'
-                    } transition-all duration-200 ${className}`}
+                className={`relative w-full h-[100px] bg-[#360875] rounded-[10px] overflow-hidden border-2 border-[#6B46C1] ${isAdAvailable && !isWatchingAd
+                    ? 'cursor-pointer shadow-[0_4px_20px_rgba(139,92,246,0.6),0_0_30px_rgba(139,92,246,0.4),inset_0_1px_0_rgba(255,255,255,0.1)] hover:shadow-[0_6px_25px_rgba(139,92,246,0.8),0_0_40px_rgba(139,92,246,0.6),inset_0_1px_0_rgba(255,255,255,0.15)] hover:border-[#8B5CF6] hover:-translate-y-0.5'
+                    : 'cursor-not-allowed opacity-75 shadow-[0_2px_10px_rgba(139,92,246,0.3)]'
+                    } transition-all duration-300 transform ${className}`}
+                style={{
+                    boxShadow: isAdAvailable && !isWatchingAd
+                        ? '0 4px 20px rgba(139, 92, 246, 0.6), 0 0 30px rgba(139, 92, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.2)'
+                        : '0 2px 10px rgba(139, 92, 246, 0.3)',
+                }}
                 onClick={handleAdClick}
             >
                 <div className="relative h-[99px] top-px bg-[url(https://c.animaapp.com/3mn7waJw/img/clip-path-group-3@2x.png)] bg-[100%_100%]">
+                    {/* 3D Glow Overlay */}
+                    <div className="absolute inset-0 rounded-[8px] bg-gradient-to-b from-white/10 via-transparent to-black/20 pointer-events-none" />
+
                     {/* Content Section */}
                     <div className="flex flex-col w-[205px] h-12 items-start absolute top-[25px] left-[116px]">
                         <div className="flex flex-col items-start pt-0 pb-2 px-0 relative self-stretch w-full flex-[0_0_auto] mt-[2.4px]">

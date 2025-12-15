@@ -64,7 +64,6 @@ const SurveysSection = () => {
 
     const handleSurveyClick = (survey) => {
         console.log('Survey clicked:', survey.title);
-        
         // Directly redirect to clickUrl from survey response
         if (survey.clickUrl) {
             // Open in new tab/window
@@ -165,13 +164,13 @@ const SurveysSection = () => {
 
     // Show empty state if no surveys but not loading/error
     if (!surveys || surveys.length === 0) {
-    return (
-        <div className="flex w-full flex-col my-1 items-start gap-3 relative">
-            <div className="flex w-full items-center justify-between">
-                    <p className="[font-family:'Poppins',Helvetica] text-lg font-semibold leading-[normal] tracking-[0] text-[#FFFFFF]">
-                    Get Paid to do Surveys
-                </p>
-            </div>
+        return (
+            <div className="flex w-full flex-col my-1  mt-8 items-start gap-3 relative">
+                <div className="flex w-full items-center justify-between">
+                    <p className="[font-family:'Poppins',Helvetica] font-bold text-[#F4F3FC] pb-12   mr-20 text-xl opacity-[100%] leading-[normal] tracking-[0] t">
+                        Get Paid to do Surveys
+                    </p>
+                </div>
                 <div className="relative flex h-[190px] rounded-[10px] w-full items-center justify-center">
                     <p className="text-gray-400 text-lg">
                         No surveys available at the moment
@@ -182,9 +181,9 @@ const SurveysSection = () => {
     }
 
     return (
-        <div className="flex justify-between items-center transition-transform pt-4 px-2 mb-4 duration-200 ease-in-out">
+        <div className="flex justify-between items-center transition-transform  px-2 mb-4 duration-200 ease-in-out">
             <section className="flex flex-col w-full max-w-[335px] justify-center items-start gap-2.5 mx-auto">
-                <h3 className="font-bold text-[#F4F3FC] pb-12 mr-20 text-xl opacity-[100%]">
+                <h3 className="font-bold text-[#F4F3FC] pb-12   mr-20 text-xl opacity-[100%]">
                     Get Paid to do Surveys
                 </h3>
                 <div
@@ -208,28 +207,28 @@ const SurveysSection = () => {
                             const cardWidth = 'w-28'; // Same size for all cards
                             const cardHeight = 'min-h-[180px]'; // Same size for all cards
                             const imageHeight = 'h-[110px]'; // Same size for all cards
-                            const bannerHeight = 'h-[40px]'; // Reduced height to reduce space below
+                            const bannerHeight = 'h-[55px]'; // Height to accommodate title, coins/XP, and time
 
                             // Get circular transform
                             const circularTransform = getCardTransform(index, surveys.length);
                             const isActive = index === activesIndex;
 
-                    const cardStyle = {
+                            const cardStyle = {
                                 position: 'absolute',
                                 left: '50%',
                                 ...circularTransform,
                                 transition: isAnimating ? 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)' : 'all 0.3s ease-out',
-                    };
+                            };
 
-                    return (
+                            return (
                                 <article
                                     key={survey.id || survey.surveyId || index}
                                     className={`relative ${cardWidth} ${cardHeight} flex-shrink-0 cursor-pointer ${isActive ? 'hover:scale-110' : 'hover:scale-105'} transition-all duration-200`}
                                     style={cardStyle}
-                            onClick={() => {
+                                    onClick={() => {
                                         if (index !== activesIndex) {
                                             setIsAnimating(true);
-                                setActivesIndex(index);
+                                            setActivesIndex(index);
                                             setTimeout(() => setIsAnimating(false), 400);
                                         } else {
                                             handleSurveyClick(survey);
@@ -254,51 +253,62 @@ const SurveysSection = () => {
 
                                         {/* Gradient Banner Section - Connected */}
                                         <div
-                                            className={`relative w-full ${bannerHeight} overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] flex flex-col justify-center px-3 py-0.5`}
+                                            className={`relative w-full ${bannerHeight} overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] flex flex-col justify-center px-3 py-1 gap-0.5`}
                                             role="banner"
                                             aria-label="Survey rewards banner"
                                         >
-                                            {/* Top Row - Coins and Time */}
-                                            <div className="flex items-center justify-between w-full">
+                                            {/* First Row - Title */}
+                                            {survey.title && (
+                                                <div className="flex items-center justify-start w-full">
+                                                    <span className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[9px] tracking-[0] leading-tight break-words text-left">
+                                                        {survey.title}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Second Row - Coins and XP */}
+                                            <div className="flex items-center justify-center w-full gap-3">
                                                 <div className="flex items-center gap-1">
                                                     <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[11px] tracking-[0] leading-[normal]">
                                                         {coins}
-                                        </span>
+                                                    </span>
                                                     <img
-                                                        className="w-[11px] h-[11px] aspect-[0.97]"
+                                                        className="w-[11px] h-[11px] aspect-[0.97] translate-x-[1px] -translate-y-[1px]"
                                                         alt="Dollar coin icon"
                                                         src="/dollor.png"
                                                     />
                                                 </div>
 
-                                                {/* Time indicator - Centered in middle */}
-                                                {estimatedTime > 0 && (
-                                                    <div className="[font-family:'Poppins',Helvetica] font-medium text-white text-[11px] tracking-[0] leading-[normal]">
-                                                        {estimatedTime} min
+                                                {/* XP */}
+                                                {xp > 0 && (
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[11px] tracking-[0] leading-[normal]">
+                                                            {xp}
+                                                        </span>
+                                                        <img
+                                                            className="w-[11px] h-[11px] translate-x-[1px] -translate-y-[1px]"
+                                                            alt="XP points icon"
+                                                            src="/xp.svg"
+                                                            onError={(e) => {
+                                                                e.target.style.display = 'none';
+                                                            }}
+                                                        />
                                                     </div>
                                                 )}
-                                </div>
+                                            </div>
 
-                                            {/* Bottom Row - XP */}
-                                            <div className="flex items-center justify-start w-full mt-0">
-                                                <div className="flex items-center gap-1">
-                                                    <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[11px] tracking-[0] leading-[normal]">
-                                                        {xp}
+                                            {/* Third Row - Time */}
+                                            {estimatedTime > 0 && (
+                                                <div className="flex items-center justify-center w-full">
+                                                    <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[10px] tracking-[0] leading-[normal]">
+                                                        {estimatedTime} min
                                                     </span>
-                                                    <img
-                                                        className="w-[11px] h-[11px]"
-                                                        alt="XP points icon"
-                                                        src="/xp.svg"
-                                                        onError={(e) => {
-                                                            e.target.style.display = 'none';
-                                                        }}
-                                />
-                            </div>
-                        </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </article>
-                    );
+                            );
                         }) : (
                             <div className="w-full flex flex-col items-center justify-center py-6 px-4">
                                 <h4 className="[font-family:'Poppins',Helvetica] font-semibold text-[#F4F3FC] text-[14px] text-center mb-2">
@@ -309,7 +319,7 @@ const SurveysSection = () => {
                                 </p>
                             </div>
                         )}
-            </div>
+                    </div>
                 </div>
             </section>
         </div>

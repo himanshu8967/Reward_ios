@@ -11,11 +11,24 @@ const SpinWin = () => {
     };
 
     return (
-        <section className="w-full flex mt-4  mb-1 justify-center">
+        <section className="w-full flex mt-0 mb-1 justify-center px-4">
             <div
-                className="relative w-full max-w-[335px] h-[103px] rounded-[10px] overflow-hidden bg-[linear-gradient(107deg,rgba(200,117,251,1)_0%,rgba(16,4,147,1)_100%)] cursor-pointer hover:scale-105 transition-transform duration-200"
+                className="relative w-full max-w-[335px] h-[103px] rounded-[20px] overflow-hidden cursor-pointer hover:scale-105 transition-all duration-200 p-[2px]"
+                style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.3) 100%)',
+                    boxShadow: `
+                        0 4px 12px rgba(0, 0, 0, 0.4),
+                        0 2px 4px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                        inset 0 -1px 0 rgba(0, 0, 0, 0.2)
+                    `
+                }}
                 onClick={handleSpinClick}
             >
+                <div 
+                    className="relative w-full h-full rounded-[18px] overflow-hidden bg-[linear-gradient(107deg,rgba(200,117,251,1)_0%,rgba(16,4,147,1)_100%)]"
+                    style={{ boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.2)' }}
+                >
                 <div className="inline-flex flex-col items-start pl-4 pr-8 py-4">
                     <h4 className="font-bold text-[#e5bfff] text-sm">Spin &amp; Win</h4>
                     <div className="relative">
@@ -121,6 +134,7 @@ const SpinWin = () => {
                     alt=""
                     src="https://c.animaapp.com/V1uc3arn/img/-----8@2x.png"
                 />
+                </div>
             </div>
         </section>
     )

@@ -1,8 +1,61 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
+import { useSelector } from "react-redux";
+import { useWalletUpdates } from "@/hooks/useWalletUpdates";
 
-export const RaceModal = ({ isOpen, isAnimating, onClose }) => {
+export const RaceModal = ({ isOpen, isAnimating, onClose, token }) => {
     if (!isOpen) return null;
+
+    // Get real-time XP data
+    const { realTimeXP } = useWalletUpdates(token);
+    const { walletScreen } = useSelector((state) => state.walletTransactions);
+    const xpCurrent = realTimeXP !== null && realTimeXP !== undefined ? realTimeXP : (walletScreen?.xp?.current || 0);
+    const xpLevel = walletScreen?.xp?.level || 1;
+
+    // Get XP tier data from Redux if available
+    const { xpTierData } = useSelector((state) => state.profile) || {};
+    const currentTier = xpTierData?.currentTier || null;
+    const tiers = xpTierData?.tiers || [];
+
+    // Calculate dynamic progress data
+    const progressData = useMemo(() => {
+        let currentPoints = xpCurrent || 0;
+        let maxPoints = 10000;
+        let currentLevel = "Junior";
+        let nextLevel = "Mid-level";
+        let achievementText = "You discovered Mid-level feature";
+
+        if (currentTier && tiers.length > 0) {
+            // Find the maximum tier's xpMax for totalXP display
+            const maxTier = tiers.reduce((max, tier) =>
+                (tier.xpMax > (max?.xpMax || 0)) ? tier : max, tiers[0]
+            );
+            maxPoints = maxTier.xpMax || currentTier.xpMax || 10000;
+
+            const tierName = currentTier.name || "";
+            currentLevel = tierName;
+
+            // Determine next level and achievement text
+            if (tierName === "Junior" || tierName.toLowerCase() === "junior") {
+                nextLevel = "Mid-level";
+                achievementText = "You discovered Mid-level feature";
+            } else if (tierName === "Middle" || tierName === "Mid-level" || tierName.toLowerCase() === "middle" || tierName.toLowerCase() === "mid-level") {
+                nextLevel = "Senior";
+                achievementText = "You discovered Senior feature";
+            } else if (tierName === "Senior" || tierName.toLowerCase() === "senior") {
+                nextLevel = "Senior";
+                achievementText = "You've reached the highest tier!";
+            }
+        }
+
+        return {
+            currentPoints,
+            maxPoints,
+            currentLevel,
+            nextLevel,
+            achievementText,
+        };
+    }, [xpCurrent, currentTier, tiers]);
 
     const decorativeStars = [
         { id: 1, top: "44px", left: "248px" },
@@ -14,14 +67,6 @@ export const RaceModal = ({ isOpen, isAnimating, onClose }) => {
         { id: 7, top: "0px", left: "271px" },
         { id: 8, top: "29px", left: "13px" },
     ];
-
-    const progressData = {
-        currentPoints: 2592,
-        maxPoints: 10000,
-        currentLevel: "Junior",
-        nextLevel: "Mid-level",
-        achievementText: "You discovered Mid-level feature",
-    };
 
     return (
         <>
@@ -124,13 +169,13 @@ export const RaceModal = ({ isOpen, isAnimating, onClose }) => {
                             </div>
                         </header>
 
-                        {/* Description Section - Responsive */}
+                        {/* Description Section - Responsive with Dynamic XP Values */}
                         <div className="mb-5 sm:mb-6">
                             <p
                                 id="banner-description"
                                 className="w-full [font-family:'Poppins',Helvetica] font-light text-white text-xs sm:text-sm text-center tracking-[0] leading-4 sm:leading-5 px-2 sm:px-4"
                             >
-                                Compete against players by completing tasks. Finish first to win extra XP & reward coins. Higher XP tiers unlock tougher races with bigger rewards.
+                                Compete against players by completing tasks. Finish first to win extra XP & reward coins. You currently have <span className="font-semibold text-[#ffb568]">{progressData.currentPoints.toLocaleString()}</span> XP out of <span className="font-semibold text-[#ffb568]">{progressData.maxPoints.toLocaleString()}</span> XP. Higher XP tiers unlock tougher races with bigger rewards.
                             </p>
                         </div>
 

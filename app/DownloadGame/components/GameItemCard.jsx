@@ -45,14 +45,22 @@ const GameItemCard = ({
     // Get genre from game object
     const genre = game.genre || game.category || "Game";
 
+    // Format numbers with commas for better readability
+    const formatNumber = (num) => {
+        if (num === null || num === undefined) return "0";
+        const numValue = typeof num === 'string' ? parseFloat(num.replace(/,/g, '')) : num;
+        if (isNaN(numValue)) return "0";
+        return numValue.toLocaleString();
+    };
+
     const stats = [
         {
-            value: game.amount || game.score || "0",
+            value: formatNumber(game.amount || game.score || "0"),
             icon: "https://c.animaapp.com/3btkjiTJ/img/image-3937@2x.png",
             iconAlt: "Coin",
         },
         {
-            value: game.xp, // Hardcoded XP as requested
+            value: formatNumber(game.xp || "0"),
             icon: "https://c.animaapp.com/3btkjiTJ/img/pic.svg",
             iconAlt: "XP",
         },
@@ -60,12 +68,12 @@ const GameItemCard = ({
 
     return (
         <header
-            className={`flex items-center justify-between py-4 px-0 border-b border-[#4d4d4d] cursor-pointer hover:opacity-90 transition-opacity ${className}`}
+            className={`flex items-start sm:items-center justify-between py-4 px-0 border-b border-[#4d4d4d] cursor-pointer hover:opacity-90 transition-opacity ${className}`}
             data-model-id="2035:3315"
             onClick={handleClick}
         >
             {/* Left Section - Game Info */}
-            <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0 pr-2">
                 {/* Game Image */}
                 <div className="w-[55px] h-[55px] rounded-full overflow-hidden flex-shrink-0">
                     <img
@@ -85,28 +93,28 @@ const GameItemCard = ({
                 </div>
 
                 {/* Game Details */}
-                <div className="flex flex-col  flex-1 min-w-0">
+                <div className="flex flex-col flex-1 min-w-0">
                     {/* Game Name */}
-                    <h1 className="[font-family:'Poppins',Helvetica] font-bold text-white text-base leading-tight truncate">
+                    <h1 className="[font-family:'Poppins',Helvetica] font-bold text-white text-sm sm:text-base leading-tight break-words">
                         {cleanGameName}
                     </h1>
-                    <h1 className="[font-family:'Poppins',Helvetica] mb-2  mt-[2px] font-light text-white text-[12px] leading-tight truncate">
+                    <h1 className="[font-family:'Poppins',Helvetica] mb-2 mt-[2px] font-light text-white text-[11px] sm:text-[12px] leading-tight break-words">
                         ({genre})
                     </h1>
 
                     {/* Stats */}
-                    <div className="flex gap-2" role="list" aria-label="Game statistics">
+                    <div className="flex gap-2 flex-wrap" role="list" aria-label="Game statistics">
                         {stats.map((stat, index) => (
                             <div
                                 key={index}
-                                className="flex items-center justify-center w-14 h-[29px] rounded-[10px] bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] relative"
+                                className="flex items-center justify-center min-w-fit h-[29px] px-2 rounded-[10px] bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] relative"
                                 role="listitem"
                             >
-                                <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-sm leading-5">
+                                <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-xs sm:text-sm leading-5 whitespace-nowrap">
                                     {stat.value}
                                 </span>
                                 <img
-                                    className="w-4 h-4 ml-1"
+                                    className="w-4 h-4 ml-1 flex-shrink-0"
                                     alt={stat.iconAlt}
                                     src={stat.icon}
                                 />
@@ -117,9 +125,9 @@ const GameItemCard = ({
             </div>
 
             {/* Right Section - Download Button */}
-            <div className="flex-shrink-0 ml-5 w-[110px] flex justify-end">
+            <div className="flex-shrink-0 ml-2 sm:ml-5 flex justify-end">
                 <button
-                    className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] cursor-pointer hover:opacity-90 transition-opacity min-w-[100px] h-[36px]"
+                    className="flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg bg-[linear-gradient(180deg,rgba(158,173,247,1)_0%,rgba(113,106,231,1)_100%)] cursor-pointer hover:opacity-90 transition-opacity min-w-fit sm:min-w-[100px] h-[36px]"
                     type="button"
                     aria-label={`Download ${cleanGameName} game`}
                     onClick={(e) => {
@@ -132,12 +140,12 @@ const GameItemCard = ({
                     }}
                 >
                     <img
-                        className="w-[15px] h-[15px] flex-shrink-0"
+                        className="w-[14px] h-[14px] sm:w-[15px] sm:h-[15px] flex-shrink-0"
                         alt=""
                         src="https://c.animaapp.com/3btkjiTJ/img/download.svg"
                         aria-hidden="true"
                     />
-                    <span className="[font-family:'Poppins',Helvetica] font-normal text-white text-sm whitespace-nowrap">
+                    <span className="[font-family:'Poppins',Helvetica] font-normal text-white text-xs sm:text-sm whitespace-nowrap">
                         Download
                     </span>
                 </button>

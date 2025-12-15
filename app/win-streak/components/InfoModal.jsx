@@ -12,16 +12,24 @@ import React from "react";
  * 
  * @param {boolean} isVisible - Modal visibility state
  * @param {function} onClose - Handler for closing modal
+ * @param {array} milestones - Milestone rewards from API
  */
-export const InfoModal = ({ isVisible = false, onClose }) => {
+export const InfoModal = ({ isVisible = false, onClose, milestones = [] }) => {
     if (!isVisible) return null;
 
-    const milestoneRewards = [
-        { day: 7, coins: 50, xp: 25 },
-        { day: 14, coins: 100, xp: 50 },
-        { day: 21, coins: 150, xp: 75 },
-        { day: 30, coins: 250, xp: 125 }
-    ];
+    // Use API milestones if available, otherwise fallback to defaults
+    const milestoneRewards = milestones.length > 0 
+        ? milestones.map(m => ({
+            day: m.day,
+            coins: m.rewards?.find(r => r.type === 'coins')?.value || 0,
+            xp: m.rewards?.find(r => r.type === 'xp')?.value || 0
+        }))
+        : [
+            { day: 7, coins: 50, xp: 25 },
+            { day: 14, coins: 100, xp: 50 },
+            { day: 21, coins: 150, xp: 75 },
+            { day: 30, coins: 250, xp: 125 }
+        ];
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 animate-fade-in">
@@ -89,26 +97,31 @@ export const InfoModal = ({ isVisible = false, onClose }) => {
                                         </span>
                                     </div>
                                     <div className="flex gap-3">
-                                        <div className="flex items-center gap-1 bg-yellow-500/20 rounded-full px-3 py-1">
-                                            <img
-                                                className="w-4 h-4"
-                                                alt="Coins"
-                                                src="https://c.animaapp.com/hVj7UvM7/img/image-3938@2x.png"
-                                            />
-                                            <span className="text-yellow-400 font-bold text-sm">
-                                                {reward.coins}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-1 bg-purple-500/20 rounded-full px-3 py-1">
-                                            <img
-                                                className="w-4 h-4"
-                                                alt="XP"
-                                                src="https://c.animaapp.com/hVj7UvM7/img/pic.svg"
-                                            />
-                                            <span className="text-purple-400 font-bold text-sm">
-                                                {reward.xp}
-                                            </span>
-                                        </div>
+                                        {reward.coins > 0 && (
+                                            <div className="flex items-center gap-1 bg-yellow-500/20 rounded-full px-3 py-1">
+                                                <img
+                                                    className="w-4 h-4"
+                                                    alt="Coins"
+                                                    src="/dollor.png"
+                                                />
+                                                <span className="text-yellow-400 font-bold text-sm">
+                                                    {reward.coins}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {reward.xp > 0 && (
+                                            <div className="flex items-center gap-1 bg-purple-500/20 rounded-full px-3 py-1">
+                                                <img
+                                                    className="w-4 h-4"
+                                                    alt="XP"
+                                                    src="/xp.svg"
+                                                    onError={(e) => { e.target.src = "/xp.png"; }}
+                                                />
+                                                <span className="text-purple-400 font-bold text-sm">
+                                                    {reward.xp}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

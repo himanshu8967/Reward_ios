@@ -5,11 +5,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { fetchMostPlayedScreenGames } from "@/lib/redux/slice/gameSlice";
 import { useAuth } from "@/contexts/AuthContext";
-import { getAgeGroupFromProfile, getGenderFromProfile } from "@/lib/utils/ageGroupUtils";
 import GameItemCard from "./GameItemCard";
 import WatchAdCard from "./WatchAdCard";
-// Note: This file uses fetchMostPlayedScreenGames, not fetchGamesBySection
-// If fetchMostPlayedScreenGames also needs user object support, it should be updated separately
 
 export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) => {
     // Redux state management
@@ -23,26 +20,40 @@ export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) =
 
     // Fetch games from API for "Most Played Screen" section
     React.useEffect(() => {
-        // Get dynamic age group and gender from user profile
-        const ageGroup = getAgeGroupFromProfile(userProfile);
-        const gender = getGenderFromProfile(userProfile);
+        if (!userProfile) return;
 
-        console.log('🎮 MostPlayedCategories: Using dynamic user profile:', {
+        console.log('🎮 MostPlayedCategories: Using user profile:', {
             age: userProfile?.age,
-            calculatedAgeGroup: ageGroup,
-            calculatedGender: gender
+            ageRange: userProfile?.ageRange,
+            gender: userProfile?.gender
         });
 
-        // Only fetch if we don't have data and status is idle
-        if (mostPlayedScreenStatus === "idle" && (!mostPlayedScreenGames || mostPlayedScreenGames.length === 0)) {
+        // Always dispatch - stale-while-revalidate will handle cache logic automatically
+        // Pass user object directly - API will extract age and gender dynamically
+        dispatch(fetchMostPlayedScreenGames({
+            user: userProfile,
+            page: 1,
+            limit: 50
+        }));
+    }, [dispatch, userProfile]);
+
+    // Refresh games in background after showing cached data (to get admin updates)
+    React.useEffect(() => {
+        if (!userProfile) return;
+
+        const refreshTimer = setTimeout(() => {
+            console.log("🔄 [MostPlayedCategories] Refreshing games in background to get admin updates...");
             dispatch(fetchMostPlayedScreenGames({
-                ageGroup,
-                gender,
+                user: userProfile,
                 page: 1,
-                limit: 50
+                limit: 50,
+                force: true,
+                background: true
             }));
-        }
-    }, [dispatch, mostPlayedScreenStatus, mostPlayedScreenGames, userProfile]);
+        }, 100);
+
+        return () => clearTimeout(refreshTimer);
+    }, [dispatch, userProfile]);
 
     console.log("mostPlayedScreenGames", mostPlayedScreenGames)
 
@@ -224,11 +235,8 @@ export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) =
                             <p>Failed to load games</p>
                             <button
                                 onClick={() => {
-                                    const ageGroup = getAgeGroupFromProfile(userProfile);
-                                    const gender = getGenderFromProfile(userProfile);
                                     dispatch(fetchMostPlayedScreenGames({
-                                        ageGroup,
-                                        gender,
+                                        user: userProfile,
                                         page: 1,
                                         limit: 50
                                     }));
@@ -278,11 +286,8 @@ export const MostPlayedCategories = ({ searchQuery = "", showSearch = false }) =
                             <p>Failed to load games</p>
                             <button
                                 onClick={() => {
-                                    const ageGroup = getAgeGroupFromProfile(userProfile);
-                                    const gender = getGenderFromProfile(userProfile);
                                     dispatch(fetchMostPlayedScreenGames({
-                                        ageGroup,
-                                        gender,
+                                        user: userProfile,
                                         page: 1,
                                         limit: 50
                                     }));

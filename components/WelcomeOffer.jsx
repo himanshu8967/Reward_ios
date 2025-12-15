@@ -83,9 +83,12 @@ export const WelcomeOffer = () => {
   return (
     <>
       <div
-        className={`relative w-full max-w-[375px] rounded-[20px] overflow-hidden bg-[linear-gradient(103deg,rgba(121,32,207,1)_0%,rgba(205,73,153,1)_80%)] transition-all duration-300 ${isExpanded ? "h-[330px]" : "h-[245px]"
+        className={`relative w-full max-w-[375px] rounded-[22px] overflow-hidden bg-gradient-to-br from-[#7920CF] via-[#A832B8] to-[#CD4999] shadow-[0_8px_24px_rgba(121,32,207,0.4)] transition-all duration-300 ${isExpanded ? "h-[330px]" : "h-[245px]"
           }`}
         data-model-id="4001:7472"
+        style={{
+          background: 'linear-gradient(135deg, rgba(121,32,207,1) 0%, rgba(168,50,184,1) 50%, rgba(205,73,153,1) 100%)'
+        }}
       >
         {/* --- ADDED THIS SECTION --- */}
         {/* This div positions the SVG label at the top-center of the component, as per the Figma design. */}
@@ -95,31 +98,182 @@ export const WelcomeOffer = () => {
         {/* --- END OF ADDED SECTION --- */}
 
         <div className="absolute w-full h-[245px] top-0 left-0">
-          <div className="absolute w-full h-[200px] top-0 left-0">
-            <div className="absolute w-[196px] h-[85px] top-[61px] left-5">
-              <div className="top-0 left-0 font-bold text-[#ffe664] text-[40px] leading-[48px] absolute [font-family:'Poppins',Helvetica] tracking-[0] whitespace-nowrap">
+          <div className="absolute w-full h-[200px] top-0 left-0 px-5">
+            <div className="absolute w-full max-w-[200px] h-[90px] top-[58px] left-5">
+              <div className="top-0 left-0 font-bold text-[#ffe664] text-[42px] leading-[50px] absolute [font-family:'Poppins',Helvetica] tracking-[-0.5px] whitespace-nowrap drop-shadow-[0_3px_10px_rgba(0,0,0,0.4)]">
                 Welcome
               </div>
-              <div className="absolute w-[79px] h-[39px] top-[46px] left-0 rounded overflow-hidden bg-[linear-gradient(331deg,rgba(237,131,0,1)_0%,rgba(237,166,0,1)_100%)]">
-                <div className="relative w-[70px] h-[39px]">
-                  <img
-                    className="absolute w-[61px] h-[39px] top-0 left-0"
-                    alt="Clip path group"
-                    src="https://c.animaapp.com/iuW6cMRd/img/clip-path-group@2x.png"
-                  />
+              {/* Enhanced 3D Bonus Badge - Modern Android Style */}
+              <div className="absolute top-[50px] left-0 flex items-center justify-center" style={{ perspective: '1000px' }}>
+                <div className="relative transform-gpu" style={{ transformStyle: 'preserve-3d' }}>
+                  {/* 3D Main Bonus Badge Container */}
+                  <div
+                    className="relative w-[95px] h-[44px] rounded-[12px] overflow-visible transform-gpu transition-all duration-500 animate-float-3d group"
+                    style={{
+                      transform: 'rotateX(-8deg) rotateY(5deg) translateZ(0)',
+                      transformStyle: 'preserve-3d',
+                      boxShadow: `
+                        0 8px 24px rgba(237, 131, 0, 0.5),
+                        0 4px 12px rgba(0, 0, 0, 0.4),
+                        0 2px 6px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                        inset 0 -1px 0 rgba(0, 0, 0, 0.2)
+                      `
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'rotateX(-5deg) rotateY(8deg) scale(1.15) translateZ(10px)';
+                      e.currentTarget.style.boxShadow = `
+                        0 12px 32px rgba(237, 131, 0, 0.6),
+                        0 6px 16px rgba(0, 0, 0, 0.5),
+                        0 3px 8px rgba(0, 0, 0, 0.4),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                        inset 0 -1px 0 rgba(0, 0, 0, 0.3)
+                      `;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'rotateX(-8deg) rotateY(5deg) translateZ(0)';
+                      e.currentTarget.style.boxShadow = `
+                        0 8px 24px rgba(237, 131, 0, 0.5),
+                        0 4px 12px rgba(0, 0, 0, 0.4),
+                        0 2px 6px rgba(0, 0, 0, 0.3),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                        inset 0 -1px 0 rgba(0, 0, 0, 0.2)
+                      `;
+                    }}
+                  >
+                    {/* 3D Depth Layer - Back */}
+                    <div
+                      className="absolute inset-0 rounded-[12px] bg-gradient-to-br from-[#CC7000] to-[#996600] transform-gpu"
+                      style={{
+                        transform: 'translateZ(-4px)',
+                        opacity: 0.6,
+                        filter: 'blur(2px)'
+                      }}
+                    ></div>
 
-                  <div className="top-[7px] left-[7px] font-medium text-white text-xl leading-6 absolute [font-family:'Poppins',Helvetica] tracking-[0] whitespace-nowrap">
-                    Bonus
+                    {/* 3D Depth Layer - Middle */}
+                    <div
+                      className="absolute inset-0 rounded-[12px] bg-gradient-to-br from-[#E67E00] to-[#CC7700] transform-gpu"
+                      style={{
+                        transform: 'translateZ(-2px)',
+                        opacity: 0.8
+                      }}
+                    ></div>
+
+                    {/* Animated 3D Gradient Background - Front */}
+                    <div
+                      className="absolute inset-0 rounded-[12px] transform-gpu"
+                      style={{
+                        background: 'linear-gradient(135deg, #FF8C00 0%, #FFA500 50%, #FFD700 100%)',
+                        transform: 'translateZ(0)',
+                        boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2)'
+                      }}
+                    ></div>
+
+                    {/* Top Highlight - 3D Lighting Effect */}
+                    <div
+                      className="absolute top-0 left-0 right-0 h-[40%] rounded-t-[12px] transform-gpu"
+                      style={{
+                        background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%)',
+                        transform: 'translateZ(2px)',
+                        pointerEvents: 'none'
+                      }}
+                    ></div>
+
+                    {/* Bottom Shadow - 3D Depth */}
+                    <div
+                      className="absolute bottom-0 left-0 right-0 h-[30%] rounded-b-[12px] transform-gpu"
+                      style={{
+                        background: 'linear-gradient(0deg, rgba(0, 0, 0, 0.3) 0%, transparent 100%)',
+                        transform: 'translateZ(-1px)',
+                        pointerEvents: 'none'
+                      }}
+                    ></div>
+
+                    {/* Left Side Highlight */}
+                    <div
+                      className="absolute top-0 bottom-0 left-0 w-[30%] rounded-l-[12px] transform-gpu"
+                      style={{
+                        background: 'linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%)',
+                        transform: 'translateZ(1px)',
+                        pointerEvents: 'none'
+                      }}
+                    ></div>
+
+                    {/* Right Side Shadow */}
+                    <div
+                      className="absolute top-0 bottom-0 right-0 w-[30%] rounded-r-[12px] transform-gpu"
+                      style={{
+                        background: 'linear-gradient(270deg, rgba(0, 0, 0, 0.25) 0%, transparent 100%)',
+                        transform: 'translateZ(-1px)',
+                        pointerEvents: 'none'
+                      }}
+                    ></div>
+
+                    {/* Content - Elevated */}
+                    <div
+                      className="relative z-10 flex items-center justify-center h-full px-3 transform-gpu"
+                      style={{ transform: 'translateZ(4px)' }}
+                    >
+                      {/* Sparkle Icon - 3D */}
+                      <svg
+                        className="w-4 h-4 mr-1.5 text-white transform-gpu transition-transform duration-300 hover:scale-125 hover:rotate-12"
+                        style={{
+                          filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3))',
+                          transform: 'translateZ(5px)'
+                        }}
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      {/* Bonus Text - 3D with emboss effect */}
+                      <span
+                        className="font-bold text-white text-[16px] leading-[20px] [font-family:'Poppins',Helvetica] tracking-[0.5px] transform-gpu"
+                        style={{
+                          textShadow: `
+                            0 1px 0 rgba(255, 255, 255, 0.4),
+                            0 2px 4px rgba(0, 0, 0, 0.6),
+                            0 0 8px rgba(255, 255, 255, 0.2)
+                          `,
+                          transform: 'translateZ(5px)',
+                          WebkitTextStroke: '0.3px rgba(0, 0, 0, 0.2)'
+                        }}
+                      >
+                        Bonus
+                      </span>
+                    </div>
+
+                    {/* 3D Corner Highlights */}
+                    <div
+                      className="absolute top-0 left-0 w-4 h-4 transform-gpu"
+                      style={{
+                        borderTop: '2px solid rgba(255, 255, 255, 0.5)',
+                        borderLeft: '2px solid rgba(255, 255, 255, 0.5)',
+                        borderRadius: '12px 0 0 0',
+                        transform: 'translateZ(3px)',
+                        boxShadow: 'inset 1px 1px 2px rgba(255, 255, 255, 0.3)'
+                      }}
+                    ></div>
+                    <div
+                      className="absolute bottom-0 right-0 w-4 h-4 transform-gpu"
+                      style={{
+                        borderBottom: '2px solid rgba(0, 0, 0, 0.3)',
+                        borderRight: '2px solid rgba(0, 0, 0, 0.3)',
+                        borderRadius: '0 0 12px 0',
+                        transform: 'translateZ(-1px)'
+                      }}
+                    ></div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="top-[37px] left-5 font-medium text-white text-xl leading-6 absolute [font-family:'Poppins',Helvetica] tracking-[0] whitespace-nowrap">
+            <div className="top-[32px] left-5 font-medium text-white text-[22px] leading-[28px] absolute [font-family:'Poppins',Helvetica] tracking-[-0.3px] whitespace-nowrap drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">
               Claim your
             </div>
             <img
-              className="absolute w-[109px] h-[109px] top-[45px] right-[15px] object-cover"
+              className="absolute w-[109px] h-[109px] top-[45px] right-[2px] object-cover"
               alt="Png clipart buried"
               src="https://c.animaapp.com/iuW6cMRd/img/png-clipart-buried-treasure-treasure-miscellaneous-treasure-tran@2x.png"
             />
@@ -134,19 +288,18 @@ export const WelcomeOffer = () => {
             />
           </div>
 
-          <div className="h-[73px] top-[172px] bg-[#982fbb] rounded-[0px_0px_20px_20px] absolute w-full left-0" />
+          <div className="h-[73px] top-[172px] bg-[#982fbb] rounded-[0px_0px_20px_20px] absolute w-full left-0 shadow-[0_-4px_12px_rgba(0,0,0,0.2)]" />
 
           <div
-            className="inline-flex items-center gap-1 absolute top-[214px] left-[100px] cursor-pointer"
+            className="inline-flex items-center gap-2 absolute top-[210px] left-1/2 -translate-x-1/2 cursor-pointer group px-3 py-1 rounded-lg hover:bg-white/10 transition-all duration-300"
             onClick={toggleExpanded}
           >
-            <div className="relative w-fit mt-[-1.00px] font-medium [font-family:'Poppins',Helvetica] text-white text-base tracking-[0] leading-6 whitespace-nowrap">
+            <div className="relative w-fit font-medium [font-family:'Poppins',Helvetica] text-white text-[15px] tracking-[0.2px] leading-6 whitespace-nowrap group-hover:text-yellow-200 transition-colors duration-300">
               Check Details
             </div>
 
             <img
-              className={`relative w-5 h-5 transition-transform duration-300 ${isExpanded ? "rotate-90" : ""
-                }`}
+              className={`relative w-5 h-5 transition-all duration-300 ${isExpanded ? "rotate-90" : ""} group-hover:translate-x-1`}
               alt="Arrow"
               src="https://c.animaapp.com/iuW6cMRd/img/arrow.svg"
             />
@@ -154,24 +307,33 @@ export const WelcomeOffer = () => {
 
           <div className="h-12 top-[161px] bg-[#80279e] absolute w-full left-0" />
 
-          <div className="absolute top-[172px] left-6 font-normal [font-family:'Poppins',Helvetica] text-white text-base tracking-[0] leading-6 whitespace-nowrap">
+          <div className="absolute top-[175px] left-6 font-medium [font-family:'Poppins',Helvetica] text-white text-[15px] tracking-[0.2px] leading-6 whitespace-nowrap drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
             Quest ends in:
           </div>
         </div>
 
-        <div className={`absolute w-[122px] h-[37px] top-[166px] left-36 rounded-[10px] overflow-hidden flex items-center justify-center ${isExpired
-          ? 'bg-[linear-gradient(107deg,rgba(255,0,0,0.8)_0%,rgba(139,0,0,1)_100%)]'
-          : 'bg-[linear-gradient(107deg,rgba(200,117,251,1)_0%,rgba(16,4,147,1)_100%)]'
+        <div className={`absolute w-[130px] h-[40px] top-[165px] left-[140px] rounded-[12px] overflow-hidden flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.3)] transform transition-all duration-300 hover:scale-105 ${isExpired
+          ? 'bg-[linear-gradient(107deg,rgba(255,0,0,0.9)_0%,rgba(180,0,0,1)_100%)]'
+          : 'bg-[linear-gradient(107deg,rgba(200,117,251,1)_0%,rgba(120,50,220,1)_50%,rgba(16,4,147,1)_100%)]'
           }`}>
-          <div className="[font-family:'Poppins',Helvetica] font-medium text-white text-base tracking-[0] leading-[normal] text-center">
-            {isLoading ? 'Loading...' : (isExpired ? 'EXPIRED' : formatTime)}
+          <div className="relative z-10 [font-family:'Poppins',Helvetica] font-semibold text-white text-[15px] tracking-[0.5px] leading-[normal] text-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
+            {isLoading ? (
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse delay-75"></span>
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse delay-150"></span>
+              </span>
+            ) : (isExpired ? 'EXPIRED' : formatTime)}
           </div>
+          {!isExpired && !isLoading && (
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+          )}
         </div>
 
         {/* Expanded content */}
         {isExpanded && (
-          <div className="absolute w-full top-[245px] left-0 bg-[#982fbb] -mt-2 rounded-[0px_0px_20px_20px] px-6 pt-4 pb-6 animate-fade-in">
-            <div className="font-normal [font-family:'Poppins',Helvetica] text-white text-sm leading-6 break-words">
+          <div className="absolute w-full top-[245px] left-0 bg-[#982fbb] -mt-2 rounded-[0px_0px_20px_20px] px-6 pt-5 pb-7 animate-fade-in shadow-[0_-4px_16px_rgba(0,0,0,0.2)]">
+            <div className="font-normal [font-family:'Poppins',Helvetica] text-white text-[14px] leading-[22px] break-words tracking-[0.1px]">
               Please start downloading your first game from below suggestions to
               claim your Welcome Bonus.
             </div>

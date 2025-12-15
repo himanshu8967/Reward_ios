@@ -59,6 +59,7 @@ const SignUp = () => {
   const [isResending, setIsResending] = useState(false);
   const otpInputs = useRef([]);
   const [turnstileToken, setTurnstileToken] = useState(null);
+  const [isTurnstileLoading, setIsTurnstileLoading] = useState(true);
   const turnstileRef = useRef(null);
   const turnstileWidgetId = useRef(null);
 
@@ -101,25 +102,34 @@ const SignUp = () => {
         try {
           // Clear the container first
           turnstileRef.current.innerHTML = '';
-          
+
           // Manually render the widget
+          setIsTurnstileLoading(true);
           const widgetId = window.turnstile.render(turnstileRef.current, {
             sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA',
             callback: (token) => {
               setTurnstileToken(token);
+              setIsTurnstileLoading(false);
               console.log('✅ Turnstile verified:', token);
             },
             'error-callback': () => {
               setTurnstileToken(null);
+              setIsTurnstileLoading(false);
               console.error('❌ Turnstile error');
             },
             'expired-callback': () => {
               setTurnstileToken(null);
+              setIsTurnstileLoading(true);
               console.warn('⏰ Turnstile token expired');
             },
             theme: 'dark',
             size: 'normal',
           });
+
+          // Mark as loaded after widget renders (usually takes ~500ms)
+          setTimeout(() => {
+            setIsTurnstileLoading(false);
+          }, 800);
 
           // Store widget ID for cleanup
           turnstileWidgetId.current = widgetId;
@@ -189,9 +199,11 @@ const SignUp = () => {
       try {
         window.turnstile.reset(turnstileWidgetId.current);
         setTurnstileToken(null);
+        setIsTurnstileLoading(true);
       } catch (err) {
         console.warn('Failed to reset Turnstile widget:', err);
         setTurnstileToken(null);
+        setIsTurnstileLoading(true);
       }
     }
   };
@@ -335,7 +347,11 @@ const SignUp = () => {
     // If no token exists, user hasn't been verified yet
     // (This usually means widget is still analyzing or failed)
     if (!turnstileToken) {
-      setError({ form: "Please complete the captcha verification." });
+      if (isTurnstileLoading) {
+        setError({ form: "Please wait for security verification to complete." });
+      } else {
+        setError({ form: "Security verification is required. Please wait a moment and try again." });
+      }
       return;
     }
 
@@ -418,25 +434,34 @@ const SignUp = () => {
               try {
                 // Clear any existing content
                 turnstileRef.current.innerHTML = '';
-                
+
+                setIsTurnstileLoading(true);
                 const widgetId = window.turnstile.render(turnstileRef.current, {
                   sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA',
                   callback: (token) => {
                     setTurnstileToken(token);
+                    setIsTurnstileLoading(false);
                     console.log('✅ Turnstile verified:', token);
                   },
                   'error-callback': () => {
                     setTurnstileToken(null);
+                    setIsTurnstileLoading(false);
                     console.error('❌ Turnstile error');
                   },
                   'expired-callback': () => {
                     setTurnstileToken(null);
+                    setIsTurnstileLoading(true);
                     console.warn('⏰ Turnstile token expired');
                   },
                   theme: 'dark',
                   size: 'normal',
                 });
                 turnstileWidgetId.current = widgetId;
+
+                // Mark as loaded after widget renders
+                setTimeout(() => {
+                  setIsTurnstileLoading(false);
+                }, 800);
               } catch (err) {
                 console.error('Failed to render Turnstile widget on script load:', err);
               }
@@ -824,17 +849,25 @@ const SignUp = () => {
                   
                   Most users will NEVER see a challenge - it's automatic!
                   ============================================================ */}
-                <div className="w-full flex justify-center mt-2">
+                <div className="w-full flex flex-col items-center justify-center mt-2">
                   <div
                     ref={turnstileRef}
                     className="cf-turnstile"
                   />
+                  {isTurnstileLoading && !turnstileToken && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="w-4 h-4 border-2 border-[#af7de6] border-t-transparent rounded-full animate-spin"></div>
+                      <p className="text-white text-xs [font-family:'Poppins',Helvetica] font-medium">
+                        Verifying security...
+                      </p>
+                    </div>
+                  )}
+                  {!isTurnstileLoading && !turnstileToken && (
+                    <p className="text-neutral-400 text-xs mt-1 text-center max-w-[314px] mx-auto break-words px-2 [font-family:'Poppins',Helvetica]">
+                      Security check in progress
+                    </p>
+                  )}
                 </div>
-                {!turnstileToken && (
-                  <p className="text-yellow-400 text-xs mt-1 text-center max-w-[314px] mx-auto break-words px-2">
-                    Please wait for captcha verification to complete
-                  </p>
-                )}
 
                 {/* Sign Up Button */}
                 <div className='flex justify-between items-center'>

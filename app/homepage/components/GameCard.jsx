@@ -660,9 +660,9 @@ const GameCard = ({ onClose: onCloseProp }) => {
     if (showLastCard && isLastCardReached) {
         return (
             <main className="relative w-[335px] h-[549px] mx-auto" data-model-id="2035:14588">
-                {/* Action buttons section - only show close button */}
+                {/* Action buttons section - only show close button - moved further below footer with more spacing */}
                 <section
-                    className="absolute w-[320px] h-[62px] top-[492px] left-10"
+                    className="absolute w-[320px] h-[62px] top-[550px] left-10"
                     aria-label="Action buttons"
                 >
                     <button
@@ -691,8 +691,22 @@ const GameCard = ({ onClose: onCloseProp }) => {
                                 e.target.src = "https://c.animaapp.com/DfFsihWg/img/image-3930@2x.png";
                             }}
                         />
-                        <div className="absolute w-[210px] h-10 top-[30px] left-11 flex items-center justify-center">
-                            <span className="[font-family:'Poppins',Helvetica] font-bold text-black text-lg text-center">
+                        <div className="absolute w-[210px] min-h-[40px] max-h-[60px] top-[30px] left-11 flex items-center justify-center px-2 py-1" style={{ minWidth: '180px', maxWidth: '210px' }}>
+                            <span
+                                className="[font-family:'Poppins',Helvetica] font-bold text-black text-lg text-center break-words hyphens-auto"
+                                style={{
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    display: '-webkit-box',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    lineHeight: '1.3',
+                                    letterSpacing: '0.01em',
+                                    textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)'
+                                }}
+                            >
                                 {(currentGame?.name || currentGame?.details?.name || currentGame?.title || "Game").split(' - ')[0]}
                             </span>
                         </div>
@@ -701,7 +715,18 @@ const GameCard = ({ onClose: onCloseProp }) => {
                     {/* Header message */}
                     <header className="absolute w-[334px] h-[88px] -top-0.5 left-0">
                         <div className="relative w-[335px] h-[87px] top-px bg-[#442a3b] rounded-[10px_10px_0px_0px]">
-                            <p className="absolute w-[304px] top-3.5 left-[15px] [font-family:'Poppins',Helvetica] font-normal text-white text-base text-center tracking-[0] leading-5">
+                            <p
+                                className="absolute w-[304px] top-3.5 left-[15px] [font-family:'Poppins',Helvetica] font-normal text-white text-base text-center tracking-[0] leading-[1.4] break-words hyphens-auto"
+                                style={{
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    minHeight: '60px',
+                                    padding: '8px 4px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
                                 Your last game recommendation
                             </p>
                         </div>
@@ -709,33 +734,54 @@ const GameCard = ({ onClose: onCloseProp }) => {
                 </article>
 
                 {/* Footer */}
-                <footer className="absolute w-[335px] h-[51px] top-[429px] left-0 rounded-[0px_0px_10px_10px] overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.4)_0%,rgba(113,106,231,0.4)_100%)] flex items-center justify-between px-3">
-                    <div className="flex flex-col text-white [font-family:'Poppins',Helvetica]">
-                        <p className="text-[13px] leading-tight font-light flex items-center gap-1">
-                            {(() => {
-                                const gameName = currentGame?.details?.name || currentGame?.title || gameData?.title || "Game";
-                                const cleanGameName = gameName.split(' - ')[0].split(':')[0].trim();
-                                return (
-                                    <>
-                                        <span> Complete <span className="text-base font-bold">{cleanGameName}</span> task and earn</span>
-                                    </>
-                                );
-                            })()}
-                        </p>
-                        <div className="flex items-center gap-x-1.5 text-sm font-semibold">
-                            <span>Earn up to {currentGameRewards.coins || 0}</span>
-                            <img
-                                className="w-5 h-5"
-                                alt="Coin icon"
-                                src="/dollor.png"
-                            />
-                            <span>& {currentGameRewards.totalXP || 0}</span>
-                            <img
-                                className="w-5 h-5"
-                                alt="XP icon"
-                                src="/xp.svg"
-                            />
-                            <span className="font-semibold">points</span>
+                <footer className="absolute w-[335px] min-h-[80px] top-[429px] left-0 rounded-[0px_0px_10px_10px] overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.4)_0%,rgba(113,106,231,0.4)_100%)] flex items-center justify-between py-3 safe-area-inset" style={{ paddingLeft: '7px', paddingRight: '6px' }}>
+                    <div className="flex flex-col text-white [font-family:'Poppins',Helvetica] flex-1 min-w-0 gap-0" style={{ minWidth: '200px', minHeight: '50px', maxWidth: 'calc(100% - 40px)' }}>
+                        {/* Game Name - Prominent, First Line - Native Android Style */}
+                        <div className="flex items-start gap-2 w-full" style={{ paddingTop: '2px', paddingBottom: '0px' }}>
+                            <h3
+                                className="font-bold text-base sm:text-lg leading-[1.3] text-white break-words hyphens-auto w-full"
+                                style={{
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    display: '-webkit-box',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    lineHeight: '1.3',
+                                    letterSpacing: '0.01em',
+                                    textAlign: 'left',
+                                    width: '100%',
+                                    maxWidth: '100%'
+                                }}
+                            >
+                                {(() => {
+                                    const gameName = currentGame?.details?.name || currentGame?.title || gameData?.title || "Game";
+                                    const cleanGameName = gameName.split(' - ')[0].split(':')[0].trim();
+                                    return cleanGameName;
+                                })()}
+                            </h3>
+                        </div>
+                        {/* Task and Rewards - Second Line, Well Spaced - Native Android Style */}
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm sm:text-base leading-[1.4]" style={{ minHeight: '24px', paddingTop: '0px' }}>
+                            <span className="text-white/90 font-normal break-words" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>Complete task and earn up to</span>
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                                <span className="font-semibold text-white whitespace-nowrap">{currentGameRewards.coins || 0}</span>
+                                <img
+                                    className="w-5 h-5 flex-shrink-0"
+                                    alt="Coin icon"
+                                    src="/dollor.png"
+                                />
+                            </div>
+                            <span className="text-white/70 font-normal flex-shrink-0">&</span>
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                                <span className="font-semibold text-white whitespace-nowrap">{currentGameRewards.totalXP || 0}</span>
+                                <img
+                                    className="w-5 h-5 flex-shrink-0"
+                                    alt="XP icon"
+                                    src="/xp.svg"
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -789,9 +835,9 @@ const GameCard = ({ onClose: onCloseProp }) => {
 
     return (
         <main className="relative w-[335px] h-[549px] mx-auto animate-fade-in" data-model-id="2035:14588">
-            {/* Action buttons section */}
+            {/* Action buttons section - moved further below footer with more spacing */}
             <section
-                className="absolute w-[320px] h-[62px] top-[492px] left-10"
+                className="absolute w-[320px] h-[62px] top-[524px] left-10"
                 aria-label="Action buttons"
             >
                 {actionButtons.map((button) => (
@@ -805,7 +851,7 @@ const GameCard = ({ onClose: onCloseProp }) => {
 
                         {/* Conditionally render the label if `hasLabel` is true */}
                         {button.label && (
-                            <div className="absolute bottom-[-10px] left-2/4 -translate-x-1/2 z-10 flex items-center justify-center">
+                            <div className="absolute bottom-[-18px] left-2/4 -translate-x-1/2 z-10 flex items-center justify-center">
                                 <UndoActionLabel
                                     current={button.label.current}
                                     total={button.label.total} />
@@ -863,7 +909,20 @@ const GameCard = ({ onClose: onCloseProp }) => {
                     {/* Header message */}
                     <header className="absolute w-[334px] h-[88px] -top-0.5 left-0">
                         <div className={`relative w-[335px] h-[87px] top-px rounded-[10px_10px_0px_0px] ${isLoopMode ? 'bg-gradient-to-r from-purple-600/80 to-pink-600/80' : 'bg-[#442a3b]'}`}>
-                            <p className="absolute w-[304px] top-3.5 left-[15px] [font-family:'Poppins',Helvetica] font-normal text-white text-base text-center tracking-[0] leading-5">
+                            <p
+                                className="absolute w-[304px] top-3.5 left-[15px] [font-family:'Poppins',Helvetica] font-normal text-white text-base text-center tracking-[0] leading-[1.4] break-words hyphens-auto"
+                                style={{
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    minHeight: '60px',
+                                    padding: '8px 4px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexDirection: 'column',
+                                    gap: '4px'
+                                }}
+                            >
                                 {isLoopMode ? (
                                     <>
                                         🔄 Loop Mode: Keep swiping to see more games!
@@ -882,33 +941,55 @@ const GameCard = ({ onClose: onCloseProp }) => {
                 </div>
             </article>
             <>
-                <footer className="absolute w-[335px] h-[51px] top-[429px] left-0 rounded-[0px_0px_10px_10px] overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.4)_0%,rgba(113,106,231,0.4)_100%)] flex items-center justify-between px-3">
-                    <div className="flex flex-col text-white [font-family:'Poppins',Helvetica]">
-                        <p className="text-[13px] leading-tight font-light flex items-center gap-1">
-                            {(() => {
-                                const gameName = currentGame?.details?.name || currentGame?.title || gameData?.title || "Game";
-                                const cleanGameName = gameName.split(' - ')[0].split(':')[0].trim();
-                                return (
-                                    <>
-                                        <span> Complete <span className="text-base font-bold">{cleanGameName}</span> task and earn</span>
-                                    </>
-                                );
-                            })()}
-                        </p>
-                        <div className="flex items-center gap-x-1.5 text-sm font-semibold">
-                            <span>Earn up to {currentGameRewards.coins || 0}</span>
-                            <img
-                                className="w-5 h-5"
-                                alt="Coin icon"
-                                src="/dollor.png"
-                            />
-                            <span>& {currentGameRewards.totalXP || 0}</span>
-                            <img
-                                className="w-5 h-5"
-                                alt="XP icon"
-                                src="/xp.svg"
-                            />
-                            <span className="font-semibold">points</span>
+                <footer className="absolute w-[335px] min-h-[80px] top-[429px] left-0 rounded-[0px_0px_10px_10px] overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.4)_0%,rgba(113,106,231,0.4)_100%)] flex items-center justify-between py-3 safe-area-inset" style={{ paddingLeft: '7px', paddingRight: '6px' }}>
+                    <div className="flex flex-col text-white [font-family:'Poppins',Helvetica] flex-1 min-w-0 gap-0" style={{ minWidth: '200px', minHeight: '50px', maxWidth: 'calc(100% - 40px)' }}>
+                        {/* Game Name - Prominent, First Line - Native Android Style */}
+                        <div className="flex items-start gap-2 w-full" style={{ paddingTop: '2px', paddingBottom: '0px' }}>
+                            <h3
+                                className="font-bold text-base sm:text-lg leading-[1.3] text-white break-words hyphens-auto w-full"
+                                style={{
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    display: '-webkit-box',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    lineHeight: '1.3',
+                                    letterSpacing: '0.01em',
+                                    textAlign: 'left',
+                                    width: '100%',
+                                    maxWidth: '100%'
+                                }}
+                            >
+                                {(() => {
+                                    const gameName = currentGame?.details?.name || currentGame?.title || gameData?.title || "Game";
+                                    const cleanGameName = gameName.split(' - ')[0].split(':')[0].trim();
+                                    return cleanGameName;
+                                })()}
+                            </h3>
+                        </div>
+                        {/* Task and Rewards - Second Line, Well Spaced - Native Android Style */}
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm sm:text-base leading-[1.4]" style={{ minHeight: '24px', paddingTop: '0px' }}>
+                            <span className="text-white/90 font-normal break-words" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>Complete task and earn</span>
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                                <span className="font-semibold text-white whitespace-nowrap">{currentGameRewards.coins || 0}</span>
+                                <img
+                                    className="w-5 h-5 flex-shrink-0"
+                                    alt="Coin icon"
+                                    src="/dollor.png"
+                                />
+                            </div>
+                            <span className="text-white/70 font-normal flex-shrink-0">&</span>
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                                <span className="font-semibold text-white whitespace-nowrap">{currentGameRewards.totalXP || 0}</span>
+                                <img
+                                    className="w-5 h-5 flex-shrink-0"
+                                    alt="XP icon"
+                                    src="/xp.svg"
+                                />
+                            </div>
+                            <span className="text-white/90 font-medium break-words" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>points</span>
                         </div>
                     </div>
 

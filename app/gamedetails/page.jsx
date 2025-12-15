@@ -18,9 +18,10 @@ import { LoadingOverlay } from "@/components/AndroidOptimizedLoader";
 // Optimized Image Component for Android - using besitosRawData
 const OptimizedGameImage = ({ game, isLoaded, onLoad, onError, className }) => {
     // Use besitosRawData images first (highest priority)
+    // Always prioritize large_image first
     const rawData = game?.besitosRawData || {};
-    const imageUrl = rawData.square_image || rawData.image || rawData.large_image ||
-        game?.square_image || game?.image || game?.images?.banner || game?.images?.large_image;
+    const imageUrl = rawData.large_image || rawData.image || rawData.square_image ||
+        game?.images?.large_image || game?.large_image || game?.image || game?.square_image || game?.images?.banner;
 
     const displayTitle = rawData.title || game?.title || game?.name || game?.details?.name;
 
@@ -28,13 +29,15 @@ const OptimizedGameImage = ({ game, isLoaded, onLoad, onError, className }) => {
 
     return (
         <img
-            className={`w-[335px] h-[164px] object-cover rounded-lg transition-opacity duration-300 game-image image-fade-in ${className || ''}`}
+            className={`w-full max-w-[335px] object-contain rounded-lg transition-opacity duration-300 game-image image-fade-in ${className || ''}`}
             alt={`${displayTitle} banner`}
             src={imageUrl}
             onLoad={onLoad}
             onError={onError}
             style={{
-                opacity: isLoaded ? 1 : 0
+                opacity: isLoaded ? 1 : 0,
+                maxHeight: 'none',
+                height: 'auto'
             }}
             loading="eager" // Load immediately for better UX
             decoding="async" // Decode asynchronously for better performance
@@ -400,11 +403,11 @@ function GameDetailsContent() {
     // Preload game image to prevent delay - use besitosRawData image first
     useEffect(() => {
         if (displayGame) {
-            // Priority: besitosRawData images > displayGame images
+            // Priority: Always use large_image first
             const rawData = displayGame.besitosRawData || {};
-            const imageUrl = rawData.square_image || rawData.image || rawData.large_image ||
-                displayGame.square_image || displayGame.image ||
-                displayGame.images?.banner || displayGame.images?.large_image;
+            const imageUrl = rawData.large_image || rawData.image || rawData.square_image ||
+                displayGame.images?.large_image || displayGame.large_image || displayGame.image ||
+                displayGame.square_image || displayGame.images?.banner;
             if (imageUrl) {
                 setIsImageLoaded(false);
                 setImageError(false);
@@ -842,8 +845,8 @@ function GameDetailsContent() {
                         </svg>
                     </button>
 
-                    <div className="flex  items-center">
-                        <h1 className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[20px] tracking-[0] leading-[normal]">
+                    <div className="flex items-center flex-1 min-w-0">
+                        <h1 className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[18px] tracking-[0] leading-[normal] line-clamp-2 break-words">
                             {(displayGame?.title || 'Game Details').split(' - ')[0]
                                 .split(':')[0]}
                         </h1>
@@ -853,12 +856,12 @@ function GameDetailsContent() {
                 </div>
 
                 {/* Game Banner */}
-                {(displayGame?.square_image || displayGame?.image || displayGame?.images?.banner || displayGame?.images?.large_image) && (
+                {(displayGame?.large_image || displayGame?.images?.large_image || displayGame?.square_image || displayGame?.image || displayGame?.images?.banner) && (
                     <div className="flex w-[375px] items-center justify-center px-4 relative">
                         {/* Image Skeleton - Show while loading */}
                         {!isImageLoaded && !imageError && (
                             <div
-                                className="w-[335px] h-[164px] bg-gray-800 rounded-lg animate-pulse shadow-[100px] shadow-blue"
+                                className="w-full max-w-[335px] min-h-[200px] bg-gray-800 rounded-lg animate-pulse shadow-[100px] shadow-blue"
                                 style={{
                                     animation: 'pulse 1.5s ease-in-out infinite',
                                     transform: 'translateZ(0)',
@@ -881,7 +884,7 @@ function GameDetailsContent() {
 
                         {/* Error State - Show if image fails to load */}
                         {imageError && (
-                            <div className="w-[335px] h-[164px] bg-gray-800 rounded-lg flex items-center justify-center shadow-lg shadow-white/30">
+                            <div className="w-[335px] h-[200px] bg-gray-800 rounded-lg flex items-center justify-center shadow-lg shadow-white/30">
                                 <div className="text-center">
                                     <svg className="w-8 h-8 text-gray-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -895,11 +898,10 @@ function GameDetailsContent() {
 
                 {/* Game Info */}
                 <div className="flex flex-col w-[375px] items-start justify-center mt-6 px-6 py-2 relative">
-                    <h2 className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[20px] ">
+                    <h2 className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[18px] leading-[1.3] line-clamp-2 break-words w-full">
                         {(displayGame?.title || displayGame?.name || displayGame?.details?.name || 'Game Title')
                             .split(' - ')[0]
                             .split(':')[0]}
-
                     </h2>
                     <div className="flex items-center gap-2 mt-1">
                         <span className="[font-family:'Poppins',Helvetica] font-regular text-[#f4f3fc] text-[13px]">
@@ -914,26 +916,26 @@ function GameDetailsContent() {
                             </>
                         )}
                     </div>
-                    <div className="flex w-[266px] items-center justify-start  mt-3 relative ">
-                        <div className="flex flex-row items-center justify-center gap-2 bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] rounded-[10px] py-2 w-full">
-                            <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[16px] flex items-center justify-center gap-2 flex-wrap">
-                                <span className="whitespace-nowrap text-[16px] font-medium">Earn up to</span>
-                                <span className="flex items-center gap-1">
-                                    <span className="font-semibold text-[16px]">
+                    <div className="flex w-full items-center justify-start mt-3 relative">
+                        <div className="flex flex-row items-center justify-center gap-1.5 bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] rounded-[10px] py-1.5 px-2.5 w-fit">
+                            <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[14px] flex items-center justify-center gap-1.5 whitespace-nowrap">
+                                <span className="whitespace-nowrap text-[14px] font-medium">Earn up to</span>
+                                <span className="flex items-center gap-0.5 whitespace-nowrap">
+                                    <span className="font-semibold text-[14px] whitespace-nowrap">
                                         {(() => {
                                             // Use rewards.coins first, then fallback to amount
                                             return displayGame?.rewards?.coins || displayGame?.besitosRawData?.amount || displayGame?.amount || 0;
                                         })()}
                                     </span>
                                     <img
-                                        className="w-[23px] h-[22px] object-contain"
+                                        className="w-[20px] h-[19px] object-contain flex-shrink-0"
                                         alt="Coin icon"
                                         src="https://c.animaapp.com/ltgoa7L3/img/image-3937-7@2x.png"
                                     />
                                 </span>
                                 <span className="whitespace-nowrap">and</span>
-                                <span className="flex items-center gap-1">
-                                    <span className="font-semibold">
+                                <span className="flex items-center gap-0.5 whitespace-nowrap">
+                                    <span className="font-semibold text-[14px] whitespace-nowrap">
                                         {(() => {
                                             // Calculate total XP with progressive multiplier
                                             // Or use rewards.xp if available
@@ -971,7 +973,7 @@ function GameDetailsContent() {
                                         })()}
                                     </span>
                                     <img
-                                        className="w-[22px] h-[23px] object-contain"
+                                        className="w-[19px] h-[20px] object-contain flex-shrink-0"
                                         alt="XP icon"
                                         src="https://c.animaapp.com/ltgoa7L3/img/pic-7.svg"
                                     />

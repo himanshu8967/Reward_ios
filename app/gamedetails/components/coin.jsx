@@ -220,7 +220,7 @@ export const Coin = ({
                     onClick={handleClaimClick}
                     disabled={availableGroups === 0 || claiming || locallyClaimed}
                     className={`
-                        absolute top-[164px] left-4 w-[257px] h-10 flex items-center justify-center rounded-lg overflow-hidden 
+                        absolute bottom-4 left-4 right-12 h-10 flex items-center justify-center rounded-lg overflow-hidden 
                         transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-black
                         ${availableGroups === 0 || claiming || locallyClaimed
                             ? 'bg-gray-600 cursor-not-allowed opacity-50'
@@ -243,28 +243,28 @@ export const Coin = ({
                 </button>
 
                 <div
-                    className="flex w-[74.49%] items-center gap-1 absolute top-[calc(50.00%_+_4px)] left-[4.40%]"
+                    className="flex items-center justify-center gap-2 absolute top-[62%] left-1/2 transform -translate-x-1/2 -translate-y-1/2"
                     role="status"
                     aria-label="Progress status"
                 >
-                    <span className={`relative w-fit [font-family:'Poppins',Helvetica] font-bold text-[15px] tracking-[0] leading-[17px] whitespace-nowrap transition-all duration-500 ${locallyClaimed ? 'text-green-400' : 'text-white'
+                    <span className={`[font-family:'Poppins',Helvetica] font-bold text-[15px] tracking-[0] leading-[17px] whitespace-nowrap transition-all duration-500 ${locallyClaimed ? 'text-green-400' : 'text-white'
                         }`}>
-                        ${locallyClaimed ? claimedCoins.toFixed(2) : availableCoins.toFixed(2)}
+                        {locallyClaimed ? claimedCoins.toFixed(2) : availableCoins.toFixed(2)}
                     </span>
 
                     <img
-                        className="relative w-[22.82px] h-[23.53px] aspect-[0.97]"
+                        className="w-[18px] h-[18px] object-contain flex-shrink-0"
                         alt="Coin icon"
                         src="https://c.animaapp.com/WucpRujl/img/image-3937@2x.png"
                     />
 
-                    <span className={`relative w-fit [font-family:'Poppins',Helvetica] font-bold text-[15px] text-right tracking-[0] leading-[17px] whitespace-nowrap transition-all duration-500 ${locallyClaimed ? 'text-green-400' : 'text-white'
+                    <span className={`[font-family:'Poppins',Helvetica] font-bold text-[15px] tracking-[0] leading-[17px] whitespace-nowrap transition-all duration-500 ${locallyClaimed ? 'text-green-400' : 'text-white'
                         }`}>
                         and {locallyClaimed ? claimedXP : availableXP}
                     </span>
 
                     <img
-                        className="relative  w-[22.82px] h-[23.53px] aspect-[0.97]"
+                        className="w-[18px] h-[18px] object-contain flex-shrink-0"
                         alt="Level icon"
                         src="https://c.animaapp.com/WucpRujl/img/pic.svg"
                     />
@@ -272,7 +272,7 @@ export const Coin = ({
 
                 {/* --- **MODIFIED** Progress Bar --- */}
                 {/* MODIFIED: Increased left and right padding to shorten the bar's length */}
-                <div className="absolute top-[90px] left-6 right-30 my-1">
+                <div className="absolute top-[90px] left-6 right-6">
                     <div
                         className="relative w-full"
                         role="progressbar"
@@ -313,7 +313,7 @@ export const Coin = ({
                         console.log('Toolkit button clicked, opening modal...');
                         setShowOptInModal(true);
                     }}
-                    className="absolute top-[165px] left-[286px] w-9 h-9 hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-black rounded-full"
+                    className="absolute bottom-4 right-2 w-9 h-9 flex items-center justify-center hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-black rounded-full"
                     aria-label="Information"
                 >
                     <img
@@ -323,23 +323,23 @@ export const Coin = ({
                     />
                 </button>
 
-                <header className="flex flex-col w-[307px] items-start gap-[5px] absolute top-[15px] left-[18px]">
-                    <div className="flex items-end justify-between relative self-stretch w-full flex-[0_0_auto]">
-                        <h1 className="relative w-fit [font-family:'Poppins',Helvetica] font-semibold text-white text-xl tracking-[-0.37px] leading-[27.2px] whitespace-nowrap">
+                <header className="flex flex-col items-start gap-2 absolute top-4 left-4 right-4">
+                    <div className="flex items-center justify-between w-full">
+                        <h1 className="[font-family:'Poppins',Helvetica] font-semibold text-white text-xl tracking-[-0.37px] leading-[27.2px] whitespace-nowrap">
                             {'My Coins'}
                         </h1>
 
                         <div
-                            className="flex items-center gap-2 px-0 py-1.5 relative mr-2"
+                            className="flex items-center gap-2"
                             role="status"
-                            aria-label={`Session earnings: $${availableCoins.toFixed(2)}`}
+                            aria-label={`Session earnings: ${availableCoins.toFixed(2)}`}
                         >
-                            <span className="relative w-fit [font-family:'Poppins',Helvetica] font-semibold text-white text-lg tracking-[0] leading-5 whitespace-nowrap">
-                                ${availableCoins.toFixed(2)}
+                            <span className="[font-family:'Poppins',Helvetica] font-semibold text-white text-lg tracking-[0] leading-5 whitespace-nowrap">
+                                {availableCoins.toFixed(2)}
                             </span>
 
                             <img
-                                className="relative w-[22.82px] h-[23.53px] aspect-[0.97]"
+                                className="w-[22px] h-[23px] object-contain"
                                 alt="Coin icon"
                                 src="https://c.animaapp.com/WucpRujl/img/image-3938@2x.png"
                             />
@@ -347,13 +347,13 @@ export const Coin = ({
                     </div>
 
                     {/* AC-08: Status message based on claim state */}
-                    <div className="relative mb-3 self-stretch">
+                    <div className="w-full">
                         <p className={`[font-family:'Poppins',Helvetica] font-normal text-sm tracking-[0.02px] leading-[normal] transition-all duration-500 ${isClaimed ? 'text-green-400' : 'text-[#ffffff99]'
                             }`}>
                             {locallyClaimed
-                                ? `✅ Successfully claimed $${claimedCoins.toFixed(2)} coins and ${claimedXP} XP!`
+                                ? `✅ Successfully claimed ${claimedCoins.toFixed(2)} coins and ${claimedXP} XP!`
                                 : availableGroups > 0
-                                    ? `🎉 Ready to claim $${availableCoins.toFixed(2)} + ${availableXP} XP from ${availableGroups} group${availableGroups > 1 ? 's' : ''}!`
+                                    ? `🎉 Ready to claim ${availableCoins.toFixed(2)} + ${availableXP} XP from ${availableGroups} group${availableGroups > 1 ? 's' : ''}!`
                                     : sessionCoins > 0
                                         ? `💰 Complete ${rewardData.nextGroupTarget - rewardData.nextGroupProgress} more tasks to unlock the next reward group!`
                                         : '*Complete level 3 to claim your reward.'}
@@ -385,7 +385,7 @@ export const Coin = ({
                                 <div className="flex items-center gap-2">
                                     <div
                                         className="flex-1 bg-gray-600 rounded-full h-1.5 overflow-hidden cursor-help"
-                                        title={`Reward Progress: $${availableCoins.toFixed(2)} earned`}
+                                        title={`Reward Progress: ${availableCoins.toFixed(2)} earned`}
                                     >
                                         <div
                                             className="bg-gradient-to-r from-yellow-400 to-orange-400 h-full rounded-full transition-all duration-500"
@@ -394,9 +394,9 @@ export const Coin = ({
                                     </div>
                                     <span
                                         className="text-xs text-yellow-400 font-medium cursor-help"
-                                        title={`Current rewards: $${availableCoins.toFixed(2)}`}
+                                        title={`Current rewards: ${availableCoins.toFixed(2)}`}
                                     >
-                                        ${availableCoins.toFixed(2)}
+                                        {availableCoins.toFixed(2)}
                                     </span>
                                 </div>
                             </div>
@@ -416,7 +416,7 @@ export const Coin = ({
                             <div className="bg-gradient-to-r from-yellow-500/10 to-blue-500/10 rounded-lg p-4 border border-yellow-500/20">
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-gray-400">Coins:</span>
-                                    <span className="font-bold text-yellow-400 text-lg">${availableCoins.toFixed(2)}</span>
+                                    <span className="font-bold text-yellow-400 text-lg">{availableCoins.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-gray-400">XP:</span>
@@ -484,7 +484,7 @@ export const Coin = ({
                             <div className="bg-green-600/20 rounded-lg p-4 mb-4 border border-green-500/30">
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-green-200">Coins Earned:</span>
-                                    <span className="font-bold text-yellow-300 text-lg">${claimedCoins.toFixed(2)}</span>
+                                    <span className="font-bold text-yellow-300 text-lg">{claimedCoins.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-green-200">XP Earned:</span>

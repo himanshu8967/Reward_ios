@@ -218,51 +218,60 @@ export const HighestEarningGame = () => {
             <section className="flex flex-col w-full max-w-[335px] justify-center items-start gap-2.5 mx-auto ">
                 <h3 className="font-semibold text-[#F4F3FC] text-[16px] opacity-[100%]">Highest Earning Games</h3>
                 <div
-                    className="flex items-center gap-[15px] w-full overflow-hidden pb-4"
+                    className="flex items-center gap-[10px] w-full overflow-x-auto pb-0 scrollbar-hide"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                    <div className="flex items-center gap-[15px] w-full">
+                    <div className="flex items-center gap-[10px]">
                         {processedGames.length > 0 ? processedGames.map((game) => (
-                            <article key={game.id} className="relative w-40 min-h-[320px] flex-shrink-0 cursor-pointer hover:scale-105 transition-all duration-200" onClick={() => handleGameClick(game)}>
-                                <img
-                                    className="absolute w-40 h-[180px] top-0 left-0 object-fit rounded-[20px]"
-                                    src={game.image || game.square_image || '/placeholder-game.png'}
-                                    alt={game.title || 'Game Image'}
-                                />
+                            <article key={game.id} className="relative w-[155px] min-h-[320px] flex-shrink-0 cursor-pointer hover:scale-105 transition-all duration-200" onClick={() => handleGameClick(game)}>
+                                <div className="relative w-full h-[180px] rounded-[20px] overflow-hidden bg-gray-800">
+                                    <img
+                                        className="w-full h-full object-cover rounded-[20px]"
+                                        src={game.image || game.square_image || '/placeholder-game.png'}
+                                        alt={game.title || 'Game Image'}
+                                    />
+                                </div>
 
-                                <div className="flex flex-col w-[154px] gap-2 absolute top-[200px] left-0">
-                                    <div className="flex flex-col ">
-                                        <h4 className="font-semibold text-[#FFFFFF] text-[16px]">
+                                <div className="flex flex-col w-full gap-2 mt-3">
+                                    <div className="flex flex-col gap-0.5">
+                                        <h4 className="font-semibold text-[#FFFFFF] text-[16px] leading-tight">
                                             {String(game.title || 'Game').split(' - ')[0]}
                                         </h4>
+                                        <div className="text-[#FFFFFF] font-normal text-[13px] opacity-80">{String(game.category || 'Action')}</div>
 
-
-
-                                        <div className="text-[#FFFFFF] mb-2 font-normal text-[13px]">{String(game.category || 'Action')}</div>
                                         <div
-                                            className="relative w-[154px] h-[60px] rounded-[10px] overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)]"
+                                            className="relative w-full min-h-[60px] rounded-[10px] overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] p-2.5 flex flex-col gap-1"
                                             data-model-id="2255:6425"
                                             role="banner"
                                             aria-label="Earn rewards banner"
                                         >
-                                            <div className="absolute top-1.5 left-[9px] [font-family:'Poppins',Helvetica] font-medium text-white text-base tracking-[0] leading-[normal]">
-                                                Earn upto {String(game.earnings || '0')}
+                                            <div className="flex items-center  gap-1.5 flex-nowrap">
+                                                <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-sm tracking-[0] leading-normal whitespace-nowrap">
+                                                    Earn upto
+                                                </span>
+                                                <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-sm tracking-[0] leading-normal whitespace-nowrap">
+                                                    {String(game.earnings || '0')}
+                                                </span>
+                                                <img
+                                                    className="w-[16px] h-[16px] object-contain flex-shrink-0"
+                                                    alt="Coin icon"
+                                                    src="/dollor.png"
+                                                />
                                             </div>
 
-                                            <img
-                                                className="absolute w-[20px] h-[20px] top-[7px] left-[124px] aspect-[0.97]"
-                                                alt="Coin icon"
-                                                src="/dollor.png"
-                                            />
-
-                                            <div className="absolute h-[13px] top-[34px] left-[9px] [font-family:'Poppins',Helvetica] font-medium text-white text-base tracking-[0] leading-[13px] whitespace-nowrap">
-                                                and {String(game.totalXP || 0)}
+                                            <div className="flex items-center gap-1.5 flex-nowrap">
+                                                <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-sm tracking-[0] leading-normal whitespace-nowrap">
+                                                    and
+                                                </span>
+                                                <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-sm tracking-[0] leading-normal whitespace-nowrap">
+                                                    {String(game.totalXP || 0)}
+                                                </span>
+                                                <img
+                                                    className="w-4 h-4 object-contain flex-shrink-0 -mt-0.5"
+                                                    alt="XP points icon"
+                                                    src="/xp.svg"
+                                                />
                                             </div>
-
-                                            <img
-                                                className="absolute w-5 h-[18px] top-7.5 left-[74px]"
-                                                alt="XP points icon"
-                                                src="/xp.svg"
-                                            />
                                         </div>
                                     </div>
                                 </div>

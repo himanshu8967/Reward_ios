@@ -494,7 +494,8 @@ export const DailyRewardsSection = ({ weekData, isCurrentWeek, isFutureWeek, onC
                 )}
 
                 {/* Missed Day Indicator - Red cross for missed days (AC4) */}
-                <MissedDayIndicator isMissed={reward.status === 'missed'} />
+                {/* Commented out X button - UX improvement: Remove big X; mark unclaimed as "missed" and use consistent iconography */}
+                {/* <MissedDayIndicator isMissed={reward.status === 'missed'} /> */}
 
                 <MemoizedImage
                     className="absolute top-[calc(50.00%_-_62px)] left-[calc(50.00%_-_73px)] w-[147px] h-[102px] object-cover"
@@ -662,9 +663,9 @@ export const DailyRewardsSection = ({ weekData, isCurrentWeek, isFutureWeek, onC
                             />
                         </div>
                     ) : (
-                        // Big Reward NOT Eligible - Show golden chest with X → arrow → normal chest (centered)
+                        // Big Reward NOT Eligible - Show golden chest (X button commented out for UX improvement)
                         <div className="absolute top-[calc(50.00%_-_58px)] left-1/2 transform -translate-x-1/2 flex items-center justify-center gap-4 w-full max-w-[320px] px-2">
-                            {/* Golden chest with red X */}
+                            {/* Golden chest - X overlay commented out */}
                             <div className="relative w-[96px] h-[96px] flex-shrink-0 flex items-center justify-center">
                                 <MemoizedImage
                                     className="w-full h-full object-contain"
@@ -672,8 +673,8 @@ export const DailyRewardsSection = ({ weekData, isCurrentWeek, isFutureWeek, onC
                                     src="https://c.animaapp.com/ciot1lOr/img/png-clipart-buried-treasure-treasure-miscellaneous-treasure-tran@2x.png"
                                     loading="lazy"
                                 />
-                                {/* Red X overlay with custom SVG - centered */}
-                                <div className="absolute inset-0 flex items-center justify-center">
+                                {/* Red X overlay with custom SVG - COMMENTED OUT for UX improvement */}
+                                {/* <div className="absolute inset-0 flex items-center justify-center">
                                     <svg width="44" height="33" viewBox="0 0 44 33" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[44px] h-[33px]">
                                         <g filter="url(#filter0_dd_2035_6990)">
                                             <path d="M3.03229 2.47884C3.09565 1.64458 3.79104 1 4.62769 1H41.2295C42.1609 1 42.8955 1.79244 42.8249 2.72117L40.9234 27.7594C40.86 28.5937 40.1646 29.2383 39.328 29.2383H2.72612C1.79473 29.2383 1.06018 28.4458 1.13072 27.5171L3.03229 2.47884Z" fill="#E6311F" />
@@ -714,7 +715,7 @@ export const DailyRewardsSection = ({ weekData, isCurrentWeek, isFutureWeek, onC
                                             </filter>
                                         </defs>
                                     </svg>
-                                </div>
+                                </div> */}
                             </div>
 
                             {/* Better looking arrow */}

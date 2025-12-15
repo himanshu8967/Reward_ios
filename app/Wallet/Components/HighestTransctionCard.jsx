@@ -14,8 +14,8 @@ export const HighestTransctionCard = ({
 }) => {
     // Priority: metadata.xp > finalXp > xpBonus
     // Use metadata.xp if available (for Daily Rewards), otherwise use finalXp, then xpBonus
-    const displayXp = (xp !== null && xp !== undefined) ? xp : 
-                      (finalXp !== null && finalXp !== undefined ? finalXp : xpBonus);
+    const displayXp = (xp !== null && xp !== undefined) ? xp :
+        (finalXp !== null && finalXp !== undefined ? finalXp : xpBonus);
     return (
         <article
             className="relative w-[335px] h-[92px] bg-black  rounded-[10px] shadow-[0_0_10px_6px_rgba(255,255,255,0.15)]"
@@ -71,38 +71,39 @@ export const HighestTransctionCard = ({
             </div>
 
             <div
-                className="absolute w-[89px] h-[22px] top-[70px] left-[123px]"
+                className="absolute top-[70px] left-[123px]"
                 aria-label={`Plus ${displayXp} XP bonus${finalXp ? ' (Final XP with multiplier)' : ''}`}
             >
-                <div className="relative w-[110px] h-7 -top-0.5 -left-1.5">
-                    <div className="absolute w-[57px] h-6 top-0 left-[27px] bg-[#201f59] rounded-[4px_4px_0px_0px] shadow-[0px_0px_4px_#fef47e33]" />
-
+                <div className="relative flex items-center h-7 -top-0.5 -left-1.5 gap-0">
                     <Image
-                        className="absolute w-[27px] h-7 top-0 left-[3px]"
+                        className="w-[27px] h-7 flex-shrink-0"
                         alt="Left decoration"
                         src="https://c.animaapp.com/UNpBPFIY/img/vector-4235.svg"
                         width={27}
                         height={28}
                     />
 
+                    <div className="relative flex items-center gap-1 px-2 bg-[#201f59] rounded-[4px_4px_0px_0px] shadow-[0px_0px_4px_#fef47e33] min-w-[30px] -ml-[2px] -mr-[2px]">
+                        <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[13px] tracking-[0] leading-[normal] whitespace-nowrap">
+                            +{displayXp}
+                        </span>
+
+                        <Image
+                            className="w-4 h-[15px] flex-shrink-0"
+                            alt="XP icon"
+                            src="/xp.svg"
+                            width={16}
+                            height={15}
+                        />
+                    </div>
+
                     <Image
-                        className="absolute w-[26px] h-[27px] top-px left-[81px]"
+                        className="w-[26px] h-[27px] flex-shrink-0 relative"
+                        style={{ top: '2px' }}
                         alt="Right decoration"
                         src="https://c.animaapp.com/UNpBPFIY/img/vector-4234.svg"
                         width={26}
                         height={27}
-                    />
-
-                    <span className="absolute h-5 top-1 left-[30px] [font-family:'Poppins',Helvetica] font-medium text-white text-[13px] tracking-[0] leading-[normal]">
-                        +{displayXp}
-                    </span>
-
-                    <Image
-                        className="absolute w-4 h-[15px] top-[5px] left-[63px]"
-                        alt="XP icon"
-                        src="/xp.svg"
-                        width={16}
-                        height={15}
                     />
                 </div>
             </div>

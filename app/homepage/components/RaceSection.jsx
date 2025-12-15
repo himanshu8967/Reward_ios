@@ -115,6 +115,7 @@ const RaceSection = () => {
                 isOpen={isRaceModalOpen}
                 isAnimating={isAnimating}
                 onClose={handleModalClose}
+                token={typeof window !== 'undefined' ? (localStorage.getItem('authToken') || localStorage.getItem('x-auth-token')) : null}
             />
         </div>
     );

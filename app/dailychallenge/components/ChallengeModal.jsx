@@ -9,6 +9,8 @@ import {
     fetchCalendar,
     fetchToday
 } from "../../../lib/redux/slice/dailyChallengeSlice";
+import { SimpleSpinWheel } from "./SimpleSpinWheel";
+import { spinForChallenge } from "../../../lib/api";
 
 export const ChallengeModal = ({
     isOpen,
@@ -27,6 +29,10 @@ export const ChallengeModal = ({
     const [isClaiming, setIsClaiming] = useState(false);
     const [timeUntilClaimable, setTimeUntilClaimable] = useState(null);
     const [isSpinning, setIsSpinning] = useState(false);
+    const [challengeStartTime, setChallengeStartTime] = useState(null);
+    const [timeLimitCountdown, setTimeLimitCountdown] = useState(null);
+    const [showCompletionSuccess, setShowCompletionSuccess] = useState(false);
+    const [spinSuccess, setSpinSuccess] = useState(false);
 
     // Log modal state changes
     useEffect(() => {
@@ -105,8 +111,65 @@ export const ChallengeModal = ({
         return () => clearInterval(interval);
     }, [today?.countdown]);
 
+    // Track challenge start time and calculate time limit countdown
+    useEffect(() => {
+        if (today?.progress?.startedAt && !today?.progress?.isCompleted) {
+            const startedAt = new Date(today.progress.startedAt);
+            setChallengeStartTime(startedAt);
+        } else if (today?.progress?.isCompleted) {
+            setChallengeStartTime(null);
+            setTimeLimitCountdown(null);
+        }
+    }, [today?.progress?.startedAt, today?.progress?.isCompleted]);
+
+    // Calculate countdown for time limit (e.g., 3 minutes)
+    useEffect(() => {
+        if (!challengeStartTime || !today?.challenge?.requirements?.timeLimit) {
+            setTimeLimitCountdown(null);
+            return;
+        }
+
+        const updateTimeLimitCountdown = () => {
+            const now = new Date();
+            const timeLimitMinutes = today.challenge.requirements.timeLimit;
+            const timeLimitMs = timeLimitMinutes * 60 * 1000; // Convert minutes to milliseconds
+            const elapsed = now - challengeStartTime;
+            const remaining = timeLimitMs - elapsed;
+
+            if (remaining <= 0) {
+                setTimeLimitCountdown(null); // Time limit reached
+                return;
+            }
+
+            // Calculate minutes and seconds
+            const minutes = Math.floor(remaining / (1000 * 60));
+            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+            setTimeLimitCountdown({
+                minutes,
+                seconds,
+                formatted: `${minutes}:${seconds.toString().padStart(2, '0')}`,
+                totalSeconds: Math.floor(remaining / 1000)
+            });
+        };
+
+        // Initial update
+        updateTimeLimitCountdown();
+
+        // Update every second
+        const interval = setInterval(updateTimeLimitCountdown, 1000);
+
+        return () => clearInterval(interval);
+    }, [challengeStartTime, today?.challenge?.requirements?.timeLimit]);
+
     // Calculate time until rewards can be claimed (10 minutes from start)
     useEffect(() => {
+        // Skip wait timer for spin challenges - they can claim immediately
+        if (today?.challenge?.type === 'spin') {
+            setTimeUntilClaimable(null);
+            return;
+        }
+
         // Only show countdown if challenge is completed but rewards can't be claimed yet
         if (!today?.progress?.isCompleted || !today?.progress?.startedAt) {
             setTimeUntilClaimable(null);
@@ -150,7 +213,7 @@ export const ChallengeModal = ({
         const interval = setInterval(updateTimeUntilClaimable, 1000);
 
         return () => clearInterval(interval);
-    }, [today?.progress?.isCompleted, today?.progress?.startedAt, today?.countdown?.serverTime]);
+    }, [today?.progress?.isCompleted, today?.progress?.startedAt, today?.countdown?.serverTime, today?.challenge?.type]);
 
     if (!isOpen) return null;
 
@@ -238,9 +301,16 @@ export const ChallengeModal = ({
             // IMPORTANT: Track when challenge started for 10-minute validation
             // If API doesn't return startedAt, we set it locally
             if (result.type.includes('fulfilled')) {
-                // Refresh today's data to get updated progress with startedAt
+                // Set local start time immediately
+                setChallengeStartTime(new Date());
+                // Refresh today's data to get updated progress with startedAt and actions
                 await dispatch(fetchToday({ token: localStorage.getItem('authToken') }));
-                console.log("🚀 [CHALLENGE MODAL] Refreshed today's data to get startedAt timestamp");
+                console.log("🚀 [CHALLENGE MODAL] Refreshed today's data to get startedAt timestamp and updated actions");
+
+                // Force a small delay to ensure state updates before UI re-renders
+                setTimeout(() => {
+                    console.log("🚀 [CHALLENGE MODAL] State should be updated now, canComplete should be available");
+                }, 100);
             }
 
             // Check for deep link in game object
@@ -285,10 +355,23 @@ export const ChallengeModal = ({
             conversionId: today?.conversionId,
             hasToken: !!token,
             today: today,
+            challengeType: today?.challenge?.type,
             timestamp: new Date().toISOString(),
         });
         try {
             setIsCompleting(true);
+
+            // For spin challenges, check if spin was successful before completing
+            if (today?.challenge?.type === 'spin') {
+                if (!spinSuccess) {
+                    console.warn("⚠️ [CHALLENGE MODAL] Spin was not successful, cannot complete challenge");
+                    alert("Please spin the wheel successfully before marking as complete.");
+                    setIsCompleting(false);
+                    return;
+                }
+                console.log("🎰 [CHALLENGE MODAL] Spin was successful, proceeding with completion");
+            }
+
             console.log("✅ [CHALLENGE MODAL] Dispatching completeTodayChallenge action");
             const result = await dispatch(completeTodayChallenge({
                 conversionId: today?.conversionId,
@@ -314,10 +397,13 @@ export const ChallengeModal = ({
                 await dispatch(fetchToday({ token }));
 
                 console.log("✅ [CHALLENGE MODAL] Calendar and today's data refreshed");
-            }
 
-            onClose();
-            console.log("✅ [CHALLENGE MODAL] Modal closed");
+                // Show success message in modal instead of closing immediately
+                setShowCompletionSuccess(true);
+            } else {
+                // If completion failed, close modal
+                onClose();
+            }
         } catch (error) {
             console.error("✅ [CHALLENGE MODAL] Failed to complete challenge:", {
                 error: error.message,
@@ -415,7 +501,13 @@ export const ChallengeModal = ({
             return false;
         }
 
-        // Condition 2: 10 minutes must have passed since start
+        // For spin challenges, skip the 10-minute wait - allow immediate claiming
+        if (today?.challenge?.type === 'spin') {
+            // Only check if API allows claiming
+            return today?.actions?.canClaimRewards || false;
+        }
+
+        // Condition 2: 10 minutes must have passed since start (for non-spin challenges)
         if (today?.progress?.startedAt) {
             // Use server time if available (more accurate), otherwise use client time
             const serverTime = today?.countdown?.serverTime
@@ -443,7 +535,7 @@ export const ChallengeModal = ({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 rounded-lg p-6 w-full max-w-sm border border-gray-700">
+            <div className="bg-gray-900 rounded-lg p-6 w-full max-w-sm border border-gray-700 max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold text-white">Today's Challenge</h2>
@@ -455,33 +547,131 @@ export const ChallengeModal = ({
                     </button>
                 </div>
 
-                {/* Countdown Timer */}
-                {countdown && (
-                    <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
-                        <div className="text-red-200 text-sm font-medium mb-1">Time Remaining</div>
-                        <div className="text-red-100 text-lg font-bold font-mono">{countdown}</div>
+                {/* Daily Reward Countdown - Simple red text at top */}
+                {today?.countdown && (
+                    <div className="mb-4 text-center">
+                        <div className="text-red-500 text-base font-medium">
+                            {countdown || today.countdown.formatted || today.countdown.timeRemainingLabel}
+                        </div>
                     </div>
                 )}
 
-                {/* Challenge Title and Description */}
-                {today?.challenge && (
+                {/* Challenge Image */}
+                {(today?.challenge?.mediaUrl || today?.challenge?.game?.iconUrl) && (
+                    <div className="mb-4 flex justify-center">
+                        <img
+                            src={today.challenge.mediaUrl || today.challenge.game?.iconUrl}
+                            alt={today.challenge.title || "Challenge"}
+                            className="w-full h-48 object-cover rounded-lg border border-gray-700"
+                            onError={(e) => {
+                                e.target.style.display = 'none';
+                            }}
+                        />
+                    </div>
+                )}
+
+                {/* Game Name - Plain white text after image */}
+                {(today?.challenge?.gameName || today?.challenge?.game?.name) && (
                     <div className="mb-4">
-                        <div className="text-white text-lg font-bold mb-2">{today.challenge.title || 'Daily Challenge'}</div>
-                        {today.challenge.description && (
-                            <div className="text-gray-300 text-sm leading-relaxed">
-                                {today.challenge.description}
+                        <div className="text-white text-base">
+                            {(today.challenge.gameName || today.challenge.game?.name || '').split(' - ')[0]}
+                        </div>
+                    </div>
+                )}
+
+                {/* Challenge Title */}
+                {/* {today?.challenge?.title && (
+                    <div className="mb-3">
+                        <div className="text-white text-lg font-bold">{today.challenge.title}</div>
+                    </div>
+                )} */}
+
+                {/* Challenge Description */}
+                {/* {today?.challenge?.description && (
+                    <div className="mb-4">
+                        <div className="text-gray-300 text-sm leading-relaxed">
+                            {today.challenge.description}
+                        </div>
+                    </div>
+                )} */}
+
+                {/* Challenge Type */}
+                {today?.challenge?.type && (
+                    <div className="mb-3 p-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
+                        <div className="text-blue-200 text-xs font-medium mb-1">Type</div>
+                        <div className="text-blue-100 text-sm font-semibold">
+                            {today.challenge.typeLabel || today.challenge.type}
+                        </div>
+                    </div>
+                )}
+
+                {/* Rewards Section */}
+                {/* {(today?.rewards || today?.challenge) && (
+                    <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
+                        <div className="text-yellow-200 text-sm font-medium mb-2">Rewards</div>
+                        <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                                <span className="text-yellow-100 text-sm">Coins:</span>
+                                <span className="text-yellow-100 text-sm font-bold">
+                                    {today?.rewards?.coins || today?.challenge?.coinReward || 0}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-yellow-100 text-sm">XP:</span>
+                                <span className="text-yellow-100 text-sm font-bold">
+                                    {today?.rewards?.xp || today?.challenge?.xpReward || 0}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )} */}
+
+                {/* Game Name */}
+                {/* {(today?.challenge?.gameName || today?.challenge?.game?.name) && (
+                    <div className="mb-3 p-2 bg-green-500/20 border border-green-500/30 rounded-lg">
+                        <div className="text-green-200 text-xs font-medium mb-1">Game</div>
+                        <div className="text-green-100 text-sm font-semibold">
+                            {today.challenge.gameName || today.challenge.game?.name}
+                        </div>
+                    </div>
+                )} */}
+
+                {/* Time Limit - Hide for spin challenges */}
+                {today?.challenge?.requirements?.timeLimit && today?.challenge?.type !== 'spin' && (
+                    <div className="mb-3 p-2 bg-purple-500/20 border border-purple-500/30 rounded-lg">
+                        <div className="text-purple-200 text-xs font-medium mb-1">Time Limit</div>
+                        <div className="text-purple-100 text-sm font-semibold">
+                            {today.challenge.requirements.timeLimit} {today.challenge.requirements.timeLimit === 1 ? 'minute' : 'minutes'}
+                        </div>
+                    </div>
+                )}
+
+                {/* Daily Reward Countdown */}
+                {/* {today?.countdown && (
+                    <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
+                        <div className="text-red-200 text-sm font-medium mb-1">Daily Reward Countdown</div>
+                        <div className="text-red-100 text-lg font-bold font-mono mb-1">
+                            {countdown || today.countdown.formatted || today.countdown.timeRemainingLabel}
+                        </div>
+                        {today.countdown.timeRemainingLabel && (
+                            <div className="text-red-200 text-xs">
+                                {today.countdown.timeRemainingLabel}
                             </div>
                         )}
-                        {today.challenge.instructions && (
-                            <div className="text-gray-400 text-xs mt-2 italic">
-                                {today.challenge.instructions}
-                            </div>
-                        )}
+                    </div>
+                )} */}
+
+                {/* Instructions */}
+                {today?.challenge?.instructions && (
+                    <div className="mb-4">
+                        <div className="text-gray-400 text-xs italic">
+                            {today.challenge.instructions}
+                        </div>
                     </div>
                 )}
 
                 {/* Spin Wheel for "spin" type challenges */}
-                {today?.challenge?.type === 'spin' && today?.actions?.canSpin && (
+                {today?.challenge?.type === 'spin' && (
                     <div className="mb-4 p-4 bg-gradient-to-br from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-lg">
                         <div className="text-center mb-2">
                             <div className="text-purple-200 text-sm font-medium mb-1">
@@ -493,21 +683,65 @@ export const ChallengeModal = ({
                                 </div>
                             )}
                         </div>
-                        <SpinWheel
-                            onSpinComplete={async () => {
-                                console.log('🎰 [CHALLENGE MODAL] Spin completed, starting challenge...');
-                                setIsSpinning(false);
-                                // After spin completes, start the challenge
-                                await handleStartChallenge();
-                            }}
-                            isSpinning={isSpinning}
-                            disabled={isStarting || isSpinning || !today?.actions?.canSpin}
-                        />
+                        {today?.actions?.canSpin && !today?.progress?.isCompleted && (
+                            <SimpleSpinWheel
+                                token={token}
+                                onSpinComplete={async (spinWasSuccessful) => {
+                                    console.log('🎰 [CHALLENGE MODAL] Spin completed, success:', spinWasSuccessful);
+                                    setIsSpinning(false);
+
+                                    if (spinWasSuccessful) {
+                                        setSpinSuccess(true);
+                                        // For spin challenges, start the challenge but don't open the game URL
+                                        try {
+                                            setIsStarting(true);
+                                            const result = await dispatch(startTodayChallenge({ token: localStorage.getItem('authToken') }));
+
+                                            if (result.type.includes('fulfilled')) {
+                                                setChallengeStartTime(new Date());
+                                                await dispatch(fetchToday({ token: localStorage.getItem('authToken') }));
+                                                console.log("🎰 [CHALLENGE MODAL] Challenge started without opening game for spin challenge");
+                                            }
+                                        } catch (error) {
+                                            console.error("🎰 [CHALLENGE MODAL] Failed to start challenge:", error);
+                                        } finally {
+                                            setIsStarting(false);
+                                        }
+                                    } else {
+                                        setSpinSuccess(false);
+                                        alert("Spin was not successful. Please try spinning again.");
+                                    }
+                                }}
+                                onSpinStart={() => {
+                                    console.log('🎰 [CHALLENGE MODAL] Spin started...');
+                                    setIsSpinning(true);
+                                    setSpinSuccess(false);
+                                }}
+                                onSpinSuccess={(spinResult) => {
+                                    console.log('🎰 [CHALLENGE MODAL] Spin API successful:', spinResult);
+                                }}
+                                onSpinError={(error) => {
+                                    console.error('🎰 [CHALLENGE MODAL] Spin API error:', error);
+                                }}
+                                isSpinning={isSpinning}
+                                disabled={isStarting || isSpinning || !today?.actions?.canSpin}
+                            />
+                        )}
+                        {today?.progress?.isCompleted && (
+                            <div className="text-center py-4">
+                                <div className="text-green-400 text-sm font-medium mb-2">
+                                    ✅ Spin Completed!
+                                </div>
+                                <div className="text-gray-300 text-xs">
+                                    Challenge completed successfully
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
                 {/* Game Selection */}
-                {!today?.selectedGame && (
+                {/* {!today?.selectedGame && (
                     <div className="mb-4">
                         <div className="text-white text-sm font-medium mb-2">Select a Game:</div>
                         <div className="space-y-2">
@@ -524,7 +758,7 @@ export const ChallengeModal = ({
                             ))}
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {/* Selected Game */}
                 {today?.selectedGame && (
@@ -535,7 +769,7 @@ export const ChallengeModal = ({
                 )}
 
                 {/* Progress Status */}
-                {today?.progress && (
+                {/* {today?.progress && (
                     <div className="mb-4">
                         <div className="text-white text-sm font-medium mb-2">Progress:</div>
                         <div className="text-gray-300 text-sm">
@@ -547,10 +781,10 @@ export const ChallengeModal = ({
                             </div>
                         )}
                     </div>
-                )}
+                )} */}
 
-                {/* Time Until Claimable Warning */}
-                {today?.progress?.isCompleted && today?.progress?.startedAt && timeUntilClaimable && (
+                {/* Time Until Claimable Warning - Hide for spin challenges */}
+                {today?.progress?.isCompleted && today?.progress?.startedAt && timeUntilClaimable && today?.challenge?.type !== 'spin' && (
                     <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
                         <div className="text-yellow-200 text-sm font-medium mb-1">⏳ Rewards Available In:</div>
                         <div className="text-yellow-100 text-lg font-bold font-mono">{timeUntilClaimable.formatted}</div>
@@ -558,79 +792,122 @@ export const ChallengeModal = ({
                     </div>
                 )}
 
-                {/* Action Buttons - Using actions flags from API with time-based validation */}
-                <div className="flex gap-3">
-                    {canClaimRewardsNow() ? (
-                        <button
-                            onClick={isClaiming ? undefined : handleClaimRewards}
-                            disabled={isClaiming}
-                            className={`flex-1 py-3 text-white rounded-lg font-medium transition-colors ${isClaiming ? 'bg-green-500 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
-                        >
-                            {isClaiming ? 'Claiming Rewards...' : '🎁 Claim Rewards'}
-                        </button>
-                    ) : today?.progress?.isCompleted && today?.progress?.startedAt && timeUntilClaimable ? (
-                        <button
-                            disabled
-                            className="flex-1 py-3 bg-gray-600 text-gray-400 rounded-lg font-medium cursor-not-allowed"
-                        >
-                            ⏳ Wait {timeUntilClaimable.formatted} to Claim
-                        </button>
-                    ) : today?.progress?.isCompleted && !canClaimRewardsNow() ? (
-                        <button
-                            disabled
-                            className="flex-1 py-3 bg-gray-600 text-gray-400 rounded-lg font-medium cursor-not-allowed"
-                        >
-                            {timeUntilClaimable
-                                ? `⏳ Wait ${timeUntilClaimable.formatted} to Claim`
-                                : '⏳ Please wait 10 minutes to claim rewards'}
-                        </button>
-                    ) : today?.actions?.canComplete ? (
-                        <button
-                            onClick={isCompleting ? undefined : handleCompleteChallenge}
-                            disabled={isCompleting}
-                            className={`flex-1 py-3 text-white rounded-lg font-medium transition-colors ${isCompleting ? 'bg-blue-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
-                        >
-                            {isCompleting ? 'Completing…' : 'Mark as Complete'}
-                        </button>
-                    ) : today?.actions?.canPlay && today?.challenge?.type !== 'spin' ? (
-                        <button
-                            onClick={isStarting ? undefined : handleStartChallenge}
-                            disabled={isStarting}
-                            className={`flex-1 py-3 text-white rounded-lg font-medium transition-colors ${isStarting ? 'bg-purple-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'}`}
-                        >
-                            {isStarting ? 'Opening…' : today?.actions?.primaryActionLabel || 'Play Now'}
-                        </button>
-                    ) : today?.challenge?.type === 'spin' && !today?.actions?.canSpin ? (
-                        <button
-                            disabled
-                            className="flex-1 py-3 bg-gray-600 text-gray-400 rounded-lg font-medium cursor-not-allowed"
-                        >
-                            Spin Not Available
-                        </button>
-                    ) : today?.actions?.canSelectGame ? (
-                        <button
-                            disabled
-                            className="flex-1 py-3 bg-gray-600 text-gray-400 rounded-lg font-medium cursor-not-allowed"
-                        >
-                            Select Game First
-                        </button>
-                    ) : (
-                        <button
-                            disabled
-                            className="flex-1 py-3 bg-gray-600 text-gray-400 rounded-lg font-medium cursor-not-allowed"
-                        >
-                            Not Available
-                        </button>
-                    )}
-                </div>
-
                 {/* Rewards Info */}
                 {(today?.rewards || today?.challenge) && (
-                    <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
+                    <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
                         <div className="text-yellow-200 text-sm font-medium mb-1">Rewards:</div>
                         <div className="text-yellow-100 text-sm">
                             {today?.rewards?.coins || today?.challenge?.coinReward || 0} coins, {today?.rewards?.xp || today?.challenge?.xpReward || 0} XP
                         </div>
+                    </div>
+                )}
+
+                {/* Success Message after completion */}
+                {showCompletionSuccess && (
+                    <div className="mb-4 p-4 bg-green-500/20 border border-green-500/50 rounded-lg">
+                        <div className="text-center">
+                            <div className="text-green-400 text-lg font-bold mb-2">
+                                ✅ Challenge Completed Successfully!
+                            </div>
+                            <div className="text-green-200 text-sm mb-3">
+                                Your rewards will be credited within a few minutes.
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setShowCompletionSuccess(false);
+                                    onClose();
+                                }}
+                                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Action Buttons - Flow: Start → Mark as Complete → Claim Rewards */}
+                {!showCompletionSuccess && (
+                    <div className="flex gap-3 mt-4">
+                        {/* Step 1: Claim Rewards (if completed and 10 minutes passed) */}
+                        {canClaimRewardsNow() ? (
+                            <button
+                                onClick={isClaiming ? undefined : handleClaimRewards}
+                                disabled={isClaiming}
+                                className={`flex-1 py-3 text-white rounded-lg font-medium transition-colors ${isClaiming ? 'bg-green-500 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
+                            >
+                                {isClaiming ? 'Claiming Rewards...' : '🎁 Claim Rewards'}
+                            </button>
+                        ) : today?.progress?.isCompleted && today?.progress?.startedAt && timeUntilClaimable && today?.challenge?.type !== 'spin' ? (
+                            <button
+                                disabled
+                                className="flex-1 py-3 bg-gray-600 text-gray-400 rounded-lg font-medium cursor-not-allowed"
+                            >
+                                ⏳ Wait {timeUntilClaimable.formatted} to Claim
+                            </button>
+                        ) : today?.progress?.isCompleted && !canClaimRewardsNow() && today?.challenge?.type !== 'spin' ? (
+                            <button
+                                disabled
+                                className="flex-1 py-3 bg-gray-600 text-gray-400 rounded-lg font-medium cursor-not-allowed"
+                            >
+                                {timeUntilClaimable
+                                    ? `⏳ Wait ${timeUntilClaimable.formatted} to Claim`
+                                    : '⏳ Please wait 10 minutes to claim rewards'}
+                            </button>
+                        ) : timeLimitCountdown && challengeStartTime && !today?.progress?.isCompleted && today?.challenge?.type !== 'spin' ? (
+                            // Show time limit countdown when challenge is started but not completed (not for spin challenges)
+                            <div className="flex-1 py-3 text-center">
+                                <div className="text-red-500 text-lg font-bold font-mono">
+                                    {timeLimitCountdown.formatted}
+                                </div>
+                                <div className="text-gray-400 text-xs mt-1">
+                                    Complete the challenge to continue
+                                </div>
+                            </div>
+                        ) : (today?.actions?.canComplete || (today?.progress?.startedAt && !today?.progress?.isCompleted)) ? (
+                            // Step 2: Mark as Complete (after starting the challenge)
+                            <button
+                                onClick={isCompleting ? undefined : handleCompleteChallenge}
+                                disabled={isCompleting}
+                                className={`flex-1 py-3 text-white rounded-lg font-medium transition-colors ${isCompleting ? 'bg-blue-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+                            >
+                                {isCompleting ? 'Completing…' : '✅ Mark as Complete'}
+                            </button>
+                        ) : today?.challenge?.type === 'spin' && today?.actions?.canSpin && !today?.progress?.isCompleted ? (
+                            // For spin challenges, the spin wheel is shown above
+                            <div className="flex-1 py-3 text-center text-gray-400 text-sm">
+                                Spin the wheel above to start
+                            </div>
+                        ) : today?.actions?.canPlay && today?.challenge?.type !== 'spin' ? (
+                            // Step 0: Start/Play Now (initial state)
+                            <button
+                                onClick={isStarting ? undefined : handleStartChallenge}
+                                disabled={isStarting}
+                                className={`flex-1 py-3 text-white rounded-lg font-medium transition-colors ${isStarting ? 'bg-purple-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'}`}
+                            >
+                                {isStarting ? 'Opening…' : today?.actions?.primaryActionLabel || '🚀 Play Now'}
+                            </button>
+                        ) : today?.challenge?.type === 'spin' && !today?.actions?.canSpin ? (
+                            <button
+                                disabled
+                                className="flex-1 py-3 bg-gray-600 text-gray-400 rounded-lg font-medium cursor-not-allowed"
+                            >
+                                Spin Not Available
+                            </button>
+                        ) : today?.actions?.canSelectGame ? (
+                            <button
+                                disabled
+                                className="flex-1 py-3 bg-gray-600 text-gray-400 rounded-lg font-medium cursor-not-allowed"
+                            >
+                                Select Game First
+                            </button>
+                        ) : (
+                            <button
+                                disabled
+                                className="flex-1 py-3 bg-gray-600 text-gray-400 rounded-lg font-medium cursor-not-allowed"
+                            >
+                                Not Available
+                            </button>
+                        )}
                     </div>
                 )}
             </div>

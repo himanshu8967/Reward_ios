@@ -195,9 +195,10 @@ const NonGameOffersSection = () => {
         return (
             <div className="flex w-full flex-col my-1 items-start gap-3 relative">
                 <div className="flex w-full items-center justify-between">
-                    <p className="[font-family:'Poppins',Helvetica] text-[16px] font-semibold leading-[normal] tracking-[0] text-[#FFFFFF]">
-                        Earn More Rewards
-                    </p>
+                    <h3 className="font-bold text-xl leading-[normal] text-start mr-26 tracking-[0] text-[#F4F3FC] pb-12   opacity-[100%]">
+
+                        Non-gaming Offer
+                    </h3>
                 </div>
                 <div className="relative flex h-[190px] rounded-[10px] w-full items-center justify-center">
                     <p className="text-gray-400 text-sm">
@@ -213,9 +214,10 @@ const NonGameOffersSection = () => {
         return (
             <div className="flex w-full flex-col my-1 items-start gap-3 relative">
                 <div className="flex w-full items-center justify-between">
-                    <p className="[font-family:'Poppins',Helvetica] text-lg font-semibold leading-[normal] tracking-[0] text-[#FFFFFF]">
+                    <h3 className="font-bold text-xl leading-[normal] text-start mr-26 tracking-[0] text-[#F4F3FC] pb-12   opacity-[100%]">
+
                         Non-gaming Offer
-                    </p>
+                    </h3>
                 </div>
                 <div className="relative flex h-[190px] rounded-[10px] w-full items-center justify-center">
                     <p className="text-gray-400 text-sm">
@@ -227,9 +229,9 @@ const NonGameOffersSection = () => {
     }
 
     return (
-        <div className="flex justify-between items-center transition-transform pt-4 px-2 mb-4 duration-200 ease-in-out">
+        <div className="flex justify-between items-center transition-transform pt-8 px-2 mb-4 duration-200 ease-in-out">
             <section className="flex flex-col w-full max-w-[335px] justify-center items-start gap-2.5 mx-auto">
-                <h3 className="font-semibold text-[#F4F3FC] pb-12 mr-26 text-lg  opacity-[100%]">
+                <h3 className="font-bold text-xl leading-[normal] text-start mr-26 tracking-[0] text-[#F4F3FC] pb-12   opacity-[100%]">
                     Non-gaming Offer
                 </h3>
                 <div
@@ -263,7 +265,7 @@ const NonGameOffersSection = () => {
                             const cardWidth = 'w-28';
                             const cardHeight = 'min-h-[180px]'; // Same size as survey cards
                             const imageHeight = 'h-[110px]';
-                            const bannerHeight = 'h-[50px]'; // Same banner height as survey cards
+                            const bannerHeight = 'h-[55px]'; // Height to accommodate title, coins/XP, and time
 
                             // Get circular transform
                             const circularTransform = getCardTransform(index, nonGameOffers.length);
@@ -296,43 +298,23 @@ const NonGameOffersSection = () => {
                                         {/* Offer Image Section - Same as survey */}
                                         <div className={`relative w-full ${imageHeight} bg-gradient-to-br from-gray-800 to-gray-900 ${(offer.type === "cashback" || offer.type === "shopping" || offer.offerType === "shopping") ? 'overflow-hidden' : 'flex items-center justify-center'}`}>
                                             {offer.type === "cashback" ? (
-                                                <>
-                                                    <img
-                                                        className="w-full h-full object-cover"
-                                                        src={offerImage}
-                                                        alt={offer.merchant_name || "Cashback Offer"}
-                                                        onError={(e) => {
-                                                            e.target.src = "https://static.bitlabs.ai/categories/other.svg";
-                                                        }}
-                                                    />
-                                                    {/* Merchant name overlay on image */}
-                                                    {offer.merchant_name && (
-                                                        <div className="absolute bottom-0 left-0 right-0 px-1.5 py-0.5 bg-black/60 backdrop-blur-sm">
-                                                            <p className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[8px] tracking-[0] leading-tight text-center truncate">
-                                                                {offer.merchant_name}
-                                                            </p>
-                                                        </div>
-                                                    )}
-                                                </>
+                                                <img
+                                                    className="w-full h-full object-cover"
+                                                    src={offerImage}
+                                                    alt={offer.merchant_name || "Cashback Offer"}
+                                                    onError={(e) => {
+                                                        e.target.src = "https://static.bitlabs.ai/categories/other.svg";
+                                                    }}
+                                                />
                                             ) : (offer.type === "shopping" || offer.offerType === "shopping") ? (
-                                                <>
-                                                    <img
-                                                        className="w-full h-full object-cover"
-                                                        src={offerImage}
-                                                        alt={offer.anchor || offer.title || "Shopping Offer"}
-                                                        onError={(e) => {
-                                                            e.target.src = "https://static.bitlabs.ai/categories/other.svg";
-                                                        }}
-                                                    />
-                                                    {/* Anchor/title overlay on image */}
-                                                    {offer.anchor && (
-                                                        <div className="absolute bottom-0 left-0 right-0 px-1.5 py-0.5 bg-black/60 backdrop-blur-sm">
-                                                            <p className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[8px] tracking-[0] leading-tight text-center truncate">
-                                                                {offer.anchor}
-                                                            </p>
-                                                        </div>
-                                                    )}
-                                                </>
+                                                <img
+                                                    className="w-full h-full object-cover"
+                                                    src={offerImage}
+                                                    alt={offer.anchor || offer.title || "Shopping Offer"}
+                                                    onError={(e) => {
+                                                        e.target.src = "https://static.bitlabs.ai/categories/other.svg";
+                                                    }}
+                                                />
                                             ) : (
                                                 <img
                                                     className="w-[64px] h-[64px] object-contain"
@@ -349,138 +331,78 @@ const NonGameOffersSection = () => {
 
                                         {/* Gradient Banner Section - Same structure as survey */}
                                         <div
-                                            className={`relative w-full ${bannerHeight} overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] flex flex-col justify-center px-3 py-0.5`}
+                                            className={`relative w-full ${bannerHeight} overflow-hidden bg-[linear-gradient(180deg,rgba(158,173,247,0.6)_0%,rgba(113,106,231,0.6)_100%)] flex flex-col justify-center px-3 py-1 gap-0.5`}
                                             role="banner"
                                             aria-label="Offer rewards banner"
                                         >
-                                            {/* Top Row - Cashback value and Reward delay (similar to coins and time in survey) */}
-                                            {offer.type === "cashback" ? (
-                                                <div className="flex items-center justify-between w-full gap-1">
-                                                    <div className="flex flex-col items-start flex-1 min-w-0">
-                                                        <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[8px] tracking-[0] leading-tight">
-                                                            Cashback
-                                                        </span>
-                                                        <span className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[9px] tracking-[0] leading-tight truncate w-full">
-                                                            {offer.cashback || offer.original_cashback || "0"}% {offer.currency || ""}
-                                                        </span>
-                                                    </div>
-                                                    {/* Reward delay on the right (like time in survey) */}
-                                                    {offer.reward_delay_days !== undefined && offer.reward_delay_days !== null && (
-                                                        <div className="flex flex-col items-end flex-shrink-0">
-                                                            <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[8px] tracking-[0] leading-tight">
-                                                                Delay
-                                                            </span>
-                                                            <span className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[9px] tracking-[0] leading-tight">
-                                                                {offer.reward_delay_days}d
-                                                            </span>
-                                                        </div>
+                                            {/* First Row - Title */}
+                                            {(offer.title || offer.merchant_name || offer.anchor) && (
+                                                <div className="flex items-center justify-start w-full">
+                                                    <span className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[9px] tracking-[0] leading-tight break-words text-left">
+                                                        {offer.title || offer.merchant_name || offer.anchor}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Second Row - Coins and XP */}
+                                            <div className="flex items-center justify-center w-full gap-3">
+                                                <div className="flex items-center gap-1">
+                                                    <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[11px] tracking-[0] leading-[normal]">
+                                                        {coins}
+                                                    </span>
+                                                    {coins > 0 && (
+                                                        <img
+                                                            className="w-[11px] h-[11px] aspect-[0.97] translate-x-[1px] -translate-y-[1px]"
+                                                            alt="Dollar coin icon"
+                                                            src="/dollor.png"
+                                                        />
                                                     )}
                                                 </div>
+
+                                                {/* XP */}
+                                                {xp > 0 && (
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[11px] tracking-[0] leading-[normal]">
+                                                            {xp}
+                                                        </span>
+                                                        <img
+                                                            className="w-[11px] h-[11px] translate-x-[1px] -translate-y-[1px]"
+                                                            alt="XP points icon"
+                                                            src="/xp.svg"
+                                                            onError={(e) => {
+                                                                e.target.style.display = 'none';
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Third Row - Time */}
+                                            {offer.type === "cashback" ? (
+                                                offer.reward_delay_days !== undefined && offer.reward_delay_days !== null && (
+                                                    <div className="flex items-center justify-center w-full">
+                                                        <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[10px] tracking-[0] leading-[normal]">
+                                                            {offer.reward_delay_days}d
+                                                        </span>
+                                                    </div>
+                                                )
                                             ) : (offer.type === "shopping" || offer.offerType === "shopping") ? (
-                                                <div className="flex items-center justify-between w-full gap-1">
-                                                    <div className="flex items-center gap-1">
-                                                        <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[11px] tracking-[0] leading-[normal]">
-                                                            {coins}
-                                                        </span>
-                                                        {coins > 0 && (
-                                                            <img
-                                                                className="w-[11px] h-[11px] aspect-[0.97]"
-                                                                alt="Dollar coin icon"
-                                                                src="/dollor.png"
-                                                            />
-                                                        )}
-                                                    </div>
-                                                    {/* Time indicator in minutes */}
-                                                    {offer.estimatedTime !== undefined && offer.estimatedTime !== null && (
-                                                        <div className="[font-family:'Poppins',Helvetica] font-medium text-white text-[11px] tracking-[0] leading-[normal]">
+                                                offer.estimatedTime !== undefined && offer.estimatedTime !== null && (
+                                                    <div className="flex items-center justify-center w-full">
+                                                        <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[10px] tracking-[0] leading-[normal]">
                                                             {offer.estimatedTime} min
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center justify-between w-full">
-                                                    <div className="flex items-center gap-1">
-                                                        <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[11px] tracking-[0] leading-[normal]">
-                                                            {coins}
                                                         </span>
-                                                        {coins > 0 && (
-                                                            <img
-                                                                className="w-[11px] h-[11px] aspect-[0.97]"
-                                                                alt="Dollar coin icon"
-                                                                src="/dollor.png"
-                                                            />
-                                                        )}
                                                     </div>
-                                                    {/* Time indicator */}
-                                                    {timeDisplay && (
-                                                        <div className="[font-family:'Poppins',Helvetica] font-medium text-white text-[11px] tracking-[0] leading-[normal]">
+                                                )
+                                            ) : (
+                                                timeDisplay && (
+                                                    <div className="flex items-center justify-center w-full">
+                                                        <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[10px] tracking-[0] leading-[normal]">
                                                             {timeDisplay}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {/* Bottom Row - Category (similar to XP in survey) */}
-                                            {offer.type === "cashback" ? (
-                                                category && (
-                                                    <div className="flex flex-col items-start w-full mt-0.5">
-                                                        <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[8px] tracking-[0] leading-tight">
-                                                            Category
-                                                        </span>
-                                                        <span className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[9px] tracking-[0] leading-tight truncate w-full">
-                                                            {category}
                                                         </span>
                                                     </div>
                                                 )
-                                            ) : (
-                                                xp > 0 && (
-                                                    <div className="flex items-center justify-start w-full mt-0">
-                                                        <div className="flex items-center gap-1">
-                                                            <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[11px] tracking-[0] leading-[normal]">
-                                                                {xp}
-                                                            </span>
-                                                            <img
-                                                                className="w-[11px] h-[11px]"
-                                                                alt="XP points icon"
-                                                                src="/xp.svg"
-                                                                onError={(e) => {
-                                                                    e.target.style.display = 'none';
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                )
                                             )}
-
-                                            {/* Magic Receipt Specific Info */}
-                                            {offer.type === "magic_receipt" && (
-                                                <>
-                                                    {offer.anchor && (
-                                                        <div className="flex items-center justify-start w-full mt-0.5">
-                                                            <span className="[font-family:'Poppins',Helvetica] font-semibold text-white text-[10px] tracking-[0] leading-[normal] truncate">
-                                                                {offer.anchor}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                    {offer.confirmation_time && (
-                                                        <div className="flex items-center justify-start w-full mt-0.5">
-                                                            <span className="[font-family:'Poppins',Helvetica] font-normal text-white/90 text-[9px] tracking-[0] leading-[normal]">
-                                                                {offer.confirmation_time}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                    {offer.total_points && (
-                                                        <div className="flex items-center justify-start w-full mt-0.5">
-                                                            <span className="[font-family:'Poppins',Helvetica] font-normal text-white/90 text-[9px] tracking-[0] leading-[normal]">
-                                                                {offer.total_points} points
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </>
-                                            )}
-
-                                            {/* Bottom Row - XP */}
-
                                         </div>
                                     </div>
                                 </article>

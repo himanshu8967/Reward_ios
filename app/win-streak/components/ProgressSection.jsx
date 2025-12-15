@@ -409,15 +409,27 @@ export const ProgressSection = ({
                         {/* Milestone Reward Badge - Only show for completed milestone days */}
                         {dayData.isMilestone && dayData.reward && dayData.isCompleted && (
                             <div
-                                className="absolute flex items-center gap-2 bg-gradient-to-br from-amber-300 via-yellow-400 to-orange-500 rounded-full px-5 py-3 shadow-[0_8px_16px_rgba(251,191,36,0.5),0_4px_8px_rgba(245,158,11,0.4),inset_0_2px_4px_rgba(255,255,255,0.4)] z-10 border-2 border-amber-200 transform hover:scale-105 transition-all duration-300 cursor-pointer"
+                                className="absolute flex items-center gap-2 bg-gradient-to-br from-amber-300 via-yellow-400 to-orange-500 rounded-full px-4 py-2.5 shadow-[0_8px_16px_rgba(251,191,36,0.5),0_4px_8px_rgba(245,158,11,0.4),inset_0_2px_4px_rgba(255,255,255,0.4)] z-10 border-2 border-amber-200 transform hover:scale-105 transition-all duration-300 cursor-pointer"
                                 style={{
                                     top: `${dayData.top - 28 - (dayData.day === 28 || dayData.day === 29 ? 15 : 0)}px`,
                                     left: `${dayData.left + 110}px`,
                                     animation: 'glow 3s ease-in-out infinite'
                                 }}
                             >
-                                <span className="text-sm font-bold text-black drop-shadow-sm">{dayData.reward.coins}</span>
-                                <img className="w-5 h-5 drop-shadow-sm" alt="coin" src="https://c.animaapp.com/hVj7UvM7/img/image-3938@2x.png" />
+                                {/* Coins */}
+                                {dayData.reward.coins > 0 && (
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-sm font-bold text-black drop-shadow-sm">{dayData.reward.coins}</span>
+                                        <img className="w-4 h-4 drop-shadow-sm" alt="coin" src="/dollor.png" />
+                                    </div>
+                                )}
+                                {/* XP */}
+                                {dayData.reward.xp > 0 && (
+                                    <div className="flex items-center gap-1 ml-1">
+                                        <span className="text-sm font-bold text-black drop-shadow-sm">{dayData.reward.xp}</span>
+                                        <img className="w-4 h-4 drop-shadow-sm" alt="XP" src="/xp.svg" onError={(e) => { e.target.src = "/xp.png"; }} />
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -455,12 +467,23 @@ export const ProgressSection = ({
                                             decoding="async"
                                             fetchPriority="high"
                                         />
-                                        {/* Show reward amount for milestone days */}
-                                        <div className="absolute -top-1 -right-1 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full px-2 py-1 shadow-lg border-2 border-yellow-600 transform transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl z-20">
-                                            <span className="text-xs font-bold text-black">
-                                                {dayData.day === 6 ? '50' : dayData.day === 13 ? '100' : dayData.day === 20 ? '150' : '250'}
-                                            </span>
-                                        </div>
+                                        {/* Show reward amount for milestone days - Coins and XP */}
+                                        {dayData.reward && (dayData.reward.coins > 0 || dayData.reward.xp > 0) && (
+                                            <div className="absolute -top-1 -right-10 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full px-2 py-1 shadow-lg border-2 border-yellow-600 transform transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl z-20 flex items-center gap-1">
+                                                {dayData.reward.coins > 0 && (
+                                                    <>
+                                                        <span className="text-xs font-bold text-black">{dayData.reward.coins}</span>
+                                                        <img className="w-3 h-3" alt="coin" src="/dollor.png" />
+                                                    </>
+                                                )}
+                                                {dayData.reward.xp > 0 && (
+                                                    <>
+                                                        <span className="text-xs font-bold text-black">{dayData.reward.xp}</span>
+                                                        <img className="w-3 h-3" alt="XP" src="/xp.svg" onError={(e) => { e.target.src = "/xp.png"; }} />
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     /* Regular leaf for other days within streak range - increased size */

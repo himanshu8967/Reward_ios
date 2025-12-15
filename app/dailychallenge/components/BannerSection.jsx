@@ -145,9 +145,9 @@ export const BannerSection = ({ calendar, today, onDayClick, onPreviousMonth, on
     };
 
     return (
-        <section className={`flex flex-col w-[375px] h-[343px] items-center gap-2.5 px-4 py-0 absolute top-[220px] left-0 overflow-x-scroll mb-4 ${isDisabled ? 'pointer-events-none opacity-90' : ''}`}>
+        <section className={`flex flex-col w-full max-w-[335px] h-[343px] items-center gap-2.5 ${isDisabled ? 'pointer-events-none opacity-90' : ''}`}>
             <article
-                className="relative w-[335px] h-[343.08px] mb-[-0.08px] rounded-[17.96px] border-[none] shadow-[inset_4.49px_4.49px_10.78px_#ffffff66,inset_-4.49px_-4.49px_13.47px_#00000075] backdrop-blur-[38.17px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(38.17px)_brightness(100%)]"
+                className="relative w-full max-w-[335px] h-[343px] rounded-[17.96px] border-[none] shadow-[inset_4.49px_4.49px_10.78px_#ffffff66,inset_-4.49px_-4.49px_13.47px_#00000075] backdrop-blur-[38.17px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(38.17px)_brightness(100%)]"
                 style={{
                     background: calendar?.streak?.current
                         ? `linear-gradient(322deg, rgba(254,248,255,${Math.min(calendar.streak.current / 30, 0.3)})_0%, rgba(254,248,255,0)_100%)`
@@ -208,7 +208,7 @@ export const BannerSection = ({ calendar, today, onDayClick, onPreviousMonth, on
                     </button>
 
                     <h2 className="absolute top-[calc(50.00%_-_10px)] left-[calc(50.00%_-_94px)]  ml-4 h-5 flex items-center justify-center [font-family:'Poppins',Helvetica] font-semibold text-white text-[13px] text-center tracking-[0] leading-[normal]">
-                        {calendar?.monthName || "MAY 2025"}
+                        {calendar?.monthName || ""}
                     </h2>
 
                     <button

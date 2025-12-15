@@ -27,17 +27,16 @@ export default function GenderSelection() {
     <div className='relative w-full h-screen bg-[#272052] overflow-hidden flex flex-col'>
       <div className='absolute w-[542px] h-[542px] top-0 left-0 bg-[#af7de6] rounded-full blur-[250px]' />
 
-      <div className='relative  z-10 px-6 pt-20 font-poppins'>
-        <h1 className='text-white text-4xl font-light leading-tight mt-1 mb-4'>
+      <div className='relative z-10 px-4 sm:px-6 pt-16 sm:pt-20 pb-4 font-poppins'>
+        <h1 className='text-white text-3xl sm:text-4xl font-light leading-tight mt-1 mb-3 sm:mb-4'>
           Select your gender
         </h1>
-        <p className='text-white/70 text-base font-light'>
+        <p className='text-white/70 text-sm sm:text-base font-light'>
           This will help to make your training plan more relevant
         </p>
       </div>
 
-      <div className='relative z-10 flex-1 flex   flex-col justify-center items-center  px-6 space-y-6'>
-
+      <div className='relative z-10 flex-1 flex flex-col justify-center items-center px-4 sm:px-6 pb-6 sm:pb-8 space-y-4 sm:space-y-6'>
 
         {onboardingStatus === 'succeeded' && genderOptions.map((option) => {
           const isSelected = gender === option.id;
@@ -45,18 +44,18 @@ export default function GenderSelection() {
             <button
               key={option.id}
               onClick={() => handleGenderSelect(option.id)}
-              className='relative w-full h-16 group focus:outline-none'
+              className='relative w-full max-w-[335px] h-14 sm:h-16 group focus:outline-none'
             >
               <div
-                className={`absolute inset-x-0 top-0 h-18 bg-[#D8D5E9] rounded-full transition-transform duration-300 ${isSelected ? 'scale-105' : ''
+                className={`absolute inset-x-0 top-0 h-16 sm:h-18 bg-[#D8D5E9] rounded-full transition-transform duration-300 ${isSelected ? 'scale-105' : ''
                   }`}
               />
               <div
-                className={`absolute inset-x-0 top-0 h-16 rounded-full transition-all duration-300 flex items-center justify-center bg-white group-hover:translate-y-0.5 ${isSelected ? 'scale-105 shadow-lg shadow-[#AF7DE6]/50' : ''
+                className={`absolute inset-x-0 top-0 h-14 sm:h-16 rounded-full transition-all duration-300 flex items-center justify-center bg-white group-hover:translate-y-0.5 ${isSelected ? 'scale-105 shadow-lg shadow-[#AF7DE6]/50' : ''
                   }`}
               >
                 <span
-                  className={`text-base font-semibold font-poppins tracking-wide transition-colors duration-200 ${isSelected ? 'text-[#272052]' : 'text-[#2D2D2D]'
+                  className={`text-sm sm:text-base font-semibold font-poppins tracking-wide transition-colors duration-200 ${isSelected ? 'text-[#272052]' : 'text-[#2D2D2D]'
                     }`}
                 >
                   {option.label}
@@ -66,7 +65,7 @@ export default function GenderSelection() {
           );
         })}
         {onboardingStatus === 'loading' && (
-          <p className="text-white mb-190text-center font-poppins">Loading options...</p>
+          <p className="text-white mb-4 text-center font-poppins">Loading options...</p>
         )}
         {onboardingStatus === 'failed' && (
           <p className="text-red-400 text-center font-poppins">{error}</p>

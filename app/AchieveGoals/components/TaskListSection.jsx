@@ -12,21 +12,25 @@ const RecommendationCard = ({ card, onCardClick }) => {
             className="flex flex-col w-[158px] rounded-md overflow-hidden shadow-lg cursor-pointer hover:scale-105 transition-all duration-200"
             onClick={() => onCardClick(card)}
         >
-            <div className="relative w-[158px] h-[158px]">
+            <div className="relative w-full min-h-[158px] flex items-center justify-center bg-gray-800">
                 <Image
-                    className="object-cover"
+                    className="object-contain w-full max-w-[158px]"
                     alt="Game promotion"
                     src={card.image || '/placeholder.png'}
-                    fill
+                    width={158}
+                    height={158}
                     sizes="158px"
                     priority
+                    style={{
+                        height: 'auto',
+                        maxHeight: '158px'
+                    }}
                 />
-
             </div>
             <div className="flex flex-col h-[60px] p-2  bg-[linear-gradient(180deg,rgba(81,98,182,0.9)_0%,rgba(63,56,184,0.9)_100%)]">
 
                 <div className="flex flex-col mt-auto">
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center mb-1 gap-1">
                         <p className="[font-family:'Poppins',Helvetica] font-medium text-white text-[14px]">Earn upto {card.earnings || "100"}</p>
                         <Image
                             className="w-[18px] h-[19px]"
@@ -277,7 +281,7 @@ export const TaskListSection = () => {
                 <div className="flex items-start justify-center gap-3 self-stretch flex-wrap min-w-0 max-w-full">
                     {[1, 2].map((i) => (
                         <div key={i} className="flex flex-col w-[158px] rounded-md overflow-hidden shadow-lg animate-pulse">
-                            <div className="w-[158px] h-[158px] bg-gray-700"></div>
+                            <div className="w-full min-h-[158px] bg-gray-700"></div>
                             <div className="h-[71px] bg-gray-700"></div>
                         </div>
                     ))}

@@ -74,9 +74,9 @@ const AccountOverviewCard = ({ userStats = null, className = "" }) => {
     return (
         <div className={`flex flex-col w-[335px] max-h-[479px] items-start justify-center gap-[16px] relative mx-auto ${className}`}>
             <div className="flex flex-col items-start gap-2.5 self-stretch w-full relative">
-                <div className="w-[334px] h-[479px] rounded-[20px] overflow-hidden bg-[linear-gradient(103deg,rgba(121,32,207,1)_0%,rgba(205,73,153,1)_80%)] relative overflow-x-scroll">
-                    <div className="relative w-[334px] h-[479px]">
-                        <div className="absolute w-[334px] h-[91px] top-0 left-0">
+                <div className="w-[334px] h-[479px] rounded-[20px] overflow-hidden bg-[linear-gradient(103deg,rgba(121,32,207,1)_0%,rgba(205,73,153,1)_80%)] relative overflow-x-hidden">
+                    <div className="relative w-full h-[479px]">
+                        <div className="absolute w-full h-[91px] top-0 left-0">
                             <div className="top-8 left-20 font-bold text-xl leading-6 absolute [font-family:'Poppins',Helvetica] text-[#FFFFFF] tracking-[0] whitespace-nowrap">
                                 My Account Overview
                             </div>
@@ -90,14 +90,14 @@ const AccountOverviewCard = ({ userStats = null, className = "" }) => {
                         </div>
 
                         {/* Content Background */}
-                        <div className="absolute w-[334px] h-[356px] top-[123px] left-0 bg-[#982fbb] rounded-[0px_0px_20px_20px]" />
+                        <div className="absolute w-full h-[356px] top-[123px] left-0 bg-[#982fbb] rounded-[0px_0px_20px_20px]" />
 
                         {/* Progress Sections - Dynamic values from backend */}
                         <ProgressSection
                             title={`${gamesPlayed}/${gamesTarget} Games Played`}
                             progress={calculateProgressPercentage(gamesPlayed, gamesTarget)}
                             mainValue={`${accountData?.rewardBadges?.[0]?.reward?.coins || 0}`}
-                            bonusValue={`+${accountData?.rewardBadges?.[0]?.reward?.xp || 0}`}
+                            bonusValue={`${accountData?.rewardBadges?.[0]?.reward?.xp || 0}`}
                             top="top-[138px]"
                             showBorder={true}
                         />
@@ -106,7 +106,7 @@ const AccountOverviewCard = ({ userStats = null, className = "" }) => {
                             title={`${coinsEarned}/${coinsTarget} Coins Earned (Daily)`}
                             progress={calculateProgressPercentage(coinsEarned, coinsTarget)}
                             mainValue={`${accountData?.rewardBadges?.[1]?.reward?.coins || 0}`}
-                            bonusValue={`+${accountData?.rewardBadges?.[1]?.reward?.xp || 0}`}
+                            bonusValue={`${accountData?.rewardBadges?.[1]?.reward?.xp || 0}`}
                             top="top-[253px]"
                             showBorder={true}
                         />
@@ -115,24 +115,29 @@ const AccountOverviewCard = ({ userStats = null, className = "" }) => {
                             title={`${challengesCompleted}/${challengesTarget} Challenges Finished (Daily)`}
                             progress={calculateProgressPercentage(challengesCompleted, challengesTarget)}
                             mainValue={`${accountData?.rewardBadges?.[2]?.reward?.coins || 0}`}
-                            bonusValue={`+${accountData?.rewardBadges?.[2]?.reward?.xp || 0}`}
+                            bonusValue={`${accountData?.rewardBadges?.[2]?.reward?.xp || 0}`}
                             top="top-[368px]"
                             showBorder={false}
                         />
 
                         {/* Header Background */}
-                        <div className="absolute w-[334px] h-12 top-[78px] left-0 bg-[#80279e]" />
+                        <div className="absolute w-full h-12 top-[78px] left-0 bg-[#80279e]" />
+
+                        {/* Total Earnings Label */}
+                        <div className="absolute top-[89px] left-4 [font-family:'Poppins',Helvetica] font-normal text-[#FFFFFF] text-[16px] tracking-[0] leading-6 whitespace-nowrap">
+                            Total Earnings:
+                        </div>
 
                         {/* Total Earnings Badge - Dynamic values from backend */}
-                        <div className="left-36 flex w-[87px] h-[30px] items-center gap-[169px] absolute top-[87px]">
+                        <div className="left-[140px] flex w-[87px] h-[30px] items-center absolute top-[87px]">
                             <div className="relative w-[87px] h-[30px]">
                                 <div className="relative h-[29px] rounded-3xl bg-[linear-gradient(180deg,rgba(158,173,247,0.4)_0%,rgba(113,106,231,0.4)_100%)] flex items-center justify-center px-2">
                                     <div className="flex items-center gap-1">
-                                        <div className="font-semibold text-[18px] leading-[normal] [font-family:'Poppins',Helvetica] text-[#FFFFFF] tracking-[0] top-2 left-10">
+                                        <div className="font-semibold text-[18px] leading-[normal] [font-family:'Poppins',Helvetica] text-[#FFFFFF] tracking-[0]">
                                             {formatNumber(totalCoins)}
                                         </div>
                                         <Image
-                                            className="w-[23px] h-[23px] top-[5px] left-[48]"
+                                            className="w-[23px] h-[23px]"
                                             alt="Coin"
                                             src="https://c.animaapp.com/3mn7waJw/img/image-3937-4@2x.png"
                                             width={20}
@@ -144,16 +149,15 @@ const AccountOverviewCard = ({ userStats = null, className = "" }) => {
                         </div>
 
                         {/* Balance Badge - Dynamic values from backend */}
-                        <div className="left-[236px] flex w-[90px] h-[30px] items-center gap-[169px] absolute top-[87px]">
+                        <div className="left-[235px] flex w-[90px] h-[30px] items-center absolute top-[87px]">
                             <div className="relative w-[90px] h-[30px]">
                                 <div className="relative h-[29px] rounded-3xl bg-[linear-gradient(180deg,rgba(158,173,247,0.4)_0%,rgba(113,106,231,0.4)_100%)] flex items-center justify-center px-2">
                                     <div className="flex items-center gap-1">
-                                        <div className="font-semibold text-[18px] leading-[normal] [font-family:'Poppins',Helvetica] text-[#FFFFFF] tracking-[0] top-2 left-10">
-
+                                        <div className="font-semibold text-[18px] leading-[normal] [font-family:'Poppins',Helvetica] text-[#FFFFFF] tracking-[0]">
                                             {formatNumber(totalXP)}
                                         </div>
                                         <Image
-                                            className="w-[23px] h-[18px] top-[5px] left-[40]"
+                                            className="w-[23px] h-[18px]"
                                             alt="XP"
                                             src="https://c.animaapp.com/3mn7waJw/img/pic-7.svg"
                                             width={18}
@@ -162,11 +166,6 @@ const AccountOverviewCard = ({ userStats = null, className = "" }) => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Total Earnings Label */}
-                        <div className="absolute top-[89px] left-5 [font-family:'Poppins',Helvetica] font-normal text-[#FFFFFF] text-[16px] tracking-[0] leading-6 whitespace-nowrap">
-                            Total Earnings:
                         </div>
                     </div>
                 </div>

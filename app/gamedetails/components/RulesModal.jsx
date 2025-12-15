@@ -1,6 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-export const RulesModal = ({ isVisible, onClose }) => {
+export const RulesModal = ({ isVisible, onClose, position }) => {
+    const modalRef = useRef(null);
+    const [modalStyle, setModalStyle] = useState({});
+
+    useEffect(() => {
+        if (isVisible && position && modalRef.current) {
+            const modalRect = modalRef.current.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // Calculate position relative to button
+            let top = position.top + position.buttonHeight + 8; // 8px gap below button
+            let left = position.left - (335 / 2) + (position.buttonWidth / 2); // Center modal relative to button
+            
+            // Ensure modal stays within viewport bounds
+            if (left < 16) left = 16; // 16px padding from left edge
+            if (left + 335 > viewportWidth - 16) left = viewportWidth - 335 - 16; // 16px padding from right edge
+            
+            // If modal would go below viewport, position it above the button instead
+            if (top + 315 > viewportHeight - 16) {
+                top = position.top - 315 - 8; // Position above button with 8px gap
+                if (top < 16) top = 16; // Ensure it doesn't go above viewport
+            }
+            
+            setModalStyle({
+                position: 'absolute',
+                top: `${top}px`,
+                left: `${left}px`
+            });
+        }
+    }, [isVisible, position]);
+
     const handleConfirm = () => {
         onClose();
     };
@@ -10,13 +41,16 @@ export const RulesModal = ({ isVisible, onClose }) => {
     }
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose}>
             <div
-                className="flex flex-col w-[335px] mb-60 h-[315px] items-start pt-5 pb-0 px-0 relative bg-black rounded-[20px] border-t [border-top-style:solid] border-r [border-right-style:solid] border-l [border-left-style:solid] border-[#595959] -mt-16"
+                ref={modalRef}
+                className="flex flex-col w-[335px] max-w-[90vw] h-[315px] max-h-[90vh] items-start pt-5 pb-0 px-0 relative bg-black rounded-[20px] border-t [border-top-style:solid] border-r [border-right-style:solid] border-l [border-left-style:solid] border-[#595959]"
+                style={modalStyle}
                 data-model-id="2549:6803"
                 role="dialog"
                 aria-labelledby="modal-title"
                 aria-describedby="modal-description"
+                onClick={(e) => e.stopPropagation()}
             >
                 <header className="flex items-start justify-between pt-2 pb-0 px-4 relative self-stretch w-full flex-[0_0_auto] bg-black border-r [border-right-style:solid] border-l [border-left-style:solid] border-[#595959]">
                     <div className="relative w-[219px] h-6">

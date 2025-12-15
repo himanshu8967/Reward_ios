@@ -30,17 +30,17 @@ const ProgressSection = ({
             </div>
 
             {/* Reward Badge */}
-            <div className="relative w-[70px] h-[55px] left-[226px] top-4 rounded-[12px] overflow-hidden bg-[linear-gradient(331deg,rgba(237,131,0,1)_0%,rgba(237,166,0,1)_100%)] flex items-center justify-center">
-                <div className="flex items-center justify-center gap-x-1">
-                    <div className="flex flex-col items-end">
-                        <div className="text-[16px] font-semibold text-white [font-family:'Poppins',Helvetica]">
+            <div className="relative w-[70px] h-[55px] left-[226px] top-4 rounded-[12px] overflow-hidden bg-[linear-gradient(331deg,rgba(237,131,0,1)_0%,rgba(237,166,0,1)_100%)] flex items-center justify-center px-1.5">
+                <div className="flex items-center justify-center gap-x-1.5 w-full">
+                    <div className="flex flex-col items-end justify-center gap-0.5">
+                        <div className="text-[16px] font-semibold text-white [font-family:'Poppins',Helvetica] leading-tight">
                             {mainValue}
                         </div>
-                        <div className="text-[14px] font-semibold text-white [font-family:'Poppins',Helvetica]">
+                        <div className="text-[14px] font-semibold text-white [font-family:'Poppins',Helvetica] leading-tight">
                             {bonusValue}
                         </div>
                     </div>
-                    <div className="flex flex-col items-start gap-y-[1.2px]">
+                    <div className="flex flex-col items-center justify-center gap-y-1">
                         <div className="w-[18px] h-[19px] flex items-center justify-center">
                             <Image
                                 alt="Coin"

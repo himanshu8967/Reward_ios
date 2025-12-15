@@ -44,24 +44,32 @@ export default function GamePreferencesSelection() {
 
   return (
     <div className='relative w-full h-screen bg-[#272052] overflow-hidden flex flex-col'>
-      <div className='w-[542px] h-[542px] top-0 left-0 bg-[#af7de6] rounded-full blur-[250px] fixed' />
+      <div className='absolute w-[542px] h-[542px] top-0 left-0 bg-[#af7de6] rounded-full blur-[250px]' />
 
-      <div className='relative z-10 px-6 pt-15 font-poppins'>
-        <h1 className='text-[#FFFFFF] text-3xl font-normal leading-tight '>
+      {/* Fixed Header Section */}
+      <div className='relative z-10 px-4 sm:px-6 pt-16 sm:pt-20 pb-4 font-poppins flex-shrink-0'>
+        <h1 className='text-white text-2xl sm:text-3xl font-normal leading-tight mb-2 sm:mb-3'>
           What types of games do you enjoy playing?
         </h1>
-        <p className='text-white/70 text-[16px] font-light mb-1 ml-1'>Select up to 3</p>
+        <p className='text-white/70 text-sm sm:text-base font-light mb-1'>Select up to 3</p>
       </div>
 
-      <div className='relative z-10 flex-1 flex flex-col justify-center items-center px-6'>
-        {onboardingStatus === 'loading' && (
-          <p className='text-white text-center font-poppins'>
-            Loading game options...
-          </p>
-        )}
-        {onboardingStatus === 'failed' && <p className='text-red-400 text-center font-poppins'>{error}</p>}
+      {/* Scrollable Options Section */}
+      <div className='relative z-10 flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 pb-6 sm:pb-8 scrollbar-hide'>
+        <div className='w-full max-w-[335px] mx-auto py-4 space-y-4 sm:space-y-6'>
+          {onboardingStatus === 'loading' && (
+            <div className='flex items-center justify-center py-8'>
+              <p className='text-white text-center font-poppins'>
+                Loading game options...
+              </p>
+            </div>
+          )}
+          {onboardingStatus === 'failed' && (
+            <div className='flex items-center justify-center py-8'>
+              <p className='text-red-400 text-center font-poppins'>{error}</p>
+            </div>
+          )}
 
-        <div className='w-full max-w-sm space-y-3'>
           {onboardingStatus === 'succeeded' && gamePreferencesOptions.map((option) => {
             const isSelected = gamePreferencesSafe.includes(option.id)
             return (
@@ -72,10 +80,10 @@ export default function GamePreferencesSelection() {
               >
                 <div className='absolute inset-x-0 top-0 h-14 bg-[#D8D5E9] rounded-full' />
                 <div
-                  className={`absolute inset-x-0 top-0 h-12 rounded-full transition-all duration-300 flex items-center justify-start px-8 gap-3 bg-white group-hover:translate-y-0.5 ${isSelected ? 'scale-105 shadow-lg shadow-[#AF7DE6]/50' : ''}`}
+                  className={`absolute inset-x-0 top-0 h-12 rounded-full transition-all duration-300 flex items-center justify-start px-6 sm:px-8 gap-3 bg-white group-hover:translate-y-0.5 ${isSelected ? 'scale-105 shadow-lg shadow-[#AF7DE6]/50' : ''}`}
                 >
                   {isSelected ? (
-                    <div className='w-4 h-4 bg-[#7e22ce] rounded-md flex items-center justify-center'>
+                    <div className='w-4 h-4 bg-[#7e22ce] rounded-md flex items-center justify-center flex-shrink-0'>
                       <svg
                         xmlns='http://www.w3.org/2000/svg'
                         className='w-2.5 h-2.5 text-white'
@@ -92,7 +100,7 @@ export default function GamePreferencesSelection() {
                       </svg>
                     </div>
                   ) : (
-                    <div className='w-4 h-4 border-2 border-gray-300 rounded' />
+                    <div className='w-4 h-4 border-2 border-gray-300 rounded flex-shrink-0' />
                   )}
 
                   <span

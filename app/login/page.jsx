@@ -21,6 +21,7 @@ export default function LoginPage() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [biometricMessage, setBiometricMessage] = useState(null);
   const [turnstileToken, setTurnstileToken] = useState(null);
+  const [isTurnstileLoading, setIsTurnstileLoading] = useState(true);
   const turnstileRef = useRef(null);
   const turnstileWidgetId = useRef(null);
 
@@ -100,23 +101,32 @@ export default function LoginPage() {
           turnstileRef.current.innerHTML = '';
 
           // Manually render the widget
+          setIsTurnstileLoading(true);
           const widgetId = window.turnstile.render(turnstileRef.current, {
             sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA',
             callback: (token) => {
               setTurnstileToken(token);
+              setIsTurnstileLoading(false);
               console.log('✅ Turnstile verified:', token);
             },
             'error-callback': () => {
               setTurnstileToken(null);
+              setIsTurnstileLoading(false);
               console.error('❌ Turnstile error');
             },
             'expired-callback': () => {
               setTurnstileToken(null);
+              setIsTurnstileLoading(true);
               console.warn('⏰ Turnstile token expired');
             },
             theme: 'dark',
             size: 'normal',
           });
+
+          // Mark as loaded after widget renders (usually takes ~500ms)
+          setTimeout(() => {
+            setIsTurnstileLoading(false);
+          }, 800);
 
           // Store widget ID for cleanup
           turnstileWidgetId.current = widgetId;
@@ -186,9 +196,11 @@ export default function LoginPage() {
       try {
         window.turnstile.reset(turnstileWidgetId.current);
         setTurnstileToken(null);
+        setIsTurnstileLoading(true);
       } catch (err) {
         console.warn('Failed to reset Turnstile widget:', err);
         setTurnstileToken(null);
+        setIsTurnstileLoading(true);
       }
     }
   };
@@ -211,7 +223,11 @@ export default function LoginPage() {
     // If no token exists, user hasn't been verified yet
     // (This usually means widget is still analyzing or failed)
     if (!turnstileToken) {
-      setError({ form: "Please complete the captcha verification." });
+      if (isTurnstileLoading) {
+        setError({ form: "Please wait for security verification to complete." });
+      } else {
+        setError({ form: "Security verification is required. Please wait a moment and try again." });
+      }
       return;
     }
 
@@ -388,24 +404,33 @@ export default function LoginPage() {
                 // Clear any existing content
                 turnstileRef.current.innerHTML = '';
 
+                setIsTurnstileLoading(true);
                 const widgetId = window.turnstile.render(turnstileRef.current, {
                   sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA',
                   callback: (token) => {
                     setTurnstileToken(token);
+                    setIsTurnstileLoading(false);
                     console.log('✅ Turnstile verified:', token);
                   },
                   'error-callback': () => {
                     setTurnstileToken(null);
+                    setIsTurnstileLoading(false);
                     console.error('❌ Turnstile error');
                   },
                   'expired-callback': () => {
                     setTurnstileToken(null);
+                    setIsTurnstileLoading(true);
                     console.warn('⏰ Turnstile token expired');
                   },
                   theme: 'dark',
                   size: 'normal',
                 });
                 turnstileWidgetId.current = widgetId;
+
+                // Mark as loaded after widget renders
+                setTimeout(() => {
+                  setIsTurnstileLoading(false);
+                }, 800);
               } catch (err) {
                 console.error('Failed to render Turnstile widget on script load:', err);
               }
@@ -515,9 +540,19 @@ export default function LoginPage() {
                   ref={turnstileRef}
                   className="cf-turnstile"
                 />
-                {!turnstileToken && (
-                  <p className="w-full text-center text-yellow-400 text-xs [font-family:'Poppins',Helvetica]">
-                    Please wait for verification to complete...
+                {isTurnstileLoading && !turnstileToken && (
+                  <div className="w-full flex flex-col items-center gap-2 mt-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-[#af7de6] border-t-transparent rounded-full animate-spin"></div>
+                      <p className="text-[#af7de6] text-xs [font-family:'Poppins',Helvetica] font-medium">
+                        Verifying security...
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {!isTurnstileLoading && !turnstileToken && (
+                  <p className="w-full text-center text-neutral-400 text-xs [font-family:'Poppins',Helvetica]">
+                    Security check in progress
                   </p>
                 )}
               </div>

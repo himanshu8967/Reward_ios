@@ -408,4 +408,86 @@
   .animate-fade-in {
     animation: fade-in 0.3s ease-out;
   }
+
+  /* Slow pulse animation for Bonus badge */
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.85;
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+  }
+
+  /* Shine animation for Bonus badge */
+  @keyframes shine {
+    0% {
+      transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+      transform: translateX(200%) translateY(200%) rotate(45deg);
+    }
+  }
+
+  .animate-shine {
+    animation: shine 3s ease-in-out infinite;
+  }
+
+  /* 3D Float Animation */
+  @keyframes float-3d {
+    0%, 100% {
+      transform: rotateX(-8deg) rotateY(5deg) translateY(0px) translateZ(0);
+    }
+    50% {
+      transform: rotateX(-6deg) rotateY(7deg) translateY(-3px) translateZ(5px);
+    }
+  }
+
+  .animate-float-3d {
+    animation: float-3d 4s ease-in-out infinite;
+  }
+
+  /* 3D Shine Animation */
+  @keyframes shine-3d {
+    0% {
+      transform: translateZ(3px) translateX(-150%) translateY(-150%) skewX(-12deg);
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateZ(3px) translateX(150%) translateY(150%) skewX(-12deg);
+      opacity: 0;
+    }
+  }
+
+  /* Hardware acceleration for 3D transforms */
+  .transform-gpu {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* Safe area support for native Android/iOS apps */
+  .safe-area-inset {
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  /* Native Android-style text wrapping */
+  .text-wrap-native {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+  }
 }

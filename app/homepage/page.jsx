@@ -62,7 +62,9 @@ const Homepage = () => {
         <MostPlayedGames />
         <WelcomeOfferSection />
         <GameCard />
-        <SurveysSection />
+        <div className="mt-14">
+          <SurveysSection />
+        </div>
         <NonGameOffersSection />
         <VipBanner />
         <RaceSection />

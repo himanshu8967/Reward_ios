@@ -178,7 +178,7 @@ export const HomeIndicator = ({ activeTab }) => {
 
               <Link
                 href="/games"
-                className="group flex flex-col items-center gap-1 cursor-pointer focus:outline-none rounded-lg p-1 min-w-[50px] relative"
+                className="group flex flex-col items-center gap-1 cursor-pointer focus:outline-none rounded-lg p-1 min-w-[50px] relative -ml-14"
                 aria-label="Navigate to My Games"
                 aria-current={currentActiveTab === "games" ? "page" : undefined}
               >
@@ -227,7 +227,7 @@ export const HomeIndicator = ({ activeTab }) => {
 
               <Link
                 href="/Wallet"
-                className="group flex flex-col items-center gap-1 cursor-pointer focus:outline-none rounded-lg p-1 min-w-[50px] relative"
+                className="group flex flex-col items-center gap-1 cursor-pointer focus:outline-none rounded-lg p-1 min-w-[50px] relative -mr-16"
                 aria-label="Navigate to My Wallet"
                 aria-current={currentActiveTab === "wallet" ? "page" : undefined}
               >

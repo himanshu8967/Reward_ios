@@ -25,17 +25,17 @@ export default function GameStyleSelection() {
     <div className='relative w-full h-screen bg-[#272052] overflow-hidden flex flex-col'>
       <div className='absolute w-[542px] h-[542px] top-0 left-0 bg-[#af7de6] rounded-full blur-[250px]' />
 
-      <div className='relative z-10 px-6 pt-20 font-poppins'>
-        <h1 className='text-white text-4xl font-light leading-tight mb-4'>
+      <div className='relative z-10 px-4 sm:px-6 pt-16 sm:pt-20 pb-4 font-poppins'>
+        <h1 className='text-white text-3xl sm:text-4xl font-light leading-tight mb-3 sm:mb-4'>
           What kind of games do you prefer?
         </h1>
 
-        <p className='text-white/70 text-base font-light'>
+        <p className='text-white/70 text-sm sm:text-base font-light'>
           Choose the pace and reward style you like.
         </p>
       </div>
 
-      <div className='relative z-10 flex-1 flex flex-col items-center justify-center px-6 space-y-6 '>
+      <div className='relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 pb-6 sm:pb-8 space-y-4 sm:space-y-6'>
         {onboardingStatus === 'loading' && (
           <p className='text-white text-center font-poppins'>Loading styles...</p>
         )}
@@ -50,7 +50,7 @@ export default function GameStyleSelection() {
               <button
                 key={option.id}
                 onClick={() => handleSelectGameStyle(option.id)}
-                className='relative w-full h-16 group focus:outline-none'
+                className='relative w-full max-w-[335px] h-16 group focus:outline-none'
               >
                 <div
                   className={`absolute inset-x-0 top-0 h-18 bg-[#D8D5E9] rounded-full transition-transform duration-300 ${isSelected ? 'scale-105' : ''
@@ -61,7 +61,7 @@ export default function GameStyleSelection() {
                     }`}
                 >
                   <span
-                    className={`text-base font-semibold font-poppins tracking-wide transition-colors duration-200 ${isSelected ? 'text-[#272052]' : 'text-[#2D2D2D]'
+                    className={`text-sm sm:text-base font-semibold font-poppins tracking-wide transition-colors duration-200 ${isSelected ? 'text-[#272052]' : 'text-[#2D2D2D]'
                       }`}
                   >
                     {option.label}

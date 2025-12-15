@@ -166,9 +166,16 @@ const XPTierTracker = ({ stats, token }) => {
                 const tierName = currentTier.name || "";
                 const tierRange = currentTier.xpMax - currentTier.xpMin;
 
+                // Find tier boundaries
+                const juniorTier = tiers.find(t => t.name === "Junior" || t.name?.toLowerCase() === "junior");
+                const midTier = tiers.find(t => t.name === "Middle" || t.name === "Mid-level" || t.name?.toLowerCase() === "middle" || t.name?.toLowerCase() === "mid-level");
+                const seniorTier = tiers.find(t => t.name === "Senior" || t.name?.toLowerCase() === "senior");
+
                 // Calculate progress within current tier (0-100%)
+                // If user has fallen below tier minimum, show progress based on tier XP value
+                const adjustedXP = Math.max(currentXP, currentTier.xpMin);
                 const tierProgress = tierRange > 0
-                    ? Math.min(Math.max((currentXP - currentTier.xpMin) / tierRange, 0), 1)
+                    ? Math.min(Math.max((adjustedXP - currentTier.xpMin) / tierRange, 0), 1)
                     : 0;
 
                 // Determine bar position and width based on tier
@@ -179,16 +186,21 @@ const XPTierTracker = ({ stats, token }) => {
                     progressBarWidth = segmentWidth * tierProgress;
                     indicatorPosition = JUNIOR_POS + progressBarWidth;
                 } else if (tierName === "Middle" || tierName === "Mid-level" || tierName.toLowerCase() === "middle" || tierName.toLowerCase() === "mid-level") {
-                    // Middle tier: Show progress between Mid-level and Senior labels
-                    progressBarStart = MID_LEVEL_POS;
-                    const segmentWidth = SENIOR_POS - MID_LEVEL_POS; // 145px
-                    progressBarWidth = segmentWidth * tierProgress;
-                    indicatorPosition = MID_LEVEL_POS + progressBarWidth;
-                } else if (tierName === "Senior" || tierName.toLowerCase() === "senior") {
-                    // Senior tier: Show full progress bar from Junior to Senior
+                    // Middle tier: Start from Junior, cover Junior segment completely, then fill Mid segment based on progress
                     progressBarStart = JUNIOR_POS;
-                    const segmentWidth = SENIOR_POS - JUNIOR_POS; // 259px
-                    progressBarWidth = segmentWidth * tierProgress;
+                    const juniorSegmentWidth = MID_LEVEL_POS - JUNIOR_POS; // 114px (Junior segment)
+                    const midSegmentWidth = SENIOR_POS - MID_LEVEL_POS; // 145px (Mid segment)
+                    // Fill junior segment completely + mid segment based on progress
+                    progressBarWidth = juniorSegmentWidth + (midSegmentWidth * tierProgress);
+                    indicatorPosition = JUNIOR_POS + progressBarWidth;
+                } else if (tierName === "Senior" || tierName.toLowerCase() === "senior") {
+                    // Senior tier: Start from Junior, cover Junior and Mid segments completely, then fill Senior segment based on progress
+                    progressBarStart = JUNIOR_POS;
+                    const juniorSegmentWidth = MID_LEVEL_POS - JUNIOR_POS; // 114px (Junior segment)
+                    const midSegmentWidth = SENIOR_POS - MID_LEVEL_POS; // 145px (Mid segment)
+                    const seniorSegmentWidth = BAR_WIDTH - SENIOR_POS; // 29px (Senior segment to end)
+                    // Fill junior and mid segments completely + senior segment based on progress
+                    progressBarWidth = juniorSegmentWidth + midSegmentWidth + (seniorSegmentWidth * tierProgress);
                     indicatorPosition = JUNIOR_POS + progressBarWidth;
                 } else {
                     // Fallback: Show progress from start

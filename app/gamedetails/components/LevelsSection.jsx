@@ -14,6 +14,7 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
     const [showTooltip, setShowTooltip] = useState(false);
     const [showClaimModal, setShowClaimModal] = useState(false);
     const [showRulesModal, setShowRulesModal] = useState(false);
+    const [modalPosition, setModalPosition] = useState(null);
     const [claiming, setClaiming] = useState(false);
     const [milestoneLevel, setMilestoneLevel] = useState(3); // Configurable milestone - Complete 3 tasks to claim
     const [isGameDownloaded, setIsGameDownloaded] = useState(false);
@@ -699,7 +700,7 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
                 {/* Progress Line - Dynamic Height - Connects first to last card */}
                 {activeLevels.length > 0 && (
                     <div
-                        className="absolute left-[39px] top-6 z-0"
+                        className="absolute left-[35px] top-6 z-0"
                         style={{
                             width: '2px',
                             height: `${activeLineHeight}px`
@@ -720,20 +721,20 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
                 {activeLevels.map((level, index) => (
                     <div key={level.id} className="flex items-center gap-3 w-full relative z-10">
                         {/* Level Number Circle with Status Indicator */}
-                        <div className={`flex w-[43px] h-[43px] items-center justify-center rounded-full flex-shrink-0 relative ${level.isCompleted ? 'bg-green-600' :
+                        <div className={`flex w-[38px] h-[38px] items-center justify-center rounded-full flex-shrink-0 relative ${level.isCompleted ? 'bg-green-600' :
                             level.isFailed || level.isExpired ? 'bg-red-600/50' :
                                 'bg-[#2f344a]'
                             }`}>
                             {level.isCompleted ? (
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                 </svg>
                             ) : level.isFailed || level.isExpired ? (
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             ) : (
-                                <div className="font-semibold text-[#f4f3fc] text-[14.7px]">
+                                <div className="font-semibold text-[#f4f3fc] text-[12px]">
                                     {level.id}
                                 </div>
                             )}
@@ -835,7 +836,7 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
 
                         {/* Arrow between levels */}
                         {index < activeLevels.length - 1 && (
-                            <div className="absolute top-[116px] left-[8px] z-20">
+                            <div className="absolute top-[120px] left-[4px] z-20">
                                 <img
                                     className="w-[23px] h-[23px]"
                                     alt="Arrow back ios new"
@@ -850,7 +851,7 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
             {/* FIX: Claim Rewards Button - Aligned with the level layout structure */}
             <div className="flex w-full items-start gap-3 px-5 ">
                 {/* Spacer to align with level cards, matches width of the level number circle */}
-                <div className="w-[43px] flex-shrink-0" />
+                <div className="w-[38px] flex-shrink-0" />
 
                 {/* Container for the button, matches width of level cards */}
                 <div className="w-[256px] relative rounded-[10px] flex items-center justify-center">
@@ -865,7 +866,16 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
                         </p>
 
                         <button
-                            onClick={() => setShowRulesModal(true)}
+                            onClick={(e) => {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setModalPosition({
+                                    top: rect.top + window.scrollY,
+                                    left: rect.left + window.scrollX,
+                                    buttonHeight: rect.height,
+                                    buttonWidth: rect.width
+                                });
+                                setShowRulesModal(true);
+                            }}
                             disabled={isClaimed}
                             className={`flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 bg-[#716ae7] rounded-full flex-shrink-0
                             hover:bg-[#5a52d4] transition-colors duration-200 
@@ -910,7 +920,7 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
                 {/* Progress Line for Locked Levels - Dynamic Height - Connects first to last card */}
                 {lockedLevels.length > 0 && (
                     <div
-                        className="absolute left-[40px] top-6 z-0 bg-[#2f344a] "
+                        className="absolute left-[36px] top-6 z-0 bg-[#2f344a] "
                         style={{
                             width: '2px',
                             height: `${lockedLineHeight}px`
@@ -930,14 +940,14 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
 
                 {lockedLevels.map((level, index) => (
                     <div key={`locked-${index}`} className="flex items-center gap-2.5 w-full relative z-10">
-                        <div className="flex w-[43px] h-[43px] items-center justify-center bg-[#2f344a] rounded-full flex-shrink-0 relative">
-                            <div className="font-semibold text-white-f4f3fc text-[14.7px]">
+                        <div className="flex w-[38px] h-[38px] items-center justify-center bg-[#2f344a] rounded-full flex-shrink-0 relative">
+                            <div className="font-semibold text-white-f4f3fc text-[12px]">
                                 {level.id}
                             </div>
                             {/* Lock overlay */}
                             <div className="absolute inset-0 bg-[#d6d6d680] rounded-full flex items-center justify-center">
                                 <img
-                                    className="w-[35px] h-[35px]"
+                                    className="w-[28px] h-[28px]"
                                     alt="Lock Icon"
                                     src="https://c.animaapp.com/ABnBdu2U/img/image-3943-3@2x.png"
                                 />
@@ -955,7 +965,7 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
 
                         {/* Arrow between locked levels */}
                         {index < lockedLevels.length - 1 && (
-                            <div className="absolute top-[80px] left-[9px] z-20">
+                            <div className="absolute top-[84px] left-[5px] z-20">
                                 <img
                                     className="w-[23px] h-[23px]"
                                     alt="Arrow back ios new"
@@ -1056,7 +1066,11 @@ export const LevelsSection = ({ game, selectedTier, onTierChange, onSessionUpdat
             {/* Rules Modal */}
             <RulesModal
                 isVisible={showRulesModal}
-                onClose={() => setShowRulesModal(false)}
+                position={modalPosition}
+                onClose={() => {
+                    setShowRulesModal(false);
+                    setModalPosition(null);
+                }}
             />
         </div>
     );

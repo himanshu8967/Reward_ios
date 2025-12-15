@@ -11,7 +11,7 @@ export const DailyChallenge = ({ game }) => {
             maskingImage: "/img/masking.png",
             bgImage: "https://c.animaapp.com/efaCLdlC/img/bg.svg",
             bannerImage: "https://c.animaapp.com/efaCLdlC/img/banner.svg",
-            reward: "Earn $20",
+            reward: "Earn Reward",
             title: "Accept the Challenge",
             mainImage: "https://c.animaapp.com/efaCLdlC/img/image@2x.png"
         }
@@ -57,7 +57,7 @@ export const DailyChallenge = ({ game }) => {
                                         aria-hidden="true"
                                     />
 
-                                    <p className="top-[81px] font-bold text-[#ffe664] text-[44px] leading-[48px] absolute left-6 [font-family:'Poppins',Helvetica] tracking-[0] whitespace-nowrap">
+                                    <p className="top-[81px] font-bold text-[#ffe664] text-[34px] leading-[48px] absolute left-6 [font-family:'Poppins',Helvetica] tracking-[0] whitespace-nowrap">
                                         {banner.reward}
                                     </p>
 
