@@ -1,13 +1,28 @@
 package com.jackson.app;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.WebView;
 import androidx.core.splashscreen.SplashScreen;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+    
+    private static final String TAG = "🚀 MainActivity";
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "╔════════════════════════════════════════════════════════════╗");
+        Log.d(TAG, "║           MainActivity.onCreate() - Starting               ║");
+        Log.d(TAG, "╚════════════════════════════════════════════════════════════╝");
+        
+        // Register Native BiometricPrompt Plugin FIRST (before super.onCreate)
+        // This plugin uses androidx.biometric.BiometricPrompt with BIOMETRIC_STRONG
+        // Tied to device hardware trust zone (TEE)
+        Log.d(TAG, "🔐 Registering NativeBiometricPlugin...");
+        registerPlugin(NativeBiometricPlugin.class);
+        Log.d(TAG, "✅ NativeBiometricPlugin registered successfully");
+        
         // Hide the action bar before splash screen
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();

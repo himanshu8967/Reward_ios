@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 
 const RewardProgress = ({ stats }) => {
     const router = useRouter();
-    const rewardGoal = 6000;
+    const rewardGoal = 60000;
 
     // OPTIMIZED: Memoize expensive calculations to prevent re-computation
     const pointsData = useMemo(() => {
@@ -37,103 +37,100 @@ const RewardProgress = ({ stats }) => {
     const walletScreen = useSelector((state) => state.walletTransactions.walletScreen);
     const balance = walletScreen?.wallet?.balance || 0;
 
+    // Calculate progress for the progress bar image
+    const progressPercentage = Math.min((pointsData.currentPoints / pointsData.targetPoints) * 100, 100);
+
     return (
-        <div
-            className="relative w-full max-w-[375px] mx-auto h-[135px]"
-            data-model-id="1151:33569"
+        <section
+            className="flex flex-col items-center gap-2 sm:gap-2.5 p-1 sm:p-2 md:p-3 pr-0 py-0 relative w-full max-w-full sm:max-w-[375px] mx-auto overflow-visible"
+            aria-label="Loyalty points tracker"
         >
-            <div className="relative w-full h-[135px]">
-                <div className="absolute w-full h-[135px] top-0 left-0">
+            <article
+                className="relative w-full sm:w-[335px] h-[130px] sm:h-[140px] md:h-[147px] rounded-[8px] sm:rounded-[10px] bg-[linear-gradient(103deg,rgba(121,32,207,1)_0%,rgba(205,73,153,1)_80%)] cursor-pointer hover:opacity-95 transition-opacity duration-200 overflow-visible"
+                onClick={handleHurryBoxClick}
+                role="button"
+                tabIndex={0}
+            >
+                <header className="absolute w-[calc(100%_-_80px)] sm:w-[calc(100%_-_88px)] top-[16px] sm:top-[18px] md:top-[22px] left-[48px] sm:left-[50px] md:left-[54px] h-4 sm:h-5">
+                    <h1 className="font-semibold text-[13px] sm:text-[14px] md:text-[15px] leading-[18px] sm:leading-[20px] md:leading-5 flex items-center justify-start sm:justify-center [font-family:'Poppins',Helvetica] text-white tracking-[0] line-clamp-2 sm:line-clamp-none">
+                        {"Keep a track of loyalty points"}
+                    </h1>
+                </header>
+
+                <img
+                    className="absolute top-2.5 sm:top-3 left-2.5 sm:left-3 w-[28px] h-[29px] sm:w-[30px] sm:h-[31px] md:w-[34px] md:h-[35px] aspect-[0.97]"
+                    alt="Loyalty points icon"
+                    src="/dollor.png"
+                />
+
+                <div
+                    className="absolute top-[58px] sm:top-[62px] md:top-[67px] left-[12px] sm:left-[14px] md:left-[15px] right-[12px] sm:right-[14px] md:right-[15px] h-10 sm:h-12 md:h-14 overflow-visible"
+                    role="group"
+                    aria-label="Points progress"
+                >
                     <div
-                        className="relative w-full h-[135px] bg-black rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.8),2.48px_2.48px_18.58px_#3b3b3b80,-1.24px_-1.24px_16.1px_#825700] cursor-pointer hover:opacity-95 transition-opacity duration-200"
-                        onClick={handleHurryBoxClick}
-                        role="button"
-                        tabIndex={0}
-                        aria-label="View wallet balance and transaction history"
+                        className="inline-flex items-center gap-[2px] sm:gap-[3px] absolute top-0 left-0 z-10"
+                        aria-label="Current points"
                     >
-                        <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[0_0_30px_8px_rgba(255,215,0,0.06)]" />
-                        <div className="absolute w-[calc(100%-34px)] max-w-[302px] h-[25px] top-[79px] left-[17px]">
-                            <div className="absolute w-full h-[25px] top-0 left-0">
-                                <div className="w-full h-[25px]">
-                                    <div className="relative w-full h-[25px]">
-                                        {/* Progress bar background */}
-                                        <div className="absolute w-full h-full rounded-full overflow-hidden ring-1 ring-[#8b7332] bg-gradient-to-r from-[#4a3c1a] to-[#6b5424] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),inset_0_-1px_0_rgba(0,0,0,0.25)]"></div>
+                        <span className="relative flex items-center justify-center w-fit [font-family:'Poppins',Helvetica] font-semibold text-white text-[16px] sm:text-[16px] md:text-[16px] tracking-[0] leading-normal whitespace-nowrap">
+                            {balance}
+                        </span>
 
-                                        {/* Progress bar fill */}
-                                        <div
-                                            className="absolute h-full bg-gradient-to-r from-[#ffd700] via-[#ffed4e] to-[#f4d03f] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
-                                            style={{
-                                                left: '10px', // Start from circle center to create curved connection
-                                                width: `calc(${(pointsData.currentPoints / pointsData.targetPoints) * 100}% - 10px)`,
-                                                borderRadius: '9999px',
-                                                borderTopLeftRadius: '12px', // Curved left edge to flow from circle
-                                                borderBottomLeftRadius: '12px',
-                                                borderTopRightRadius: '9999px',
-                                                borderBottomRightRadius: '9999px',
-                                            }}
-                                        ></div>
-                                        {/* Current level indicator */}
-                                        <div className="absolute w-[24px] h-[25px] top-0.3 left-[-1px] bg-[#d4af37] rounded-full border-0.5 border-[#b8860b] flex items-center justify-center shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
-                                            <div className="[font-family:'Poppins',Helvetica] font-semibold text-[#815c23] text-[12px] tracking-[0.02px] leading-[normal]">
-                                                {pointsData.currentLevel}
-                                            </div>
-                                        </div>
-                                        {/* Next level indicator - MOVED & FIXED */}
-                                        <div className="absolute w-[24px] h-[25px] top-0.3 right-[-1px] bg-[#d4af37] rounded-full border-0.5 border-[#b8860b] flex items-center justify-center shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
-                                            <div className="[font-family:'Poppins',Helvetica] font-semibold text-[#815c23] text-[12px] tracking-[0.02px] leading-[normal]">
-                                                2
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <img
+                            className="relative w-[18px] h-[19px] sm:w-[18px] sm:h-[19px] md:w-[18px] md:h-[19px] aspect-[0.97]"
+                            alt=""
+                            src="/dollor.png"
+                            aria-hidden="true"
+                        />
+                    </div>
 
-                            <p className="absolute top-1 left-1/2 -translate-x-1/2 opacity-80 [font-family:'Poppins',Helvetica] font-semibold text-transparent text-[12px] tracking-[0.02px] leading-[normal]">
-                                <span className="text-white">
-                                    <span
-                                        role="img"
-                                        aria-label="star"
-                                        className="inline-block relative "
-                                        style={{
-                                            filter: 'drop-shadow(0 0 2px rgba(255, 215, 0, 0.5))',
-                                            transform: 'translateY(-1px)'
-                                        }}
-                                    >
-                                        ⭐
-                                    </span>{" "}
-                                    {balance}
-                                </span>
+                    <div
+                        className="inline-flex items-center gap-[2px] sm:gap-[3px] absolute top-0 right-0 z-10"
+                        aria-label="Maximum points"
+                    >
+                        <span className="relative flex items-center justify-center w-fit [font-family:'Poppins',Helvetica] font-semibold text-white text-[16px] sm:text-[16px] md:text-[16px] tracking-[0] leading-normal whitespace-nowrap">
+                            {pointsData.targetPoints}
+                        </span>
 
-                                <span className="text-gray-400">
-                                    /{pointsData.targetPoints}
-                                </span>
-                            </p>
-                        </div>
+                        <img
+                            className="relative w-[18px] h-[19px] sm:w-[18px] sm:h-[19px] md:w-[18px] md:h-[19px] aspect-[0.97]"
+                            alt=""
+                            src="/dollor.png"
+                            aria-hidden="true"
+                        />
+                    </div>
 
-                        <header className="absolute w-[calc(100%-40px)] max-w-[299px] h-[42px] top-[19px]  left-5">
-                            <div className="relative  w-full h-[42px]">
-                                <div className="absolute w-full h-[21px] top-0 left-0">
-                                    <h1 className="absolute w-full top-0 left-0 [font-family:'Poppins',Helvetica] font-semibold text-white text-lg sm:text-xl tracking-[-0.37px] leading-[27.2px] truncate">
-                                        {pointsData.pointsNeeded > 0
-                                            ? `Hurry! Earn ${pointsData.pointsNeeded} more & Claim`
-                                            : 'Congratulations! You\'ve reached your goal!'
-                                        }
-                                    </h1>
-                                </div>
+                    <div
+                        className="absolute top-[24px] sm:top-[26px] md:top-[29px] left-[-4px] sm:left-[-6px] md:left-[-8px] right-[4px] sm:right-[6px] md:right-[8px] h-6"
+                        role="progressbar"
+                        aria-valuenow={pointsData.currentPoints}
+                        aria-valuemin={0}
+                        aria-valuemax={pointsData.targetPoints}
+                        aria-label={`Progress: ${pointsData.currentPoints} out of ${pointsData.targetPoints} points`}
+                    >
+                        {/* Progress bar background - pink theme from card gradient */}
+                        <div className="absolute w-full h-[19px] top-0.5 left-0 bg-[#b13388] rounded-[32px] border-4 border-solid border-[#FFFFFF33]" />
 
-                                <p className="absolute w-full top-[27px] left-0 [font-family:'Poppins',Helvetica] font-semibold text-[#ffffff99] text-sm tracking-[0.02px] leading-[normal] truncate">
-                                    {pointsData.pointsNeeded > 0
-                                        ? `${pointsData.pointsNeeded} Points until your next reward`
-                                        : 'You can now claim your reward!'
-                                    }
-                                </p>
-                            </div>
-                        </header>
+                        {/* Progress bar fill - same as XPTierTracker */}
+                        <div
+                            className="absolute h-[11px] top-1.5 left-1 bg-gradient-to-r from-[#FFD700] to-[#FFA500] rounded-[32px] transition-all duration-300 ease-out"
+                            style={{
+                                width: `calc(${progressPercentage}% - 8px)`,
+                            }}
+                        />
+
+                        {/* Current progress indicator - same as XPTierTracker with proper circle */}
+                        <div
+                            className="absolute w-6 h-6 top-0 bg-white rounded-full border-4 border-solid border-[#FFD700] transition-all duration-300 ease-out"
+                            style={{
+                                left: `calc(${progressPercentage}% - 12px)`,
+                            }}
+                        />
                     </div>
                 </div>
-                {/* The misplaced circle and star icon have been removed from here */}
-            </div>
-        </div>
+
+            </article>
+        </section>
     );
 };
 
