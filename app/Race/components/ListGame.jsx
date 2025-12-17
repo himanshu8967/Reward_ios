@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { fetchGamesBySection } from "@/lib/redux/slice/gameSlice";
 // Removed getAgeGroupFromProfile and getGenderFromProfile - now passing user object directly
@@ -81,9 +81,13 @@ const RecommendationCard = React.memo(({ card, onCardClick }) => {
 
 export const ListGame = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const dispatch = useDispatch();
     const [currentScaleClass, setCurrentScaleClass] = useState("scale-100");
     const [loadingTimeout, setLoadingTimeout] = useState(false);
+    
+    // Check if user came from race banner
+    const fromRace = searchParams.get('fromRace') === 'true';
 
     // Use both API games and downloaded games
     const { gamesBySection, gamesBySectionStatus, inProgressGames, availableUiSections } = useSelector((state) => state.games);
@@ -288,6 +292,11 @@ export const ListGame = () => {
         }
     }, [router, dispatch]);
 
+    // Handle race button click
+    const handleRaceButtonClick = useCallback(() => {
+        router.push('/Race');
+    }, [router]);
+
 
 
     // Reuse existing game data from homepage - no need to fetch again
@@ -471,11 +480,27 @@ export const ListGame = () => {
                 {recommendationCards.length > 0 ? (
                     <div className="grid grid-cols-2 gap-4">
                         {recommendationCards.map((card) => (
-                            <RecommendationCard
-                                key={card.id}
-                                card={card}
-                                onCardClick={handleGameClick}
-                            />
+                            <div key={card.id} className="flex flex-col">
+                                <RecommendationCard
+                                    card={card}
+                                    onCardClick={handleGameClick}
+                                    showRaceButton={fromRace}
+                                    onRaceClick={handleRaceButtonClick}
+                                />
+                                {fromRace && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleRaceButtonClick();
+                                        }}
+                                        className="w-full h-10 mt-2 rounded-xl overflow-hidden bg-[linear-gradient(180deg,rgba(81,98,182,0.9)_0%,rgba(63,56,184,0.9)_100%)] flex items-center justify-center hover:opacity-90 transition-opacity duration-200 shadow-lg"
+                                    >
+                                        <span className="[font-family:'Poppins',Helvetica] font-medium text-white text-[14px] tracking-[0] leading-normal">
+                                            Race
+                                        </span>
+                                    </button>
+                                )}
+                            </div>
                         ))}
                     </div>
                 ) : (

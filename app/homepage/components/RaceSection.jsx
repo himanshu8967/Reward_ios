@@ -36,9 +36,9 @@ const RaceSection = () => {
         return () => window.removeEventListener('keydown', handleEscape);
     }, [isRaceModalOpen]);
 
-    // Go to Race page
+    // Go to game list page
     const handleRaceClick = useCallback(() => {
-        router.push('/Race');
+        router.push('/Race/ListGame?fromRace=true');
     }, [router]);
 
     // Open the tooltip/modal
