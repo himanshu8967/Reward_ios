@@ -4,7 +4,7 @@
 # require_relative '../../../node_modules/@capacitor/ios/scripts/pods_helpers'
 # Add this line instead:
 # Use ENV['BITRISE_SOURCE_DIR'] for an absolute path to the project root
-require File.join(File.dirname(`node -p 'require.resolve(\"@capacitor/ios\")'`.strip), 'scripts/pods_helpers')
+require File.join(File.dirname(`node -p 'const path = require("path"); path.join(path.dirname(require.resolve("@capacitor/core")), "../ios")'`.strip), 'scripts/pods_helpers')
 
 platform :ios, '14.0'
 use_frameworks!
