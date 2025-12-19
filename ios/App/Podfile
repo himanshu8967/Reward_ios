@@ -1,18 +1,26 @@
+# This executes a Node command to get the absolute path to the helper script.
+# This bypasses all problematic Ruby relative path resolution logic.
 # require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
 # require_relative '../../../node_modules/@capacitor/ios/scripts/pods_helpers'
 # Add this line instead:
 # Use ENV['BITRISE_SOURCE_DIR'] for an absolute path to the project root
-require_relative File.join(ENV['BITRISE_SOURCE_DIR'], 'node_modules/@capacitor/ios/scripts/pods_helpers')
+require File.join(File.dirname(`node -p 'require.resolve(\"@capacitor/ios\")'`.strip), 'scripts/pods_helpers')
 
 platform :ios, '14.0'
 use_frameworks!
 
 # workaround to avoid Xcode caching of Pods that requires
-# Product -> Clean Build Folder after new Cordova plugins installedgit
+# Product -> Clean Build Folder after new Cordova plugins installed
 # Requires CocoaPods 1.6 or newer
 install! 'cocoapods', :disable_input_output_paths => true
 
 def capacitor_pods
+  # Use the absolute path from the project root (where the Podfile code is executed from)
+  # The path to the pod is now calculated correctly by the Node command above.
+  # The pods must use the path relative to the Podfile, which IS ../../node_modules 
+  # based on your file structure. Since this is failing, we must simplify the pod path.
+  # Note: The 'path' here is a relative path from the Podfile.
+
   pod 'Capacitor', :path => '../../node_modules/@capacitor/ios'
   pod 'CapacitorCordova', :path => '../../node_modules/@capacitor/ios'
   pod 'CapacitorCommunityStripe', :path => '../../node_modules/@capacitor-community/stripe'
